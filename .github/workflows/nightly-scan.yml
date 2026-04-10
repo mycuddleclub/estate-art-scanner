@@ -1,0 +1,41 @@
+name: Nightly Estate Art Scan
+
+on:
+  schedule:
+    # 7:00 AM UTC = 3:00 AM EST / 12:00 AM PST — runs while you sleep
+    - cron: '0 7 * * *'
+  workflow_dispatch:  # allows manual trigger from GitHub UI for testing
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run estate art scanner
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          ALERT_EMAIL_FROM: ${{ secrets.ALERT_EMAIL_FROM }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+        run: python src/scanner.py
+
+      - name: Commit updated seen_sales.json
+        run: |
+          git config user.name "estate-scanner-bot"
+          git config user.email "scanner@noreply.github.com"
+          git add data/seen_sales.json
+          git diff --staged --quiet || git commit -m "Update seen sales [skip ci]"
+          git push
