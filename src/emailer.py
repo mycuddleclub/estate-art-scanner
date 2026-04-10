@@ -2,6 +2,7 @@
 Email alert builder and sender using SendGrid.
 """
 
+import base64
 import logging
 import os
 import re
@@ -11,6 +12,19 @@ import requests
 logger = logging.getLogger(__name__)
 
 SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send"
+
+
+def _img_to_data_uri(url: str) -> str | None:
+    """Download image and return as inline base64 data URI, or None on failure."""
+    try:
+        resp = requests.get(url, timeout=15)
+        resp.raise_for_status()
+        b64 = base64.b64encode(resp.content).decode("utf-8")
+        content_type = resp.headers.get("Content-Type", "image/jpeg").split(";")[0].strip()
+        return f"data:{content_type};base64,{b64}"
+    except Exception as e:
+        logger.warning(f"Could not embed image {url}: {e}")
+        return None
 
 
 def _format_sale_date(sale_detail: dict) -> str:
@@ -55,8 +69,9 @@ def _build_html_alert(alert: dict) -> str:
 
     photo_html = ""
     for url in alert.get("art_photo_urls", [])[:4]:
+        src = _img_to_data_uri(url) or url
         photo_html += (
-            f'<img src="{url}" style="width:180px;height:140px;'
+            f'<img src="{src}" style="width:180px;height:140px;'
             f'object-fit:cover;margin:4px;border-radius:4px;display:inline-block;">'
         )
 
