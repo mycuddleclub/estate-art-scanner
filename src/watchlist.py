@@ -44,8 +44,9 @@ WATCHLIST_ZIPS = {
     "15215": "Aspinwall PA",
     "15228": "Mt Lebanon PA",
 
-    # Easton PA — Kay WalkingStick territory
+    # Easton PA — Kay WalkingStick territory / active studio hub
     "18042": "Easton PA",
+    "18040": "Easton PA area",
 
     # Cincinnati
     "45208": "Hyde Park OH",
@@ -59,9 +60,17 @@ WATCHLIST_ZIPS = {
     # Kansas City
     "66208": "Mission Hills KS",
 
-    # Minneapolis / St. Paul
+    # Minneapolis — Walker Art Center proximity, mid-century collectors
     "55391": "Wayzata MN",
     "55424": "Edina MN",
+    "55405": "Lowry Hill/Kenwood Minneapolis MN",
+    "55403": "Loring Park Minneapolis MN",
+    "55803": "Duluth MN",
+    "55804": "Duluth MN",
+
+    # St. Paul — historic estates, deep generational wealth
+    "55105": "Summit Hill/Crocus Hill St Paul MN",
+    "55116": "Highland Park St Paul MN",
 
     # Indianapolis
     "46032": "Carmel IN",
@@ -113,6 +122,11 @@ WATCHLIST_ZIPS = {
     "07976": "Harding NJ",
     "07920": "Basking Ridge NJ",
 
+    # NJ arts communities
+    "07631": "Englewood NJ",
+    "07042": "Montclair NJ",
+    "07043": "Montclair NJ",
+
     # Massachusetts islands / Berkshires — serious summer collector culture
     "02554": "Nantucket MA",
     "02539": "Martha's Vineyard MA",
@@ -131,6 +145,8 @@ WATCHLIST_ZIPS = {
     "14850": "Ithaca NY",
     "14853": "Ithaca NY",
     "44074": "Oberlin OH",
+    "13202": "Syracuse NY",
+    "13210": "Syracuse NY",
     "52240": "Iowa City IA",
     "27514": "Chapel Hill NC",
     "22902": "Charlottesville VA",
@@ -233,12 +249,15 @@ WATCHLIST_ZIPS = {
     "90274": "Palos Verdes CA",
 
     # Desert wealth & art colonies
+    "85251": "Scottsdale AZ",
     "85253": "Paradise Valley AZ",
+    "85255": "Scottsdale AZ",
     "85262": "Scottsdale AZ",
     "86336": "Sedona AZ",
     "87501": "Santa Fe NM",
     "87505": "Santa Fe NM",
     "87506": "Santa Fe NM",
+    "87571": "Taos NM",
 
     # Pacific Northwest
     "98039": "Medina WA",
