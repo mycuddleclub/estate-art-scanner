@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Haiku for cheap bulk filtering, Sonnet for quality assessment
 FILTER_MODEL = "claude-haiku-4-5-20251001"
-ASSESS_MODEL = "claude-sonnet-4-6"
+ASSESS_MODEL = "claude-sonnet-5"
 
 
 def _download_image_b64(url: str) -> str | None:
@@ -77,9 +77,13 @@ def filter_art_photos(thumbnail_urls: list[str], client: anthropic.Anthropic) ->
             "type": "text",
             "text": (
                 f"For each of the {len(images)} images above, answer YES or NO: "
-                "does this photo show original artwork hanging on a wall or displayed — "
-                "paintings, drawings, or sculptures? "
-                "Ignore decorative prints, posters, and mirrors. "
+                "does this photo show anything that could be an artwork — paintings, "
+                "drawings, watercolors, fine prints, photographs, sculpture, studio "
+                "ceramics/pottery, or textile art? Count artwork anywhere in the frame: "
+                "hanging on walls in the background, leaning against furniture, propped "
+                "in stacks, or partially visible at the edge. When uncertain, answer YES. "
+                "Answer NO only if there is clearly no artwork at all, or the only "
+                "candidates are mirrors, commercial posters, or obvious mass-produced decor. "
                 "Reply in exactly this format with no other text: 1:YES 2:NO 3:YES"
             )
         })
@@ -120,7 +124,7 @@ def assess_collection_quality(
     if not art_photo_urls:
         return {"score": 0, "summary": "No art photos", "priority": "LOW", "alert_worthy": False}
 
-    urls_to_use = art_photo_urls[:8]
+    urls_to_use = art_photo_urls[:20]
     content = []
 
     for idx, url in enumerate(urls_to_use):
@@ -137,24 +141,40 @@ def assess_collection_quality(
     content.append({
         "type": "text",
         "text": (
-            "You are an expert contemporary art advisor reviewing an estate sale for "
-            "investment-grade artwork. I'm showing you photos from this estate sale.\n\n"
+            "You are an expert art advisor scouting an estate sale for a collector who "
+            "specializes in OVERLOOKED and UNDERRECOGNIZED art: works by documented but "
+            "market-forgotten artists, folk/self-taught/outsider art, regional schools, "
+            "works on paper, studio ceramics, and unfashionable periods. The best finds "
+            "are usually uncatalogued — visible only in these photos, never mentioned in "
+            "the listing text.\n\n"
             f"Sale description: \"{clean_description}\"\n\n"
             "Assess the artwork visible and respond with exactly these four sections:\n\n"
-            "SCORE: [1-10] (10 = multiple significant originals by potentially important artists)\n\n"
-            "WHAT I SEE: Describe each artwork — medium, size, style/period, any visible "
-            "signature or text, overall quality. Be specific.\n\n"
-            "RED FLAGS: Any prints, giclees, or mass-produced work to ignore.\n\n"
-            "VERDICT: One sentence — is this worth immediate attention?\n\n"
-            "Focus only on investment-grade original works: canvases, major mixed media, sculpture. "
-            "Ignore decorative art, student work, and anything mass-produced."
+            "SCORE: [1-10] — score the SINGLE STRONGEST work visible, not the average. "
+            "One serious original in a house of junk deserves a high score. "
+            "(10 = at least one work with strong evidence of a documented or important "
+            "artist; 7 = at least one confident, skilled original worth researching; "
+            "4 = competent originals of uncertain merit; 1 = nothing but reproductions.)\n\n"
+            "WHAT I SEE: Describe each distinct artwork — medium, approximate size, "
+            "style/period, condition cues, overall quality. TRANSCRIBE any visible "
+            "signature, label, inscription, or stamp, even partially ('signature lower "
+            "right, possibly B—something'). Note works that appear only in backgrounds "
+            "or stacks and whether the listing text mentions them. Note collector "
+            "context: dense multi-work walls, art books, quality framing.\n\n"
+            "RED FLAGS: Likely prints/giclees/posters presented as originals, "
+            "mass-produced decor, condition problems.\n\n"
+            "VERDICT: One sentence — is this worth immediate attention, and which "
+            "specific work drives that judgment?\n\n"
+            "Do NOT dismiss works for being unfashionable, naive, regional, or "
+            "'decorative-looking' — that is exactly where sleepers hide. Distinguish "
+            "what you can SEE from what you INFER, and say when photo quality limits "
+            "your confidence."
         )
     })
 
     try:
         response = client.messages.create(
             model=ASSESS_MODEL,
-            max_tokens=700,
+            max_tokens=1500,
             messages=[{"role": "user", "content": content}],
         )
         summary = response.content[0].text.strip()

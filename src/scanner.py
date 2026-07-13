@@ -13,10 +13,10 @@ when first seen. These are re-checked each run — estate sale companies often
 list a sale days before uploading photos.
 
 Environment variables required:
-    OPENAI_API_KEY       - OpenAI API key for GPT-4o Vision
-    GMAIL_USER           - Gmail address to send from
-    GMAIL_APP_PASSWORD   - Gmail app password (not your login password)
-    ALERT_EMAIL          - Email address to send alerts to
+    ANTHROPIC_API_KEY    - Anthropic API key (Haiku photo filter + Sonnet assessment)
+    SENDGRID_API_KEY     - SendGrid API key for sending alerts
+    ALERT_EMAIL_FROM     - Verified sender address
+    ALERT_EMAIL_TO       - Email address to send alerts to
 """
 
 import json
@@ -40,7 +40,7 @@ from vision import assess_collection_quality, filter_art_photos
 from watchlist import WATCHLIST_ZIPS, score_description
 
 # ── Config ────────────────────────────────────────────────────────────────────
-PUBLISHED_WITHIN_HOURS = 48     # Catch sales from last 2 days (handles timezone gaps)
+PUBLISHED_WITHIN_HOURS = 72     # Catch sales from last 3 days (handles timezone gaps)
 MIN_PHOTO_COUNT = 12            # Skip sales with too few photos
 MIN_ART_PHOTOS_FOR_ASSESSMENT = 2
 PENDING_MAX_AGE_DAYS = 14       # Drop pending sales older than this
