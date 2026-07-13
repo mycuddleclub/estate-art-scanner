@@ -30,6 +30,14 @@ def _download_image_b64(url: str) -> str | None:
         return None
 
 
+def _response_text(response) -> str:
+    """Join text blocks, skipping thinking blocks (Sonnet 5+ emits those first)."""
+    return "".join(
+        block.text for block in response.content
+        if getattr(block, "type", "") == "text"
+    ).strip()
+
+
 def _image_block(b64: str) -> dict:
     """Build Anthropic image content block from base64."""
     return {
@@ -94,7 +102,7 @@ def filter_art_photos(thumbnail_urls: list[str], client: anthropic.Anthropic) ->
                 max_tokens=60,
                 messages=[{"role": "user", "content": content}],
             )
-            answer = response.content[0].text.strip()
+            answer = _response_text(response)
             logger.debug(f"Art filter response: {answer}")
 
             for match in re.finditer(r"(\d+):(YES|NO)", answer.upper()):
@@ -175,9 +183,13 @@ def assess_collection_quality(
         response = client.messages.create(
             model=ASSESS_MODEL,
             max_tokens=1500,
+            # Sonnet 5 defaults to adaptive thinking, which shares the
+            # max_tokens budget and can starve the text output on image-heavy
+            # requests; this is a fixed-format scoring task, so keep it off.
+            thinking={"type": "disabled"},
             messages=[{"role": "user", "content": content}],
         )
-        summary = response.content[0].text.strip()
+        summary = _response_text(response)
 
         score = 0
         match = re.search(r"SCORE:\s*(\d+)", summary, re.IGNORECASE)
