@@ -29,7 +29,8 @@ def parse_sale_ref(ref: str) -> int | None:
     return int(segments[-1]) if segments else None
 
 
-def _record_photo(conn, sale_id: int, source_url: str | None, data: bytes) -> bool:
+def _record_photo(conn, sale_id: int, source_url: str | None, data: bytes,
+                  lot_text: str | None = None) -> bool:
     file_hash = store_bytes(data)
     try:
         img = load(file_hash)
@@ -38,17 +39,28 @@ def _record_photo(conn, sale_id: int, source_url: str | None, data: bytes) -> bo
         return False
     try:
         conn.execute(
-            "INSERT OR IGNORE INTO photos (sale_id, source_url, file_hash, width, height)"
-            " VALUES (?,?,?,?,?)",
-            (sale_id, source_url or file_hash, file_hash, w, h),
+            "INSERT INTO photos (sale_id, source_url, file_hash, width, height, lot_text)"
+            " VALUES (?,?,?,?,?,?)"
+            " ON CONFLICT(sale_id, source_url) DO UPDATE SET"
+            " lot_text=COALESCE(excluded.lot_text, photos.lot_text)",
+            (sale_id, source_url or file_hash, file_hash, w, h,
+             (lot_text or None) and lot_text[:400]),
         )
         return True
     finally:
         conn.commit()
 
 
-def add_estatesales(conn, sale_id: int, max_photos: int | None = None) -> int:
+def add_estatesales(conn, sale_id: int, max_photos: int | None = None,
+                    force: bool = False) -> int:
     detail = (get_sale_details_batch([sale_id]) or [None])[0]
+    if detail and not force:
+        from .blocklist import blocked_match
+        frag = blocked_match(detail.get("orgName"))
+        if frag:
+            raise SystemExit(
+                f"sale {sale_id} is run by '{detail.get('orgName')}' — matches"
+                f" blocked house '{frag}'. Use --force to scan it anyway.")
     full = get_sale_full(sale_id)
     if not full:
         raise SystemExit(f"could not fetch sale {sale_id}")

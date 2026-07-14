@@ -142,7 +142,7 @@ def test_stage2_stops_spending_after_cost_cap(conn, monkeypatch):
 
     calls = {"n": 0}
 
-    def fake_screen(client, meter, crop, ctx, desc, prom):
+    def fake_screen(client, meter, crop, ctx, desc, prom, lot_text=None):
         calls["n"] += 1
         meter.total += 1.0
         if meter.total >= meter.cap:

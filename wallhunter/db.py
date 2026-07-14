@@ -101,6 +101,7 @@ MIGRATIONS = [
     "ALTER TABLE sales ADD COLUMN identity_name TEXT",
     "ALTER TABLE sales ADD COLUMN identity_verdict TEXT",
     "ALTER TABLE sales ADD COLUMN identity_evidence TEXT",
+    "ALTER TABLE photos ADD COLUMN lot_text TEXT",
 ]
 
 

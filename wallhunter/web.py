@@ -82,6 +82,13 @@ def _card(w, sale_title: str, ctx: float = 0.0, taste: float = 0.0) -> str:
         boost_chips += (f'<span class="flag">taste {"+" if taste > 0 else ""}{taste:.1f}</span>')
     sig = (f'<div class="sig"><b>Sig/label text:</b> {e(w["sig_text"])}</div>'
            if w["sig_text"] else "")
+    lot = ""
+    try:
+        if w["lot_text"]:
+            lot = (f'<div class="field"><b>Listing:</b> {e(w["lot_text"][:150])}'
+                   f' <span class="unc">(seller claim)</span></div>')
+    except (KeyError, IndexError):
+        pass
     return f"""
 <div class="card" id="w{w['id']}" data-id="{w['id']}">
   <img class="crop" src="/img/{e(w['crop_hash'])}" loading="lazy"
@@ -93,6 +100,7 @@ def _card(w, sale_title: str, ctx: float = 0.0, taste: float = 0.0) -> str:
     <div class="field"><b>Medium:</b> {e(w['medium_guess'])} &middot; <b>Period:</b> {e(w['period_guess'])}</div>
     <div class="field"><b>Quality:</b> {e((w['quality_notes'] or '')[:220])}</div>
     {sig}
+    {lot}
     <div class="field unc">{e(sale_title)}</div>
     <div class="btns">
       <button onclick="act({w['id']},'save')">&#11088; Save (s)</button>
@@ -172,9 +180,10 @@ select(0);
 def queue(sale: int | None = None, all: int = 0):
     conn = _conn()
     try:
-        q = ("SELECT w.*, d.crop_hash, s.title AS sale_title,"
+        q = ("SELECT w.*, d.crop_hash, s.title AS sale_title, p.lot_text,"
              " COALESCE(s.context_score, 0) AS context_score FROM works w"
              " JOIN detections d ON d.id=w.best_detection_id"
+             " JOIN photos p ON p.id=d.photo_id"
              " JOIN sales s ON s.id=w.sale_id WHERE w.status='screened'")
         params: list = []
         if sale:

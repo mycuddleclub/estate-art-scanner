@@ -33,12 +33,12 @@ def cmd_add(conn, args):
         return
     if "hibid.com" in args.ref:
         from .hibid import add_hibid
-        add_hibid(conn, args.ref, args.max_photos)
+        add_hibid(conn, args.ref, args.max_photos, force=args.force)
         return
     sale_id = parse_sale_ref(args.ref)
     if sale_id is None:
         raise SystemExit(f"not an EstateSales.net/HiBid URL, sale id, or folder: {args.ref}")
-    add_estatesales(conn, sale_id, args.max_photos)
+    add_estatesales(conn, sale_id, args.max_photos, force=args.force)
 
 
 def cmd_run(conn, args):
@@ -110,6 +110,8 @@ def main():
     p = sub.add_parser("add", help="ingest a sale's photos")
     p.add_argument("ref", help="EstateSales.net URL, sale id, or image folder")
     p.add_argument("--max-photos", type=int, default=None)
+    p.add_argument("--force", action="store_true",
+                   help="scan even if the seller matches the blocked-house list")
     p.set_defaults(fn=cmd_add)
 
     p = sub.add_parser("run", help="detect, dedupe, screen")

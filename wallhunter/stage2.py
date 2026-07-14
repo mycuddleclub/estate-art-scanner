@@ -50,10 +50,17 @@ def _text_of(response) -> str:
 
 
 def _screen_one(client, meter: CostMeter, crop_b64: str, ctx_b64: str | None,
-                detection_desc: str, prominence: str) -> tuple[dict, float]:
+                detection_desc: str, prominence: str,
+                lot_text: str | None = None) -> tuple[dict, float]:
     cost = 0.0
     intro = (f"Detector's note: \"{detection_desc}\" (prominence: {prominence}). "
              "Judge from the images yourself; the note may be wrong.")
+    if lot_text:
+        intro += (f"\nSeller's listing text for this lot: \"{lot_text[:300]}\" — "
+                  "treat this as an UNVERIFIED SELLER CLAIM. If it names an artist, "
+                  "record the name in sig_text prefixed 'listing:' and raise "
+                  "interest_score if the named artist makes this worth researching, "
+                  "but do not treat the attribution as fact.")
     content = [
         {"type": "text", "text": "Image 1 — the artwork crop:"},
         {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": crop_b64}},
@@ -141,7 +148,7 @@ def pending_works_best_first(conn, sale_id: int):
     return conn.execute(
         "SELECT w.id AS work_id, d.crop_hash, d.description, d.prominence, d.uncertain,"
         "       d.bbox_w * d.bbox_h AS bbox_frac,"
-        "       p.file_hash AS photo_hash"
+        "       p.file_hash AS photo_hash, p.lot_text"
         " FROM works w JOIN detections d ON d.id = w.best_detection_id"
         " JOIN photos p ON p.id = d.photo_id"
         " WHERE w.sale_id=? AND w.status='queued'"
@@ -172,7 +179,8 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
             ctx_b64 = downscale_jpeg_b64(load(row["photo_hash"]),
                                          STAGE2_CONTEXT_MAX_EDGE, quality=70)
         parsed, cost = _screen_one(client, meter, crop_b64, ctx_b64,
-                                   row["description"] or "", row["prominence"] or "featured")
+                                   row["description"] or "", row["prominence"] or "featured",
+                                   lot_text=row["lot_text"])
         return row, parsed, cost
 
     # Submit incrementally: pre-loading every job into the pool means the

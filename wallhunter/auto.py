@@ -55,9 +55,11 @@ def pick_new_sales(active: list[dict], known_ids: set[int],
     return [s["id"] for s in candidates[:max_new]]
 
 
-def drop_excluded_auctions(details: list[dict], hosts=None) -> list[int]:
-    """Pure (unit-tested): sale ids whose auctionUrl does NOT point at an
-    excluded platform (e.g. LiveAuctioneers, which Daniel reviews manually)."""
+def drop_excluded_auctions(details: list[dict], hosts=None, blocked=None) -> list[int]:
+    """Pure (unit-tested): sale ids that are neither cross-listed on an
+    excluded platform (e.g. LiveAuctioneers, which Daniel reviews manually)
+    nor run by a blacklisted auction house."""
+    from .blocklist import blocked_match
     from .config import EXCLUDE_AUCTION_HOSTS
     hosts = hosts if hosts is not None else EXCLUDE_AUCTION_HOSTS
     out = []
@@ -66,6 +68,11 @@ def drop_excluded_auctions(details: list[dict], hosts=None) -> list[int]:
         if any(h in url for h in hosts):
             print(f"   skipping sale {d.get('id')} — cross-listed on"
                   f" {next(h for h in hosts if h in url)} (covered manually)")
+            continue
+        frag = blocked_match(d.get("orgName"), blocked)
+        if frag:
+            print(f"   skipping sale {d.get('id')} — org '{d.get('orgName')}'"
+                  f" matches blocked house '{frag}'")
             continue
         out.append(d["id"])
     return out
