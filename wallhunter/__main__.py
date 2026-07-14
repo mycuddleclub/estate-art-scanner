@@ -76,6 +76,13 @@ def cmd_report(conn, args):
     build_report(conn, args.sale or _latest_sale(conn))
 
 
+def cmd_exclusives(conn, args):
+    from .exclusives import find_exclusives
+    for a in find_exclusives(force_refresh=args.refresh):
+        print(f"[{a['platform']}] {a['house']} — {a['title']}"
+              f"{'  (' + a['info'] + ')' if a['info'] else ''}\n    {a['url']}")
+
+
 def cmd_auto(conn, args):
     from .auto import run_auto
     run_auto(conn, max_new=args.max_new, daily_cap=args.daily_cap,
@@ -129,6 +136,11 @@ def main():
     p = sub.add_parser("serve", help="open the review queue (localhost)")
     p.add_argument("--port", type=int, default=8787)
     p.set_defaults(fn=cmd_serve)
+
+    p = sub.add_parser("exclusives", help="HiBid/Bidsquare auctions not on LA/Invaluable")
+    p.add_argument("--refresh", action="store_true",
+                   help="re-harvest the LA/Invaluable house set (ignores 20h cache)")
+    p.set_defaults(fn=cmd_exclusives)
 
     p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")
     p.add_argument("--max-new", type=int, default=2)

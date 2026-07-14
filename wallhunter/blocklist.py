@@ -15,27 +15,36 @@ from pathlib import Path
 ARTSCOUT_CONFIG = Path.home() / "art-scout" / "config.py"
 
 
-@lru_cache(maxsize=1)
-def load_blocked_houses() -> tuple[str, ...]:
-    fragments: list[str] = []
+def _load_artscout_list(var_name: str) -> list[str]:
+    """Extract a list/set constant from art-scout's config.py via ast."""
     try:
         tree = ast.parse(ARTSCOUT_CONFIG.read_text())
         for node in ast.walk(tree):
             if isinstance(node, ast.Assign) and any(
-                    isinstance(t, ast.Name) and t.id == "BLACKLISTED_HOUSES"
+                    isinstance(t, ast.Name) and t.id == var_name
                     for t in node.targets):
                 value = ast.literal_eval(node.value)
-                fragments = [str(v).strip().lower() for v in value if str(v).strip()]
-                break
-        if not fragments:
-            print(f"blocklist: BLACKLISTED_HOUSES not found in {ARTSCOUT_CONFIG}")
+                return [str(v).strip().lower() for v in value if str(v).strip()]
+        print(f"blocklist: {var_name} not found in {ARTSCOUT_CONFIG}")
     except OSError as e:
-        print(f"blocklist: cannot read {ARTSCOUT_CONFIG} ({e}) — using env only")
+        print(f"blocklist: cannot read {ARTSCOUT_CONFIG} ({e})")
     except (SyntaxError, ValueError) as e:
-        print(f"blocklist: failed to parse {ARTSCOUT_CONFIG} ({e}) — using env only")
+        print(f"blocklist: failed to parse {ARTSCOUT_CONFIG} ({e})")
+    return []
+
+
+@lru_cache(maxsize=1)
+def load_blocked_houses() -> tuple[str, ...]:
+    fragments = _load_artscout_list("BLACKLISTED_HOUSES")
     extra = [f.strip().lower() for f in
              os.environ.get("WH_EXTRA_BLOCKED_HOUSES", "").split(",") if f.strip()]
     return tuple(fragments + extra)
+
+
+@lru_cache(maxsize=1)
+def load_non_art_keywords() -> tuple[str, ...]:
+    """Art Scout's junk-auction title keywords (surplus, pallets, guns, ...)."""
+    return tuple(_load_artscout_list("NON_ART_AUCTION_KEYWORDS"))
 
 
 def blocked_match(org_name: str | None, blocked=None) -> str | None:
