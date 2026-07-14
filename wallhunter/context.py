@@ -10,7 +10,7 @@ import re
 
 import anthropic
 
-from .config import STAGE1_MODEL, CostMeter
+from .config import STAGE1_MODEL, CostCapExceeded, CostMeter
 from .images import downscale_jpeg_b64, load
 
 PROMPT = """You are assessing an estate sale for COLLECTOR CONTEXT - how likely this
@@ -62,6 +62,8 @@ def score_sale_context(conn, sale_id: int, meter: CostMeter,
         parsed = json.loads(m.group(0)) if m else {}
         score = max(0.0, min(1.0, float(parsed.get("context_score", 0))))
         note = str(parsed.get("note", ""))[:200]
+    except CostCapExceeded:
+        raise  # budget stop must propagate, not become a 0.0 score
     except Exception as e:
         score, note = 0.0, f"context scoring failed: {str(e)[:80]}"
     # never lower a score already pinned high (e.g. by named-collection research)

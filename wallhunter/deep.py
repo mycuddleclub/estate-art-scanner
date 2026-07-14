@@ -154,13 +154,18 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
     conn.commit()
     print(f"  deep: {len(unknown_names)} new names -> {len(persons)} person-like,"
           f" {len(rejected)} product-like (skipped)")
+    from .config import CostCapExceeded
     for n in persons:
         if not budget_left:
             break
         try:
             research_artist(conn, n, meter)
-        except Exception:
+        except CostCapExceeded:
+            print(f"  deep: research budget cap hit (${meter.total:.2f})"
+                  f" — remaining names carry to tomorrow")
             budget_left = False
+        except Exception as e:
+            print(f"  deep: research of '{n}' errored ({str(e)[:60]}) — continuing")
 
     # pass 3: flag against the (now warm) store
     for auction, lots in per_auction:

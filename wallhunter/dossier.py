@@ -13,7 +13,7 @@ import re
 import anthropic
 
 from . import db
-from .config import CostMeter
+from .config import CostCapExceeded, CostMeter
 
 RESEARCH_MODEL = "claude-sonnet-5"
 WEB_SEARCH_COST_USD = 0.01  # per search, billed on top of tokens
@@ -112,6 +112,8 @@ def research_sale_identity(conn, sale_id: int, meter: CostMeter) -> str | None:
             verdict = str(parsed.get("verdict", "unknown")).lower()
             confidence = str(parsed.get("confidence", "low")).lower()
             evidence = str(parsed.get("evidence", ""))[:500]
+    except CostCapExceeded:
+        raise  # budget stop must propagate, not be recorded as a verdict
     except Exception as e:
         evidence = f"research failed: {str(e)[:150]}"
 

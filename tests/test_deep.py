@@ -36,6 +36,35 @@ def test_flag_reason():
     assert flag_reason(None, {"high_bid_usd": None}) is None
 
 
+def test_research_artist_propagates_cost_cap(conn, monkeypatch):
+    """Regression: CostCapExceeded was swallowed by the broad except and
+    recorded as 'research failed' — live incident: $8.96 spend vs $1.50 cap."""
+    import pytest
+    from wallhunter import artists
+    from wallhunter.config import CostCapExceeded, CostMeter
+
+    class FakeUsage:
+        input_tokens = 1_000_000
+        output_tokens = 1_000_000
+
+    class FakeResp:
+        usage = FakeUsage()
+        content = []
+
+    class FakeClient:
+        class messages:
+            @staticmethod
+            def create(**kw):
+                return FakeResp()
+
+    monkeypatch.setattr(artists.anthropic, "Anthropic", lambda: FakeClient)
+    meter = CostMeter(0.01)  # first add() blows the cap
+    with pytest.raises(CostCapExceeded):
+        artists.research_artist(conn, "Someone New", meter)
+    # and nothing bogus was cached for the name
+    assert artists.lookup(conn, "Someone New") is None
+
+
 def test_import_checker_cache_shape(conn, tmp_path, monkeypatch):
     from wallhunter import artists
     fake = {"entries": {

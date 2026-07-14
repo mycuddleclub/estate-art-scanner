@@ -15,7 +15,7 @@ from pathlib import Path
 import anthropic
 
 from . import db
-from .config import CostMeter
+from .config import CostCapExceeded, CostMeter
 
 CHECKER_CACHE = (Path.home() / "Desktop/williams-art-engine/arbitrage_smart"
                  / "data/artist_market_cache.json")
@@ -144,6 +144,8 @@ def classify_person_names(names: list[str], meter: CostMeter) -> dict[str, bool]
         verdicts = dict(re.findall(r"(\d+)\s*:\s*([PX])", txt.upper()))
         return {n: verdicts.get(str(i + 1), "P") == "P"
                 for i, n in enumerate(names)}
+    except CostCapExceeded:
+        raise
     except Exception as e:
         print(f"   name classifier failed ({str(e)[:80]}) — failing open")
         return {n: True for n in names}
@@ -194,6 +196,10 @@ def research_artist(conn, name: str, meter: CostMeter):
                     "market_high_usd") else None
             except (TypeError, ValueError):
                 high = None
+    except CostCapExceeded:
+        raise  # the budget stop must reach the caller — never record it as
+        # a "failed research" result (that swallowed the cap: live $8.96
+        # spend against a $1.50 cap on 2026-07-14)
     except Exception as e:
         evidence = f"research failed: {str(e)[:120]}"
     conn.execute(
