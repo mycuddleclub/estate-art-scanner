@@ -15,7 +15,9 @@ paintings, drawings, watercolors, fine prints, photographs, sculpture, studio \
 ceramics/pottery, textile art. Include works in the background, hanging on walls, \
 leaning against furniture, stacked, partially visible, or reflected. High recall: \
 when uncertain whether something is an artwork, include it and mark it uncertain. \
-Exclude mirrors, TVs, windows, and obvious commercial posters.
+Exclude mirrors, TVs, windows, and obvious commercial posters. If more than 15 \
+artworks are visible, return the 15 most prominent/promising and mention the rest \
+in photo_note.
 Return ONLY this JSON, no other text:
 {"artworks": [{"box": [x, y, w, h], "type": "painting|print|drawing|photo|sculpture|ceramic|textile|unknown", \
 "desc": "one line incl. any visible signature/label text", "sig_visible": true/false, \
@@ -38,7 +40,8 @@ def _detect_one(client, meter: CostMeter, b64: str) -> tuple[dict, float]:
         {"type": "text", "text": DETECT_PROMPT},
     ]}]
     for attempt in range(2):
-        resp = client.messages.create(model=STAGE1_MODEL, max_tokens=1500, messages=messages)
+        # 4000: dense gallery walls can need 15 detections' worth of JSON
+        resp = client.messages.create(model=STAGE1_MODEL, max_tokens=4000, messages=messages)
         cost += meter.add(STAGE1_MODEL, resp.usage)
         txt = _text_of(resp)
         m = _JSON.search(txt)

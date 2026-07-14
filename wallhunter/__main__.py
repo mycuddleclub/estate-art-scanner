@@ -31,9 +31,13 @@ def cmd_add(conn, args):
     if Path(args.ref).is_dir():
         add_folder(conn, Path(args.ref), args.max_photos)
         return
+    if "hibid.com" in args.ref:
+        from .hibid import add_hibid
+        add_hibid(conn, args.ref, args.max_photos)
+        return
     sale_id = parse_sale_ref(args.ref)
     if sale_id is None:
-        raise SystemExit(f"not an EstateSales.net URL, sale id, or folder: {args.ref}")
+        raise SystemExit(f"not an EstateSales.net/HiBid URL, sale id, or folder: {args.ref}")
     add_estatesales(conn, sale_id, args.max_photos)
 
 
@@ -72,6 +76,15 @@ def cmd_report(conn, args):
     build_report(conn, args.sale or _latest_sale(conn))
 
 
+def cmd_serve(conn, args):
+    conn.close()
+    import subprocess
+    import uvicorn
+    from .web import app
+    subprocess.Popen(["open", f"http://127.0.0.1:{args.port}/"])
+    uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")
+
+
 def cmd_status(conn, _args):
     for s in conn.execute(
             "SELECT s.id, s.title, s.photo_count,"
@@ -104,6 +117,10 @@ def main():
 
     p = sub.add_parser("status", help="pipeline status per sale")
     p.set_defaults(fn=cmd_status)
+
+    p = sub.add_parser("serve", help="open the review queue (localhost)")
+    p.add_argument("--port", type=int, default=8787)
+    p.set_defaults(fn=cmd_serve)
 
     args = ap.parse_args()
     conn = db.connect()

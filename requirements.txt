@@ -2,3 +2,7 @@ anthropic>=0.30.0
 requests>=2.31.0
 python-dotenv>=1.0.0
 pillow>=10.0.0
+fastapi>=0.110
+uvicorn>=0.29
+playwright>=1.40
+pytest>=8.0

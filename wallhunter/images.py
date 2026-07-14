@@ -62,7 +62,7 @@ def save_crop(img: Image.Image) -> tuple[str, int]:
 def dhash(img: Image.Image) -> str:
     """64-bit difference hash as 16 hex chars (pure Pillow, no numpy)."""
     small = img.convert("L").resize((9, 8), Image.LANCZOS)
-    px = list(small.getdata())
+    px = small.tobytes()  # mode L: one byte per pixel, row-major
     bits = 0
     for row in range(8):
         for col in range(8):
