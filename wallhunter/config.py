@@ -55,10 +55,15 @@ def anthropic_api_key() -> str:
     if os.environ.get("ANTHROPIC_API_KEY"):
         return os.environ["ANTHROPIC_API_KEY"]
     for env_path in _KEY_FALLBACKS:
-        if env_path.exists():
-            load_dotenv(env_path, override=False)
-            if os.environ.get("ANTHROPIC_API_KEY"):
-                return os.environ["ANTHROPIC_API_KEY"]
+        try:
+            # Desktop paths are TCC-protected under launchd: reads can fail
+            # with EDEADLK/EPERM. Skip unreadable files instead of crashing.
+            if env_path.exists():
+                load_dotenv(env_path, override=False)
+        except OSError:
+            continue
+        if os.environ.get("ANTHROPIC_API_KEY"):
+            return os.environ["ANTHROPIC_API_KEY"]
     raise SystemExit(
         "ANTHROPIC_API_KEY not set and not found in any fallback .env "
         f"({', '.join(str(p) for p in _KEY_FALLBACKS)})"

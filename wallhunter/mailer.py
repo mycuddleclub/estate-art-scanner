@@ -18,8 +18,11 @@ _SMTP_FALLBACKS = [
 
 def _smtp_config():
     for p in _SMTP_FALLBACKS:
-        if p.exists():
-            load_dotenv(p, override=False)
+        try:
+            if p.exists():
+                load_dotenv(p, override=False)
+        except OSError:  # TCC-protected path under launchd
+            continue
     user = os.environ.get("SMTP_USER")
     pw = os.environ.get("SMTP_PASSWORD")
     to = os.environ.get("EMAIL_TO") or user
