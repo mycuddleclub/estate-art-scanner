@@ -79,7 +79,7 @@ def cmd_report(conn, args):
 def cmd_auto(conn, args):
     from .auto import run_auto
     run_auto(conn, max_new=args.max_new, daily_cap=args.daily_cap,
-             email=not args.no_email)
+             per_sale_cap=args.per_sale_cap, email=not args.no_email)
 
 
 def cmd_serve(conn, args):
@@ -131,6 +131,8 @@ def main():
     p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")
     p.add_argument("--max-new", type=int, default=2)
     p.add_argument("--daily-cap", type=float, default=5.0)
+    p.add_argument("--per-sale-cap", type=float, default=None,
+                   help="max spend per sale per day (default: daily-cap / 2)")
     p.add_argument("--no-email", action="store_true")
     p.set_defaults(fn=cmd_auto)
 

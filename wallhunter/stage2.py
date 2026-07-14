@@ -95,15 +95,28 @@ def _tier(score: float) -> str:
     return "C"
 
 
-def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
-    client = anthropic.Anthropic()
-    rows = conn.execute(
+def pending_works_best_first(conn, sale_id: int):
+    """Queued works ordered by stage-1 promise, so a cost-capped run screens
+    the most promising detections first and leaves only the weak tail for
+    the next day's resume."""
+    return conn.execute(
         "SELECT w.id AS work_id, d.crop_hash, d.description, d.prominence, d.uncertain,"
         "       p.file_hash AS photo_hash"
         " FROM works w JOIN detections d ON d.id = w.best_detection_id"
         " JOIN photos p ON p.id = d.photo_id"
-        " WHERE w.sale_id=? AND w.status='queued'",
+        " WHERE w.sale_id=? AND w.status='queued'"
+        " ORDER BY (d.sig_visible*3.0 + d.label_visible*2.0"
+        "   + CASE WHEN d.prominence='background' THEN 1.0 ELSE 0 END"
+        "   + CASE d.coarse_type WHEN 'painting' THEN 2.0 WHEN 'drawing' THEN 1.5"
+        "       WHEN 'sculpture' THEN 1.0 WHEN 'ceramic' THEN 1.0"
+        "       WHEN 'unknown' THEN 0.75 ELSE 0.5 END) DESC,"
+        "   d.crop_area DESC",
         (sale_id,)).fetchall()
+
+
+def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
+    client = anthropic.Anthropic()
+    rows = pending_works_best_first(conn, sale_id)
     stats = {"screened": 0, "failed": 0, "skipped_cost": 0}
     capped = False
 

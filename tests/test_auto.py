@@ -17,6 +17,19 @@ def test_pick_new_sales_filters_and_ranks():
     assert got == [1, 5]  # richest first, capped at 2
 
 
+def test_pick_new_sales_saturates_monster_catalogs():
+    from wallhunter.auto import pick_new_sales
+    zips = {"60035"}
+    active = [
+        {"id": 1, "postalCodeNumber": "60035", "pictureCount": 1228},  # monster
+        {"id": 2, "postalCodeNumber": "60035", "pictureCount": 450},   # also >saturation
+        {"id": 3, "postalCodeNumber": "60035", "pictureCount": 300},
+    ]
+    got = pick_new_sales(active, set(), zips, 20, 3)
+    # both >=400 rank equal on saturated count; smaller (finishable) wins
+    assert got == [2, 1, 3]
+
+
 def test_pick_new_sales_empty_ok():
     from wallhunter.auto import pick_new_sales
     assert pick_new_sales([], set(), {"98040"}, 20, 3) == []
@@ -33,6 +46,28 @@ def _seed_event(conn, wid: int, kind: str, reason: str | None = None):
     from wallhunter import db as wdb
     conn.execute("INSERT INTO events (ts, tool, work_id, kind, reason)"
                  " VALUES (?, 'wall-hunter', ?, ?, ?)", (wdb.now(), wid, kind, reason))
+
+
+def test_stage2_queue_is_best_first(conn):
+    from wallhunter.stage2 import pending_works_best_first
+    conn.execute("INSERT INTO sales (id, title) VALUES (7, 'S')")
+    conn.execute("INSERT INTO photos (id, sale_id, file_hash) VALUES (70, 7, 'h')")
+    def det(sig, lbl, ctype, prom, area):
+        cur = conn.execute(
+            "INSERT INTO detections (photo_id, bbox_x, bbox_y, bbox_w, bbox_h,"
+            " coarse_type, prominence, sig_visible, label_visible, crop_hash,"
+            " dhash, crop_area) VALUES (70,0,0,1,1,?,?,?,?,'c','0',?)",
+            (ctype, prom, sig, lbl, area))
+        w = conn.execute("INSERT INTO works (sale_id, best_detection_id, status)"
+                         " VALUES (7, ?, 'queued')", (cur.lastrowid,)).lastrowid
+        return w
+    plain_print = det(0, 0, "print", "featured", 9000)
+    signed_painting = det(1, 0, "painting", "featured", 2000)
+    labeled_ceramic = det(0, 1, "ceramic", "background", 1000)
+    conn.commit()
+    order = [r["work_id"] for r in pending_works_best_first(conn, 7)]
+    # signature+painting (5.0) > label+background+ceramic (4.0) > plain print (0.5)
+    assert order == [signed_painting, labeled_ceramic, plain_print]
 
 
 def test_taste_boosts_activate_at_threshold(conn):
