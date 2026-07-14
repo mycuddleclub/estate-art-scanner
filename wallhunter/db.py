@@ -102,6 +102,21 @@ MIGRATIONS = [
     "ALTER TABLE sales ADD COLUMN identity_verdict TEXT",
     "ALTER TABLE sales ADD COLUMN identity_evidence TEXT",
     "ALTER TABLE photos ADD COLUMN lot_text TEXT",
+    """CREATE TABLE IF NOT EXISTS artists (
+        artist_key TEXT PRIMARY KEY,
+        artist TEXT NOT NULL,
+        source TEXT NOT NULL,            -- checker_cache|artscout_cache|wallhunter
+        tier TEXT,                       -- strong|listed|minor|none|unknown
+        market_high_usd REAL,
+        market_note TEXT,
+        evidence TEXT,
+        researched_at TEXT)""",
+    """CREATE TABLE IF NOT EXISTS deep_lots (
+        lot_url TEXT PRIMARY KEY,
+        sale_url TEXT, house TEXT, title TEXT,
+        artist_key TEXT, high_bid_usd REAL, bid_count INTEGER,
+        estimate TEXT, info TEXT,
+        first_seen TEXT, emailed INTEGER DEFAULT 0)""",
 ]
 
 

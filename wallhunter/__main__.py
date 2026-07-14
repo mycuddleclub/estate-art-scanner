@@ -82,9 +82,24 @@ def cmd_exclusives(conn, args):
     for a in exclusives:
         print(f"[{a['platform']}] {a['house']} — {a['title']}"
               f"{'  (' + a['info'] + ')' if a['info'] else ''}\n    {a['url']}")
+    deep_flags = None
+    if args.deep:
+        import os
+        from .artists import import_artscout_cache, import_checker_cache
+        from .config import anthropic_api_key
+        from .deep import deep_scan
+        os.environ.setdefault("ANTHROPIC_API_KEY", anthropic_api_key())
+        # refresh shared knowledge from sibling tools when readable
+        import_checker_cache(conn)
+        import_artscout_cache(conn)
+        deep_flags = deep_scan(conn, exclusives,
+                               research_cap_usd=args.research_cap,
+                               max_auctions=args.max_auctions)
+        for f in deep_flags:
+            print(f"🎯 {f['artist']}: {f['title'][:60]} — {f['reason']}\n    {f['url']}")
     if args.email:
         from .mailer import send_exclusives_email
-        send_exclusives_email(exclusives)
+        send_exclusives_email(exclusives, deep_flags=deep_flags)
 
 
 def cmd_auto(conn, args):
@@ -146,6 +161,11 @@ def main():
                    help="re-harvest the LA/Invaluable house set (ignores 20h cache)")
     p.add_argument("--email", action="store_true",
                    help="send the Off-Radar Auctions email")
+    p.add_argument("--deep", action="store_true",
+                   help="per-lot artist intelligence on each off-radar auction")
+    p.add_argument("--research-cap", type=float, default=3.0,
+                   help="max USD for researching new artist names")
+    p.add_argument("--max-auctions", type=int, default=None)
     p.set_defaults(fn=cmd_exclusives)
 
     p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")

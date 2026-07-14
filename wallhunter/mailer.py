@@ -54,7 +54,8 @@ def _work_row(w) -> str:
   {sig}</td></tr>"""
 
 
-def send_exclusives_email(exclusives: list[dict]) -> bool:
+def send_exclusives_email(exclusives: list[dict],
+                          deep_flags: list[dict] | None = None) -> bool:
     """Standalone Off-Radar Auctions email (separate program from the
     estate-sale digest, per Daniel's request)."""
     user, pw, to = _smtp_config()
@@ -62,14 +63,33 @@ def send_exclusives_email(exclusives: list[dict]) -> bool:
         print("exclusives email: SMTP not configured — skipping")
         return False
     e = lambda s: html.escape(str(s or ""))
+    deep_html = ""
+    if deep_flags:
+        items = "".join(
+            f"""<div style="background:#fef2f2;border:2px solid #dc2626;border-radius:8px;
+                 padding:10px 14px;margin:8px 0">
+              <b><a href='{e(f['url'])}'>{e(f['title'])}</a></b><br>
+              {e(f['house'])} &middot; bid: {('$%.0f' % f['high_bid_usd']) if f.get('high_bid_usd') else 'none'}
+              {f"&middot; {e(f['estimate'])}" if f.get('estimate') else ''}<br>
+              <b>{e(f['artist'])}</b> — {e(f['reason'])}<br>
+              <span style="color:#57534e;font-size:12px">{e(f['market_note'])}
+              {e(f['evidence'])}</span></div>"""
+            for f in deep_flags[:12])
+        deep_html = (f"<h3 style='margin:14px 0 4px'>&#127919; Deep finds"
+                     f" ({len(deep_flags)})</h3>" + items)
     if exclusives:
+        shown = exclusives[:40]  # soonest-ending first (pre-sorted)
         rows = "".join(
             f"<li style='margin:6px 0'><b>{e(a['house'])}</b> — "
             f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
             f" <span style='color:#78716c'>[{e(a['platform'])}]"
             f"{' ' + e(a['info']) if a.get('info') else ''}</span></li>"
-            for a in exclusives)
-        body_core = f"<ul style='padding-left:18px'>{rows}</ul>"
+            for a in shown)
+        more = (f"<p style='color:#78716c;font-size:12px'>+"
+                f"{len(exclusives) - len(shown)} more in the 14-day window"
+                " (deep scan covers them on rotation)</p>"
+                if len(exclusives) > len(shown) else "")
+        body_core = f"<ul style='padding-left:18px'>{rows}</ul>{more}"
     else:
         body_core = "<p>No off-radar auctions found today.</p>"
     body = f"""<html><body style="background:#f5f5f4;padding:16px">
@@ -79,6 +99,7 @@ def send_exclusives_email(exclusives: list[dict]) -> bool:
 <p style="color:#57534e">Auctions on HiBid / Bidsquare whose houses are NOT
 currently active on LiveAuctioneers or Invaluable — smaller bidder pools.
 Junk genres and your blocked houses are filtered out.</p>
+{deep_html}
 {body_core}
 </div></body></html>"""
     msg = MIMEText(body, "html")

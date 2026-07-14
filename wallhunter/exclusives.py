@@ -11,7 +11,7 @@ for ~20h so the heavy LA/Invaluable sweeps run once per day.
 import json
 import re
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from .config import DATA_DIR
 
@@ -68,61 +68,75 @@ def _new_page(browser):
                                viewport={"width": 1440, "height": 1000}).new_page()
 
 
-_HIBID_TILE_JS = """els => {
-  const seen = new Set(); const out = [];
-  for (const e of els) {
-    const m = (e.href || '').match(/\\/catalog\\/(\\d+)/);
-    if (!m || seen.has(m[1])) continue;
-    seen.add(m[1]);
-    let tile = e.closest('[class*=tile], [class*=card]')
-        || e.parentElement?.parentElement?.parentElement;
-    const lines = (tile?.innerText || '').split('\\n').map(t => t.trim()).filter(Boolean);
-    out.push({id: m[1], url: e.href.split('?')[0], lines: lines.slice(0, 4)});
+HIBID_GRAPHQL = "https://hibid.com/graphql"
+_AUCTION_SEARCH_Q = """query($searchText: String, $pageNum: Int, $pageLength: Int) {
+  auctionSearch(input: {status: OPEN, searchText: $searchText},
+                pageNumber: $pageNum, pageLength: $pageLength) {
+    pagedResults {
+      filteredCount
+      results { auction {
+        id eventName eventDateBegin eventDateEnd
+        auctioneer { name }
+      } }
+    }
   }
-  return out;
 }"""
+HIBID_WINDOW_DAYS = 14
 
 
-def harvest_hibid(browser, query: str = "art", max_pages: int = 3) -> list[dict]:
-    page = _new_page(browser)
+def harvest_hibid(browser=None, query: str = "art",
+                  window_days: int = HIBID_WINDOW_DAYS) -> list[dict]:
+    """All OPEN HiBid auctions matching the query, via HiBid's own GraphQL
+    (unauthenticated, same API the site uses). Replaces tile-scraping, which
+    saw only the ~78 soonest-ending of 2,200+ matches. Window: ends between
+    now and now+window_days (the API returns zombie listings months stale —
+    'OPEN' status lies; the end date doesn't)."""
+    import requests as _rq
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    horizon = now + timedelta(days=window_days)
     auctions, seen = [], set()
-    try:
-        for n in range(1, max_pages + 1):
-            page.goto(f"https://hibid.com/auctions?q={query}&apage={n}",
-                      wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_timeout(3500)
-            new = 0
-            for t in page.eval_on_selector_all("a[href*='/catalog/']", _HIBID_TILE_JS):
-                if t["id"] in seen or len(t["lines"]) < 2:
-                    continue
-                seen.add(t["id"])
-                # tile lines vary: title, then optionally a type line
-                # ("Online Only Auction", "Live Webcast..."), then the house,
-                # then "N Lots - Ends ..." — pick the first line that is
-                # neither a type line nor a lots/date line
-                title = t["lines"][0]
-                house = ""
-                info = ""
-                for ln in t["lines"][1:]:
-                    if re.search(r"\d+\s+Lots|Ends\b|Bidding", ln, re.I):
-                        info = info or ln
-                    elif re.match(r"(online only|live webcast|live auction|webcast|"
-                                  r"absentee|timed|share|favorite|watch|bid now|"
-                                  r"view catalog|featured|closing|shipping)", ln, re.I):
-                        continue
-                    elif not house:
-                        house = ln
-                if not house:
-                    continue
-                auctions.append({"platform": "hibid", "title": title[:120],
-                                 "house": house[:80], "url": t["url"],
-                                 "info": info[:60]})
-                new += 1
-            if not new:
-                break
-            time.sleep(0.5)
-    finally:
-        page.close()
+    page_num = 1
+    while page_num <= 40:  # 40 x 100 = well past any realistic result set
+        try:
+            r = _rq.post(HIBID_GRAPHQL, timeout=30,
+                         headers={"User-Agent": UA,
+                                  "Content-Type": "application/json"},
+                         json={"query": _AUCTION_SEARCH_Q,
+                               "variables": {"searchText": query,
+                                             "pageNum": page_num,
+                                             "pageLength": 100}})
+            r.raise_for_status()
+            data = r.json()["data"]["auctionSearch"]["pagedResults"]
+        except Exception as e:
+            print(f"  hibid graphql page {page_num} failed: {str(e)[:80]}")
+            break
+        results = data.get("results", [])
+        if not results:
+            break
+        for res in results:
+            a = res.get("auction") or {}
+            if not a.get("id") or a["id"] in seen:
+                continue
+            seen.add(a["id"])
+            try:
+                ends = datetime.fromisoformat(a.get("eventDateEnd", ""))
+            except ValueError:
+                continue
+            if not (now - timedelta(hours=12) <= ends <= horizon):
+                continue
+            house = ((a.get("auctioneer") or {}).get("name") or "").strip()
+            if not house:
+                continue
+            auctions.append({
+                "platform": "hibid",
+                "title": (a.get("eventName") or "").strip()[:120],
+                "house": house[:80],
+                "url": f"https://hibid.com/catalog/{a['id']}/_",
+                "info": f"ends {ends:%m/%d}",
+                "ends": ends.isoformat(),
+            })
+        page_num += 1
+        time.sleep(0.4)
     return auctions
 
 
@@ -161,34 +175,51 @@ LA_HOUSES_URL = ("https://raw.githubusercontent.com/mycuddleclub/"
                  "auction-checker/main/la_houses.json")
 
 
+def _github_token() -> str | None:
+    import os
+    import subprocess
+    if os.environ.get("GITHUB_TOKEN"):
+        return os.environ["GITHUB_TOKEN"]
+    try:
+        out = subprocess.run(
+            ["security", "find-internet-password", "-s", "github.com",
+             "-a", "mycuddleclub", "-w"],
+            capture_output=True, text=True, timeout=10)
+        return out.stdout.strip() or None
+    except Exception:
+        return None
+
+
 def harvest_la_houses(browser=None) -> set[str]:
     """House names with auctions currently on LiveAuctioneers.
 
     LA blocks headless browsers from residential IPs, so this reads
     la_houses.json published nightly by the auction-checker GitHub Action
-    (which scrapes LA successfully from Actions runners)."""
+    (which scrapes LA successfully from Actions runners). The repo is
+    PRIVATE — the contents API needs the keychain token."""
     import base64
     import json as _json
-    import time as _time
 
     import requests
+    token = _github_token()
+    if not token:
+        print("  LA house list: no GitHub token available — diff will be"
+              " Invaluable-only this run")
+        return set()
     try:
-        # cache-buster: raw CDN negative-caches 404s for freshly created files
-        resp = requests.get(f"{LA_HOUSES_URL}?t={int(_time.time())}", timeout=20)
+        resp = requests.get(
+            "https://api.github.com/repos/mycuddleclub/auction-checker"
+            "/contents/la_houses.json", timeout=20,
+            headers={"Authorization": f"Bearer {token}",
+                     "Accept": "application/vnd.github+json"})
         resp.raise_for_status()
-        data = resp.json()
-    except Exception:
-        try:  # fallback: contents API (no CDN)
-            resp = requests.get(
-                "https://api.github.com/repos/mycuddleclub/auction-checker"
-                "/contents/la_houses.json", timeout=20)
-            resp.raise_for_status()
-            data = _json.loads(base64.b64decode(resp.json()["content"]))
-        except Exception as e:
-            print(f"  LA house list unavailable ({str(e)[:80]}) — diff will be"
-                  " Invaluable-only this run")
-            return set()
-    print(f"  LA list updated {data.get('updated', '?')[:16]}")
+        data = _json.loads(base64.b64decode(resp.json()["content"]))
+    except Exception as e:
+        print(f"  LA house list unavailable ({str(e)[:80]}) — diff will be"
+              " Invaluable-only this run")
+        return set()
+    print(f"  LA list: {data.get('count')} houses, updated"
+          f" {data.get('updated', '?')[:16]}")
     return set(data.get("houses", []))
 
 
@@ -278,6 +309,8 @@ def find_exclusives(force_refresh: bool = False) -> list[dict]:
         if any(k in title_l for k in junk):
             continue  # surplus/pallets/guns etc. per Art Scout's keyword list
         exclusives.append(a)
+    # soonest-ending first (undated entries, e.g. Bidsquare, sort last)
+    exclusives.sort(key=lambda a: a.get("ends") or "9999")
     print(f"exclusives: {len(exclusives)}/{len(auctions)} auctions are"
           " off-LA/Invaluable, non-junk, non-blocked")
     return exclusives
