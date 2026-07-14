@@ -115,6 +115,40 @@ def lookup(conn, name: str):
                         (artist_key(name),)).fetchone()
 
 
+CLASSIFY_MODEL = "claude-haiku-4-5-20251001"
+
+CLASSIFY_PROMPT = """These strings were extracted from auction lot titles as possible
+artist names. Many are actually product/object descriptions in Title Case.
+For each, answer P if it is plausibly a PERSON'S NAME (artist attribution)
+or X if it is a product/object/place/brand description.
+Strings:
+{numbered}
+Reply with ONLY lines like "1:P" or "2:X", one per string."""
+
+
+def classify_person_names(names: list[str], meter: CostMeter) -> dict[str, bool]:
+    """Batch Haiku gate before spending web-research money. Fail-open (treat
+    as person) so a classifier outage can't silently drop real artists."""
+    if not names:
+        return {}
+    client = anthropic.Anthropic()
+    numbered = "\n".join(f"{i+1}. {n}" for i, n in enumerate(names))
+    try:
+        resp = client.messages.create(
+            model=CLASSIFY_MODEL, max_tokens=800,
+            messages=[{"role": "user",
+                       "content": CLASSIFY_PROMPT.format(numbered=numbered)}])
+        meter.add(CLASSIFY_MODEL, resp.usage)
+        txt = "".join(b.text for b in resp.content
+                      if getattr(b, "type", "") == "text")
+        verdicts = dict(re.findall(r"(\d+)\s*:\s*([PX])", txt.upper()))
+        return {n: verdicts.get(str(i + 1), "P") == "P"
+                for i, n in enumerate(names)}
+    except Exception as e:
+        print(f"   name classifier failed ({str(e)[:80]}) — failing open")
+        return {n: True for n in names}
+
+
 RESEARCH_PROMPT = """Research the artist "{name}". Search auction records and market
 evidence. Return ONLY JSON:
 {{"tier": "strong|listed|minor|none",

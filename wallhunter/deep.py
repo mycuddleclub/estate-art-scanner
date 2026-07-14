@@ -115,6 +115,10 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
     flagged = []
     budget_left = True
 
+    # pass 1: harvest every auction's art lots, collect unknown claimed names
+    from .artists import artist_key, classify_person_names
+    per_auction: list[tuple[dict, list[dict]]] = []
+    unknown_names: dict[str, str] = {}  # key -> display name
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         for auction in hibid:
@@ -127,30 +131,54 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
             if not lots:
                 continue
             print(f"  deep: {auction['house'][:36]} — {len(lots)} art lots")
-            for lot in lots:
-                if conn.execute("SELECT 1 FROM deep_lots WHERE lot_url=?",
-                                (lot["url"],)).fetchone():
-                    continue  # already assessed a previous day
+            new_lots = [l for l in lots if not conn.execute(
+                "SELECT 1 FROM deep_lots WHERE lot_url=?", (l["url"],)).fetchone()]
+            per_auction.append((auction, new_lots))
+            for lot in new_lots:
                 name = listing_artist_claim(lot["title"])
-                row = lookup(conn, name) if name else None
-                if name and row is None and budget_left:
-                    try:
-                        row = research_artist(conn, name, meter)
-                    except Exception:
-                        budget_left = False
-                reason = flag_reason(row, lot) if row else None
-                conn.execute(
-                    "INSERT OR IGNORE INTO deep_lots (lot_url, sale_url, house,"
-                    " title, artist_key, high_bid_usd, bid_count, estimate,"
-                    " info, first_seen, emailed) VALUES (?,?,?,?,?,?,?,?,?,?,0)",
-                    (lot["url"], auction["url"], auction["house"], lot["title"],
-                     row["artist_key"] if row else None, lot["high_bid_usd"],
-                     lot["bid_count"], lot["estimate"], reason or "", db.now()))
-                if reason:
-                    flagged.append({**lot, "house": auction["house"],
-                                    "artist": row["artist"], "reason": reason,
-                                    "market_note": row["market_note"] or "",
-                                    "evidence": (row["evidence"] or "")[:200]})
-            conn.commit()
+                lot["claim"] = name
+                if name and lookup(conn, name) is None:
+                    unknown_names.setdefault(artist_key(name), name)
+
+    # pass 2: penny-cheap gate — only person-like names get web research;
+    # product-like strings are cached tier 'none' so they never recur
+    verdicts = classify_person_names(list(unknown_names.values()), meter)
+    persons = [n for n, ok in verdicts.items() if ok]
+    rejected = [n for n, ok in verdicts.items() if not ok]
+    for n in rejected:
+        conn.execute(
+            "INSERT OR IGNORE INTO artists (artist_key, artist, source, tier,"
+            " evidence) VALUES (?,?,?,?,?)",
+            (artist_key(n), n, "wallhunter-classifier", "none",
+             "classifier: product/object description, not a person name"))
+    conn.commit()
+    print(f"  deep: {len(unknown_names)} new names -> {len(persons)} person-like,"
+          f" {len(rejected)} product-like (skipped)")
+    for n in persons:
+        if not budget_left:
+            break
+        try:
+            research_artist(conn, n, meter)
+        except Exception:
+            budget_left = False
+
+    # pass 3: flag against the (now warm) store
+    for auction, lots in per_auction:
+        for lot in lots:
+            row = lookup(conn, lot["claim"]) if lot.get("claim") else None
+            reason = flag_reason(row, lot) if row else None
+            conn.execute(
+                "INSERT OR IGNORE INTO deep_lots (lot_url, sale_url, house,"
+                " title, artist_key, high_bid_usd, bid_count, estimate,"
+                " info, first_seen, emailed) VALUES (?,?,?,?,?,?,?,?,?,?,0)",
+                (lot["url"], auction["url"], auction["house"], lot["title"],
+                 row["artist_key"] if row else None, lot["high_bid_usd"],
+                 lot["bid_count"], lot["estimate"], reason or "", db.now()))
+            if reason:
+                flagged.append({**lot, "house": auction["house"],
+                                "artist": row["artist"], "reason": reason,
+                                "market_note": row["market_note"] or "",
+                                "evidence": (row["evidence"] or "")[:200]})
+        conn.commit()
     print(f"deep: {len(flagged)} flagged lots, research spend ${meter.total:.2f}")
     return flagged
