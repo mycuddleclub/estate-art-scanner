@@ -167,17 +167,29 @@ def harvest_la_houses(browser=None) -> set[str]:
     LA blocks headless browsers from residential IPs, so this reads
     la_houses.json published nightly by the auction-checker GitHub Action
     (which scrapes LA successfully from Actions runners)."""
+    import base64
+    import json as _json
+    import time as _time
+
     import requests
     try:
-        resp = requests.get(LA_HOUSES_URL, timeout=20)
+        # cache-buster: raw CDN negative-caches 404s for freshly created files
+        resp = requests.get(f"{LA_HOUSES_URL}?t={int(_time.time())}", timeout=20)
         resp.raise_for_status()
         data = resp.json()
-        print(f"  LA list updated {data.get('updated', '?')[:16]}")
-        return set(data.get("houses", []))
-    except Exception as e:
-        print(f"  LA house list unavailable ({str(e)[:80]}) — diff will be"
-              " Invaluable-only this run")
-        return set()
+    except Exception:
+        try:  # fallback: contents API (no CDN)
+            resp = requests.get(
+                "https://api.github.com/repos/mycuddleclub/auction-checker"
+                "/contents/la_houses.json", timeout=20)
+            resp.raise_for_status()
+            data = _json.loads(base64.b64decode(resp.json()["content"]))
+        except Exception as e:
+            print(f"  LA house list unavailable ({str(e)[:80]}) — diff will be"
+                  " Invaluable-only this run")
+            return set()
+    print(f"  LA list updated {data.get('updated', '?')[:16]}")
+    return set(data.get("houses", []))
 
 
 def harvest_invaluable_houses(browser, scrolls: int = 25) -> set[str]:
