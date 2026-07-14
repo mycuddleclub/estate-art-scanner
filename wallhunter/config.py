@@ -32,6 +32,18 @@ CROP_PAD_FRACTION = 0.05
 TIER_A_MIN = 7.5
 TIER_B_MIN = 5.0
 
+WORK_CATEGORIES = [
+    "painting", "work_on_paper", "print", "photograph", "sculpture",
+    "ceramics", "textile", "glass", "jewelry", "metalware", "furniture",
+    "decor", "book", "other",
+]
+# Categories collapsed by default in reports (toggleable in the page)
+HIDE_CATEGORIES = set(
+    c.strip() for c in os.environ.get(
+        "WH_HIDE_CATEGORIES",
+        "jewelry,glass,metalware,furniture,decor,book").split(",") if c.strip()
+)
+
 _KEY_FALLBACKS = [
     REPO_ROOT / ".env",
     Path.home() / "Desktop/williams-art-engine/.env",

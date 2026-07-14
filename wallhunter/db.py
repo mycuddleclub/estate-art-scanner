@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS works (
   medium_guess TEXT, medium_basis TEXT,
   period_guess TEXT, period_basis TEXT,
   subject TEXT, quality_notes TEXT,
+  category TEXT,
   sig_text TEXT,
   interest_score REAL, tier TEXT,
   sig_visible INTEGER DEFAULT 0, label_visible INTEGER DEFAULT 0,
@@ -93,6 +94,11 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+MIGRATIONS = [
+    "ALTER TABLE works ADD COLUMN category TEXT",
+]
+
+
 def connect() -> sqlite3.Connection:
     ensure_dirs()
     conn = sqlite3.connect(DB_PATH)
@@ -100,4 +106,9 @@ def connect() -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
     conn.executescript(SCHEMA)
+    for mig in MIGRATIONS:
+        try:
+            conn.execute(mig)
+        except sqlite3.OperationalError:
+            pass  # column already exists
     return conn

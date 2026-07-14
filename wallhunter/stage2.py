@@ -28,6 +28,7 @@ naive, regional, or decorative-looking.
 Return ONLY this JSON:
 {"medium_guess": {"value": "...", "basis": "..."},
  "period_guess": {"value": "...", "basis": "..."},
+ "category": "painting|work_on_paper|print|photograph|sculpture|ceramics|textile|glass|jewelry|metalware|furniture|decor|book|other",
  "subject": "...",
  "quality_notes": "...",
  "sig_text": "transcription of any visible signature/label text, or null",
@@ -140,13 +141,18 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
                 score = 0.0
             medium = a.get("medium_guess") or {}
             period = a.get("period_guess") or {}
+            from .config import WORK_CATEGORIES
+            category = str(a.get("category", "other")).strip().lower()
+            if category not in WORK_CATEGORIES:
+                category = "other"
             conn.execute(
-                "UPDATE works SET medium_guess=?, medium_basis=?, period_guess=?,"
+                "UPDATE works SET category=?, medium_guess=?, medium_basis=?, period_guess=?,"
                 " period_basis=?, subject=?, quality_notes=?, sig_text=?, interest_score=?,"
                 " tier=?, sig_visible=?, label_visible=?, verso_visible=?, repro_suspect=?,"
                 " background_only=?, background_context=?, uncertainties=?,"
                 " stage2_cost_usd=?, status='screened' WHERE id=?",
-                (str(medium.get("value", ""))[:120], str(medium.get("basis", ""))[:300],
+                (category,
+                 str(medium.get("value", ""))[:120], str(medium.get("basis", ""))[:300],
                  str(period.get("value", ""))[:120], str(period.get("basis", ""))[:300],
                  str(a.get("subject", ""))[:300], str(a.get("quality_notes", ""))[:600],
                  (str(a["sig_text"])[:300] if a.get("sig_text") else None),

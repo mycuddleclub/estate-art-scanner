@@ -4,7 +4,7 @@ import html
 import json
 
 from . import db
-from .config import REPORT_DIR
+from .config import HIDE_CATEGORIES, REPORT_DIR
 from .images import downscale_jpeg_b64, load
 
 TIER_COLORS = {"A": "#b91c1c", "B": "#b45309", "C": "#6b7280"}
@@ -28,7 +28,22 @@ h1{font-size:22px} .meta{color:#57534e;font-size:14px;margin-bottom:20px}
 .unc{color:#78716c;font-size:12px;font-style:italic}
 .cov{background:#fff;border:1px solid #e7e5e4;border-radius:8px;padding:12px 16px;font-size:13px}
 a{color:#1d4ed8}
+.cat{display:inline-block;background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;
+     padding:1px 8px;font-size:12px;margin-right:6px;color:#3730a3}
+.card.hidden-cat{display:none}
+body.show-hidden .card.hidden-cat{display:flex;opacity:.75}
+.togglebar{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;
+           font-size:13px;margin-top:10px}
+.togglebar button{font-size:13px;padding:3px 12px;border-radius:6px;border:1px solid #d6d3d1;
+                  background:#fff;cursor:pointer}
 """
+
+TOGGLE_JS = """<script>
+function toggleHidden(btn){
+  document.body.classList.toggle('show-hidden');
+  btn.textContent = document.body.classList.contains('show-hidden') ? 'Hide again' : 'Show them';
+}
+</script>"""
 
 
 def _flags_html(w) -> str:
@@ -73,9 +88,16 @@ def build_report(conn, sale_id: int, open_after: bool = True) -> str:
         tiers[w["tier"] or "C"] = tiers.get(w["tier"] or "C", 0) + 1
 
     cards = []
+    hidden_count = 0
     for w in works:
+        category = (w["category"] or "other").lower()
+        is_hidden = category in HIDE_CATEGORIES
+        if is_hidden:
+            hidden_count += 1
         try:
-            crop_b64 = downscale_jpeg_b64(load(w["crop_hash"]), 560, quality=78)
+            crop_b64 = downscale_jpeg_b64(
+                load(w["crop_hash"]), 360 if is_hidden else 560,
+                quality=65 if is_hidden else 78)
         except Exception:
             crop_b64 = ""
         color = TIER_COLORS.get(w["tier"] or "C", "#6b7280")
@@ -89,10 +111,11 @@ def build_report(conn, sale_id: int, open_after: bool = True) -> str:
         views = conn.execute(
             "SELECT COUNT(*) n FROM work_detections WHERE work_id=?", (w["id"],)).fetchone()["n"]
         cards.append(f"""
-<div class="card">
-  <img class="crop" src="data:image/jpeg;base64,{crop_b64}">
+<div class="card{' hidden-cat' if is_hidden else ''}" data-category="{e(category)}">
+  <img class="crop" src="data:image/jpeg;base64,{crop_b64}" loading="lazy">
   <div>
     <div><span class="tier" style="background:{color}">{e(w['tier'])} &middot; {w['interest_score']:.1f}</span>
+         <span class="cat">{e(category.replace('_', ' '))}</span>
          {_flags_html(w)}</div>
     <div class="field" style="font-size:15px;margin-top:6px"><b></b>{e(w['subject'])}</div>
     <div class="field"><b>Medium:</b> {e(w['medium_guess'])} <span class="unc">({e(w['medium_basis'])})</span></div>
@@ -114,9 +137,14 @@ def build_report(conn, sale_id: int, open_after: bool = True) -> str:
 <div class="meta">{html.escape(sale['location'] or '')} &middot;
   {html.escape((sale['starts_at'] or '?')[:10])} &rarr; {html.escape((sale['ends_at'] or '?')[:10])} &middot;
   {f'<a href="{html.escape(sale["url"])}" target="_blank">sale page</a>' if sale['url'] else ''}</div>
-<div class="cov"><b>{len(works)} works</b> (A: {tiers.get('A',0)} &middot; B: {tiers.get('B',0)}
-  &middot; C: {tiers.get('C',0)}) &middot; photos — {cov_html} &middot; run cost ${cost:.2f}</div>
+<div class="cov"><b>{len(works) - hidden_count} works shown</b> of {len(works)}
+  (A: {tiers.get('A',0)} &middot; B: {tiers.get('B',0)} &middot; C: {tiers.get('C',0)})
+  &middot; photos — {cov_html} &middot; run cost ${cost:.2f}</div>
+{f'''<div class="togglebar">{hidden_count} works in categories you don&#39;t collect
+  ({html.escape(", ".join(sorted(HIDE_CATEGORIES)))}) are hidden.
+  <button onclick="toggleHidden(this)">Show them</button></div>''' if hidden_count else ''}
 {''.join(cards)}
+{TOGGLE_JS}
 </body></html>"""
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
