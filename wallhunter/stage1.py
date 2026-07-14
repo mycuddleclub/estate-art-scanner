@@ -16,10 +16,16 @@ ceramics/pottery, textile art. Include works in the background, hanging on walls
 leaning against furniture, stacked, partially visible, or reflected. High recall: \
 when uncertain whether something is an artwork, include it and mark it uncertain. \
 Exclude mirrors, TVs, windows, and obvious commercial posters. If more than 15 \
-artworks are visible, return the 15 most prominent/promising and mention the rest \
+items are visible, return the 15 most prominent/promising and mention the rest \
 in photo_note.
+IMPORTANT: if the photographed item is clearly NOT art — jewelry, a watch, coins, \
+currency, furniture, household goods, appliances, tools, books, clothing, sports \
+memorabilia — still return it, but type it accurately from the non-art types below \
+instead of forcing it into an art type. Only mark it uncertain if it could \
+genuinely be a folk/studio art object (e.g. studio jewelry by a named maker, an \
+art-pottery lamp).
 Return ONLY this JSON, no other text:
-{"artworks": [{"box": [x, y, w, h], "type": "painting|print|drawing|photo|sculpture|ceramic|textile|unknown", \
+{"artworks": [{"box": [x, y, w, h], "type": "painting|print|drawing|photo|sculpture|ceramic|textile|unknown|jewelry|watch|coin|furniture|household|book|clothing|memorabilia", \
 "desc": "one line incl. any visible signature/label text", "sig_visible": true/false, \
 "label_visible": true/false, "prominence": "featured|background", "uncertain": true/false}], \
 "photo_note": "one line: what this photo mainly shows"}

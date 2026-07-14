@@ -49,18 +49,22 @@ def _text_of(response) -> str:
                    if getattr(b, "type", "") == "text").strip()
 
 
-def _screen_one(client, meter: CostMeter, crop_b64: str, ctx_b64: str,
+def _screen_one(client, meter: CostMeter, crop_b64: str, ctx_b64: str | None,
                 detection_desc: str, prominence: str) -> tuple[dict, float]:
     cost = 0.0
     intro = (f"Detector's note: \"{detection_desc}\" (prominence: {prominence}). "
              "Judge from the images yourself; the note may be wrong.")
-    messages = [{"role": "user", "content": [
+    content = [
         {"type": "text", "text": "Image 1 — the artwork crop:"},
         {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": crop_b64}},
-        {"type": "text", "text": "Image 2 — full source photo for context:"},
-        {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": ctx_b64}},
-        {"type": "text", "text": intro + "\n\n" + SCREEN_PROMPT},
-    ]}]
+    ]
+    if ctx_b64:
+        content += [
+            {"type": "text", "text": "Image 2 — full source photo for context:"},
+            {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": ctx_b64}},
+        ]
+    content.append({"type": "text", "text": intro + "\n\n" + SCREEN_PROMPT})
+    messages = [{"role": "user", "content": content}]
     for attempt in range(2):
         resp = client.messages.create(
             model=STAGE2_MODEL, max_tokens=1200,
@@ -95,12 +99,48 @@ def _tier(score: float) -> str:
     return "C"
 
 
+# stage-1 non-art types -> queue category; confident matches skip the
+# expensive deep screen entirely ("don't go deep on the obviously-not-art")
+NONART_CATEGORY = {
+    "jewelry": "jewelry", "watch": "jewelry", "coin": "decor",
+    "furniture": "furniture", "household": "decor", "book": "book",
+    "clothing": "decor", "memorabilia": "decor", "appliance": "decor",
+    "tool": "decor",
+}
+
+
+def apply_nonart_gate(conn, sale_id: int) -> int:
+    """File confidently-non-art works as C-tier without a Sonnet call.
+    Anything uncertain, signed, or labeled still goes to the deep screen."""
+    gated = 0
+    rows = conn.execute(
+        "SELECT w.id, d.coarse_type, d.description FROM works w"
+        " JOIN detections d ON d.id = w.best_detection_id"
+        " WHERE w.sale_id=? AND w.status='queued'"
+        "   AND d.uncertain=0 AND d.sig_visible=0 AND d.label_visible=0",
+        (sale_id,)).fetchall()
+    for r in rows:
+        cat = NONART_CATEGORY.get((r["coarse_type"] or "").lower())
+        if not cat:
+            continue
+        conn.execute(
+            "UPDATE works SET status='screened', tier='C', interest_score=1.0,"
+            " category=?, medium_guess=?, subject=?,"
+            " quality_notes='auto-filed: stage-1 typed this as non-art;"
+            " not deep-screened', stage2_cost_usd=0 WHERE id=?",
+            (cat, r["coarse_type"], (r["description"] or "")[:300], r["id"]))
+        gated += 1
+    conn.commit()
+    return gated
+
+
 def pending_works_best_first(conn, sale_id: int):
     """Queued works ordered by stage-1 promise, so a cost-capped run screens
     the most promising detections first and leaves only the weak tail for
     the next day's resume."""
     return conn.execute(
         "SELECT w.id AS work_id, d.crop_hash, d.description, d.prominence, d.uncertain,"
+        "       d.bbox_w * d.bbox_h AS bbox_frac,"
         "       p.file_hash AS photo_hash"
         " FROM works w JOIN detections d ON d.id = w.best_detection_id"
         " JOIN photos p ON p.id = d.photo_id"
@@ -116,13 +156,21 @@ def pending_works_best_first(conn, sale_id: int):
 
 def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
     client = anthropic.Anthropic()
+    gated = apply_nonart_gate(conn, sale_id)
+    if gated:
+        print(f"  stage2: {gated} obvious non-art works auto-filed ($0)")
     rows = pending_works_best_first(conn, sale_id)
-    stats = {"screened": 0, "failed": 0, "skipped_cost": 0}
+    stats = {"screened": gated, "failed": 0, "skipped_cost": 0}
     capped = False
 
     def job(row):
         crop_b64 = downscale_jpeg_b64(load(row["crop_hash"]), STAGE2_CROP_MAX_EDGE)
-        ctx_b64 = downscale_jpeg_b64(load(row["photo_hash"]), STAGE2_CONTEXT_MAX_EDGE, quality=70)
+        # when the crop is essentially the whole photo (lot-per-photo auction
+        # catalogs), the context image adds nothing but input tokens
+        ctx_b64 = None
+        if (row["bbox_frac"] or 0) < 0.75:
+            ctx_b64 = downscale_jpeg_b64(load(row["photo_hash"]),
+                                         STAGE2_CONTEXT_MAX_EDGE, quality=70)
         parsed, cost = _screen_one(client, meter, crop_b64, ctx_b64,
                                    row["description"] or "", row["prominence"] or "featured")
         return row, parsed, cost

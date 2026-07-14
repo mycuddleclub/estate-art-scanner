@@ -27,12 +27,19 @@ REFRESH_GROWTH_MIN = 5   # re-ingest an active sale when it gained this many pho
 
 
 PHOTO_RANK_SATURATION = 400
+# EstateSales.net sale types (probed 2026-07-14): 1 = in-person estate sale,
+# 4 = moving/tag sale, 64 = online auction catalog, 2 = live auction.
+# In-person estate/moving sales are the informational edge (uncatalogued,
+# chaotic galleries); auction catalogs are itemized, competitive, and 5-10x
+# the screening cost - only picked when nothing better exists.
+PREFERRED_SALE_TYPES = {1, 4}
 
 
 def pick_new_sales(active: list[dict], known_ids: set[int],
                    watchlist_zips, min_photos: int, max_new: int) -> list[int]:
     """Pure selection logic (unit-tested): watchlist ZIP, enough photos, not
-    already ingested. Photo-richer ranks higher, but the count saturates at
+    already ingested. In-person estate/moving sales rank ahead of auction
+    catalogs. Photo-richer ranks higher, but the count saturates at
     PHOTO_RANK_SATURATION so 1,200-photo monsters don't always win; above the
     saturation point, smaller (finishable-today) sales win the tie."""
     candidates = [
@@ -42,6 +49,7 @@ def pick_new_sales(active: list[dict], known_ids: set[int],
         and (s.get("pictureCount") or 0) >= min_photos
     ]
     candidates.sort(key=lambda s: (
+        0 if s.get("type") in PREFERRED_SALE_TYPES else 1,
         -min(s.get("pictureCount") or 0, PHOTO_RANK_SATURATION),
         s.get("pictureCount") or 0))
     return [s["id"] for s in candidates[:max_new]]

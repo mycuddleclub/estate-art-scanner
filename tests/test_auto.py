@@ -48,6 +48,47 @@ def _seed_event(conn, wid: int, kind: str, reason: str | None = None):
                  " VALUES (?, 'wall-hunter', ?, ?, ?)", (wdb.now(), wid, kind, reason))
 
 
+def test_pick_new_sales_prefers_estate_over_auction_catalogs():
+    from wallhunter.auto import pick_new_sales
+    zips = {"60035"}
+    active = [
+        {"id": 1, "postalCodeNumber": "60035", "pictureCount": 900, "type": 64},  # catalog
+        {"id": 2, "postalCodeNumber": "60035", "pictureCount": 60, "type": 1},    # estate
+        {"id": 3, "postalCodeNumber": "60035", "pictureCount": 200, "type": 4},   # moving
+    ]
+    got = pick_new_sales(active, set(), zips, 20, 3)
+    assert got == [3, 2, 1]  # in-person sales first, catalog last resort
+
+
+def test_nonart_gate_files_confident_nonart_only(conn):
+    from wallhunter.stage2 import apply_nonart_gate
+    conn.execute("INSERT INTO sales (id, title) VALUES (12, 'S')")
+    conn.execute("INSERT INTO photos (id, sale_id, file_hash) VALUES (120, 12, 'h')")
+    def det(ctype, sig=0, unc=0):
+        cur = conn.execute(
+            "INSERT INTO detections (photo_id, bbox_x, bbox_y, bbox_w, bbox_h,"
+            " coarse_type, sig_visible, uncertain, crop_hash, dhash, crop_area,"
+            " description) VALUES (120,0,0,1,1,?,?,?,'c','0',100,'d')",
+            (ctype, sig, unc))
+        return conn.execute("INSERT INTO works (sale_id, best_detection_id, status)"
+                            " VALUES (12, ?, 'queued')", (cur.lastrowid,)).lastrowid
+    ring = det("jewelry")
+    signed_ring = det("jewelry", sig=1)        # signed -> deep screen anyway
+    odd_jewelry = det("jewelry", unc=1)        # uncertain -> deep screen
+    painting = det("painting")
+    coin = det("coin")
+    conn.commit()
+    gated = apply_nonart_gate(conn, 12)
+    assert gated == 2
+    status = {w: conn.execute("SELECT status, category FROM works WHERE id=?", (w,)).fetchone()
+              for w in (ring, signed_ring, odd_jewelry, painting, coin)}
+    assert status[ring]["status"] == "screened" and status[ring]["category"] == "jewelry"
+    assert status[coin]["status"] == "screened" and status[coin]["category"] == "decor"
+    assert status[signed_ring]["status"] == "queued"
+    assert status[odd_jewelry]["status"] == "queued"
+    assert status[painting]["status"] == "queued"
+
+
 def test_stage2_queue_is_best_first(conn):
     from wallhunter.stage2 import pending_works_best_first
     conn.execute("INSERT INTO sales (id, title) VALUES (7, 'S')")
