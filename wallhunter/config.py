@@ -37,6 +37,14 @@ WORK_CATEGORIES = [
     "ceramics", "textile", "glass", "jewelry", "metalware", "furniture",
     "decor", "book", "other",
 ]
+# Sales whose auctionUrl points at these hosts are never auto-ingested:
+# Daniel reviews every LiveAuctioneers auction personally (plus Art Scout /
+# the Super Smart Checker cover LA) — Wall Hunter spend there is duplication.
+EXCLUDE_AUCTION_HOSTS = tuple(
+    h.strip() for h in os.environ.get(
+        "WH_EXCLUDE_AUCTION_HOSTS", "liveauctioneers.com").split(",") if h.strip()
+)
+
 # Categories collapsed by default in reports (toggleable in the page)
 HIDE_CATEGORIES = set(
     c.strip() for c in os.environ.get(

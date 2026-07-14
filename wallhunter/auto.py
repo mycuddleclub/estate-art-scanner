@@ -55,6 +55,22 @@ def pick_new_sales(active: list[dict], known_ids: set[int],
     return [s["id"] for s in candidates[:max_new]]
 
 
+def drop_excluded_auctions(details: list[dict], hosts=None) -> list[int]:
+    """Pure (unit-tested): sale ids whose auctionUrl does NOT point at an
+    excluded platform (e.g. LiveAuctioneers, which Daniel reviews manually)."""
+    from .config import EXCLUDE_AUCTION_HOSTS
+    hosts = hosts if hosts is not None else EXCLUDE_AUCTION_HOSTS
+    out = []
+    for d in details:
+        url = (d.get("auctionUrl") or "").lower()
+        if any(h in url for h in hosts):
+            print(f"   skipping sale {d.get('id')} — cross-listed on"
+                  f" {next(h for h in hosts if h in url)} (covered manually)")
+            continue
+        out.append(d["id"])
+    return out
+
+
 def sales_needing_refresh(ours: list[dict], details: list[dict],
                           min_growth: int = REFRESH_GROWTH_MIN) -> list[int]:
     """Pure (unit-tested): active ingested sales whose platform photo count
@@ -181,8 +197,15 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
         except Exception as e:
             print(f"sale discovery failed: {e}")
             active = []
+        from estatesales_client import get_sale_details_batch
         known = {r["id"] for r in conn.execute("SELECT id FROM sales")}
-        for sid in pick_new_sales(active, known, WATCHLIST_ZIPS, MIN_PHOTOS, max_new):
+        # over-pick, then drop cross-listed LiveAuctioneers auctions etc.
+        shortlist = pick_new_sales(active, known, WATCHLIST_ZIPS, MIN_PHOTOS,
+                                   max_new * 3)
+        allowed = drop_excluded_auctions(get_sale_details_batch(shortlist)) \
+            if shortlist else []
+        # preserve the picker's ranking order
+        for sid in [s for s in shortlist if s in allowed][:max_new]:
             print(f"== new watchlist sale {sid} ==")
             if not process_with_slice(sid, ingest=True):
                 break

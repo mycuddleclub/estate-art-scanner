@@ -60,6 +60,17 @@ def test_pick_new_sales_prefers_estate_over_auction_catalogs():
     assert got == [3, 2, 1]  # in-person sales first, catalog last resort
 
 
+def test_drop_excluded_auctions_filters_liveauctioneers():
+    from wallhunter.auto import drop_excluded_auctions
+    details = [
+        {"id": 1, "auctionUrl": "https://www.liveauctioneers.com/catalog/422108_x"},
+        {"id": 2, "auctionUrl": "https://eastsideestateco.com/auction-group/294"},
+        {"id": 3, "auctionUrl": None},
+        {"id": 4},  # plain estate sale, no auction at all
+    ]
+    assert drop_excluded_auctions(details, hosts=("liveauctioneers.com",)) == [2, 3, 4]
+
+
 def test_nonart_gate_files_confident_nonart_only(conn):
     from wallhunter.stage2 import apply_nonart_gate
     conn.execute("INSERT INTO sales (id, title) VALUES (12, 'S')")
