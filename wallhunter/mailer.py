@@ -54,33 +54,56 @@ def _work_row(w) -> str:
   {sig}</td></tr>"""
 
 
-def _exclusives_html(exclusives: list[dict]) -> str:
-    if not exclusives:
-        return ""
+def send_exclusives_email(exclusives: list[dict]) -> bool:
+    """Standalone Off-Radar Auctions email (separate program from the
+    estate-sale digest, per Daniel's request)."""
+    user, pw, to = _smtp_config()
+    if not all([user, pw, to]):
+        print("exclusives email: SMTP not configured — skipping")
+        return False
     e = lambda s: html.escape(str(s or ""))
-    rows = "".join(
-        f"<li><b>{e(a['house'])}</b> — <a href='{e(a['url'])}'>{e(a['title'])}</a>"
-        f" <span style='color:#78716c'>[{e(a['platform'])}]"
-        f"{' ' + e(a['info']) if a.get('info') else ''}</span></li>"
-        for a in exclusives[:20])
-    more = (f"<p style='font-family:Arial;font-size:12px;color:#78716c'>"
-            f"+{len(exclusives) - 20} more</p>" if len(exclusives) > 20 else "")
-    return f"""<div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:8px;
-      padding:12px 16px;margin:10px 0;font-family:Arial;font-size:13px">
-      <b>&#128373; Off-radar auctions</b> — houses NOT currently on
-      LiveAuctioneers/Invaluable (smaller bidder pools):
-      <ul>{rows}</ul>{more}</div>"""
+    if exclusives:
+        rows = "".join(
+            f"<li style='margin:6px 0'><b>{e(a['house'])}</b> — "
+            f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
+            f" <span style='color:#78716c'>[{e(a['platform'])}]"
+            f"{' ' + e(a['info']) if a.get('info') else ''}</span></li>"
+            for a in exclusives)
+        body_core = f"<ul style='padding-left:18px'>{rows}</ul>"
+    else:
+        body_core = "<p>No off-radar auctions found today.</p>"
+    body = f"""<html><body style="background:#f5f5f4;padding:16px">
+<div style="max-width:720px;margin:0 auto;background:#fff;border-radius:10px;
+     padding:22px;font-family:Arial;font-size:13px">
+<h2 style="margin:0">&#128373; Off-Radar Auctions</h2>
+<p style="color:#57534e">Auctions on HiBid / Bidsquare whose houses are NOT
+currently active on LiveAuctioneers or Invaluable — smaller bidder pools.
+Junk genres and your blocked houses are filtered out.</p>
+{body_core}
+</div></body></html>"""
+    msg = MIMEText(body, "html")
+    msg["Subject"] = f"\U0001F575 Off-Radar Auctions — {len(exclusives)} today"
+    msg["From"] = user
+    msg["To"] = to
+    try:
+        with smtplib.SMTP("smtp.zoho.com", 587, timeout=30) as server:
+            server.starttls()
+            server.login(user, pw)
+            server.send_message(msg)
+        print(f"exclusives email sent to {to} ({len(exclusives)} auctions)")
+        return True
+    except Exception as ex:
+        print(f"exclusives email failed: {ex}")
+        return False
 
 
-def send_digest(conn, sale_ids: list[int], cost: float,
-                exclusives: list[dict] | None = None) -> bool:
+def send_digest(conn, sale_ids: list[int], cost: float) -> bool:
     user, pw, to = _smtp_config()
     if not all([user, pw, to]):
         print("digest: SMTP not configured (SMTP_USER/SMTP_PASSWORD/EMAIL_TO) — skipping email")
         return False
-    if not sale_ids and not exclusives:
+    if not sale_ids:
         return False
-    sale_ids = sale_ids or [0]
     ph = ",".join("?" * len(sale_ids))
     works = conn.execute(
         f"SELECT w.*, d.crop_hash, s.title AS sale_title FROM works w"
@@ -120,7 +143,6 @@ def send_digest(conn, sale_ids: list[int], cost: float,
   {len(works)} A/B-tier works &middot; run cost ${cost:.2f} &middot;
   open <b>Wall Hunter.command</b> on the Desktop to review the full queue</p>
 {banners}
-{_exclusives_html(exclusives or [])}
 <ul style="font-family:Arial;font-size:13px">{sale_lines}</ul>
 <table>{rows}</table>
 </div></body></html>"""

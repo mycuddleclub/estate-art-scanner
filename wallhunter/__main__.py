@@ -78,9 +78,13 @@ def cmd_report(conn, args):
 
 def cmd_exclusives(conn, args):
     from .exclusives import find_exclusives
-    for a in find_exclusives(force_refresh=args.refresh):
+    exclusives = find_exclusives(force_refresh=args.refresh)
+    for a in exclusives:
         print(f"[{a['platform']}] {a['house']} — {a['title']}"
               f"{'  (' + a['info'] + ')' if a['info'] else ''}\n    {a['url']}")
+    if args.email:
+        from .mailer import send_exclusives_email
+        send_exclusives_email(exclusives)
 
 
 def cmd_auto(conn, args):
@@ -140,6 +144,8 @@ def main():
     p = sub.add_parser("exclusives", help="HiBid/Bidsquare auctions not on LA/Invaluable")
     p.add_argument("--refresh", action="store_true",
                    help="re-harvest the LA/Invaluable house set (ignores 20h cache)")
+    p.add_argument("--email", action="store_true",
+                   help="send the Off-Radar Auctions email")
     p.set_defaults(fn=cmd_exclusives)
 
     p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")

@@ -217,16 +217,6 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
             if not process_with_slice(sid, ingest=True):
                 break
 
-    # 3. off-radar auctions (HiBid/Bidsquare houses not on LA/Invaluable) —
-    #    page reads only, no API spend; never let it break the digest
-    exclusives = []
-    try:
-        from .exclusives import find_exclusives
-        exclusives = find_exclusives()
-    except Exception as e:
-        print(f"exclusives harvest failed: {str(e)[:150]}")
-
-    print(f"== auto done: {len(touched)} sales, ${spent:.2f},"
-          f" {len(exclusives)} off-radar auctions ==")
-    if email and (touched or exclusives):
-        send_digest(conn, touched, spent, exclusives=exclusives)
+    print(f"== auto done: {len(touched)} sales, ${spent:.2f} ==")
+    if email and touched:
+        send_digest(conn, touched, spent)
