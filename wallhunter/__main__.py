@@ -76,6 +76,12 @@ def cmd_report(conn, args):
     build_report(conn, args.sale or _latest_sale(conn))
 
 
+def cmd_auto(conn, args):
+    from .auto import run_auto
+    run_auto(conn, max_new=args.max_new, daily_cap=args.daily_cap,
+             email=not args.no_email)
+
+
 def cmd_serve(conn, args):
     conn.close()
     import subprocess
@@ -121,6 +127,12 @@ def main():
     p = sub.add_parser("serve", help="open the review queue (localhost)")
     p.add_argument("--port", type=int, default=8787)
     p.set_defaults(fn=cmd_serve)
+
+    p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")
+    p.add_argument("--max-new", type=int, default=2)
+    p.add_argument("--daily-cap", type=float, default=5.0)
+    p.add_argument("--no-email", action="store_true")
+    p.set_defaults(fn=cmd_auto)
 
     args = ap.parse_args()
     conn = db.connect()

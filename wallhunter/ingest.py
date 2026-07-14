@@ -60,13 +60,15 @@ def add_estatesales(conn, sale_id: int, max_photos: int | None = None) -> int:
     ends = ((detail or {}).get("lastLocalEndDate") or {}).get("_value")
     url = get_sale_url(detail) if detail else None
 
+    description = full.get("htmlDescription") or ""
     conn.execute(
-        "INSERT INTO sales (id, url, title, location, starts_at, ends_at, fetched_at, status)"
-        " VALUES (?,?,?,?,?,?,?, 'fetching')"
+        "INSERT INTO sales (id, url, title, location, starts_at, ends_at, fetched_at,"
+        " description, status) VALUES (?,?,?,?,?,?,?,?, 'fetching')"
         " ON CONFLICT(id) DO UPDATE SET url=excluded.url, title=excluded.title,"
         " location=excluded.location, starts_at=excluded.starts_at,"
-        " ends_at=excluded.ends_at, fetched_at=excluded.fetched_at",
-        (sale_id, url, title, loc, starts, ends, db.now()),
+        " ends_at=excluded.ends_at, fetched_at=excluded.fetched_at,"
+        " description=excluded.description",
+        (sale_id, url, title, loc, starts, ends, db.now(), description[:8000]),
     )
     conn.commit()
 

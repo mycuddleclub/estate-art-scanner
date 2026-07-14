@@ -72,9 +72,14 @@ def _flags(w) -> str:
     return "".join(out)
 
 
-def _card(w, sale_title: str) -> str:
+def _card(w, sale_title: str, ctx: float = 0.0, taste: float = 0.0) -> str:
     e = lambda s: html.escape(str(s or ""))
     color = TIER_COLORS.get(w["tier"] or "C", "#6b7280")
+    boost_chips = ""
+    if ctx >= 0.4:
+        boost_chips += f'<span class="flag hot">&#127968; collector context +{ctx:.1f}</span>'
+    if abs(taste) >= 0.15:
+        boost_chips += (f'<span class="flag">taste {"+" if taste > 0 else ""}{taste:.1f}</span>')
     sig = (f'<div class="sig"><b>Sig/label text:</b> {e(w["sig_text"])}</div>'
            if w["sig_text"] else "")
     return f"""
@@ -83,7 +88,7 @@ def _card(w, sale_title: str) -> str:
        onclick="location='/work/{w['id']}'">
   <div style="flex:1">
     <div><span class="tier" style="background:{color}">{e(w['tier'])} &middot; {w['interest_score']:.1f}</span>
-      <span class="cat">{e((w['category'] or 'other').replace('_',' '))}</span>{_flags(w)}</div>
+      <span class="cat">{e((w['category'] or 'other').replace('_',' '))}</span>{_flags(w)}{boost_chips}</div>
     <div class="field" style="font-size:15px;margin-top:5px">{e(w['subject'])}</div>
     <div class="field"><b>Medium:</b> {e(w['medium_guess'])} &middot; <b>Period:</b> {e(w['period_guess'])}</div>
     <div class="field"><b>Quality:</b> {e((w['quality_notes'] or '')[:220])}</div>
@@ -167,7 +172,8 @@ select(0);
 def queue(sale: int | None = None, all: int = 0):
     conn = _conn()
     try:
-        q = ("SELECT w.*, d.crop_hash, s.title AS sale_title FROM works w"
+        q = ("SELECT w.*, d.crop_hash, s.title AS sale_title,"
+             " COALESCE(s.context_score, 0) AS context_score FROM works w"
              " JOIN detections d ON d.id=w.best_detection_id"
              " JOIN sales s ON s.id=w.sale_id WHERE w.status='screened'")
         params: list = []
@@ -178,10 +184,22 @@ def queue(sale: int | None = None, all: int = 0):
             ph = ",".join("?" * len(HIDE_CATEGORIES))
             q += f" AND COALESCE(lower(w.category),'other') NOT IN ({ph})"
             params.extend(HIDE_CATEGORIES)
-        q += " ORDER BY w.interest_score DESC"
-        works = conn.execute(q, params).fetchall()
+        rows = conn.execute(q, params).fetchall()
+        # ordering = model score + collector-context boost + learned taste prior;
+        # boosts reorder attention but never alter the stored interest_score
+        from .taste import category_boosts
+        boosts = category_boosts(conn)
+        works = sorted(
+            rows,
+            key=lambda w: (w["interest_score"] or 0)
+            + (w["context_score"] or 0)
+            + boosts.get((w["category"] or "other").lower(), 0.0),
+            reverse=True)
         saved = conn.execute("SELECT COUNT(*) n FROM works WHERE status='saved'").fetchone()["n"]
-        cards = "".join(_card(w, w["sale_title"] or "") for w in works)
+        cards = "".join(
+            _card(w, w["sale_title"] or "", ctx=w["context_score"] or 0,
+                  taste=boosts.get((w["category"] or "other").lower(), 0.0))
+            for w in works)
         other = ("show hidden categories" if not all else "hide non-collecting categories")
         other_url = f"/?all={0 if all else 1}" + (f"&sale={sale}" if sale else "")
         return f"""<!doctype html><html><head><meta charset="utf-8">

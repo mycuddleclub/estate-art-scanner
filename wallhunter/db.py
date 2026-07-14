@@ -96,6 +96,8 @@ def now() -> str:
 
 MIGRATIONS = [
     "ALTER TABLE works ADD COLUMN category TEXT",
+    "ALTER TABLE sales ADD COLUMN description TEXT",
+    "ALTER TABLE sales ADD COLUMN context_note TEXT",
 ]
 
 
