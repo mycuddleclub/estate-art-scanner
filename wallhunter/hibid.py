@@ -35,18 +35,35 @@ def _image_id(url: str) -> str | None:
     return (q.get("id") or [None])[0]
 
 
-_TILE_TEXT_JS = """els => els.map(e => {
-  // climb to the lot tile and grab its caption (lot number + title)
-  let node = e, text = '';
-  for (let i = 0; i < 5 && node; i++) {
-    node = node.parentElement;
-    if (!node) break;
-    const t = (node.innerText || '').trim().replace(/\\s+/g, ' ');
-    if (t.length > 5 && t.length < 400) { text = t; break; }
-    if (t.length >= 400) break;  // climbed past the tile into the grid
+# Lot titles live on a.lot-link elements: as aria-label on the text link and
+# as the URL slug (/lot/<id>/<title-slug>). Build href->title from labeled
+# links, then pair each image with its enclosing lot-link's title.
+_TILE_TEXT_JS = """() => {
+  const titles = {};
+  for (const a of document.querySelectorAll('a.lot-link, a[href*="/lot/"]')) {
+    const href = (a.href || '').split('?')[0];
+    if (!href.includes('/lot/')) continue;
+    const label = (a.getAttribute('aria-label') || '').trim();
+    if (label && !titles[href]) titles[href] = label;
   }
-  return {src: e.src || '', text};
-})"""
+  const out = [];
+  for (const img of document.querySelectorAll('img')) {
+    const src = img.src || '';
+    if (!src.includes('img.axd')) continue;
+    const link = img.closest('a[href*="/lot/"]');
+    let text = '';
+    if (link) {
+      const href = (link.href || '').split('?')[0];
+      text = titles[href] || '';
+      if (!text) {
+        const slug = href.split('/').filter(Boolean).pop() || '';
+        text = slug.replace(/-+/g, ' ').trim();
+      }
+    }
+    out.push({src, text});
+  }
+  return out;
+}"""
 
 
 def _collect_page_images(page) -> dict[str, tuple[str, str]]:
@@ -56,7 +73,7 @@ def _collect_page_images(page) -> dict[str, tuple[str, str]]:
         page.mouse.wheel(0, 2400)
         page.wait_for_timeout(700)
     out = {}
-    for item in page.eval_on_selector_all("img", _TILE_TEXT_JS):
+    for item in page.evaluate(_TILE_TEXT_JS):
         src = item.get("src") or ""
         # lot images have moved hosts before (media.hibid.com -> cdn.hibid.com);
         # match any hibid host serving img.axd

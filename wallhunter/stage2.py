@@ -98,6 +98,32 @@ def _screen_one(client, meter: CostMeter, crop_b64: str, ctx_b64: str | None,
     raise ValueError("stage2: model returned unparseable output twice")
 
 
+# two+ consecutive capitalized words (allowing "Last, First" / "Last First-")
+_LISTING_NAME = re.compile(
+    r"\b([A-Z][a-z]{2,}(?:[,-]?\s+[A-Z][a-z.]{1,})+)")
+_NAME_STOPWORDS = {
+    "framed", "wall", "art", "print", "signed", "original", "vintage",
+    "antique", "large", "small", "oil", "watercolor", "canvas", "painting",
+    "limited", "edition", "made", "earth", "lot", "estate", "collection",
+}
+
+
+def listing_artist_claim(lot_text: str | None) -> str | None:
+    """Name-like phrase from the seller's lot title (unverified claim).
+    Trims genre words the regex swallows ('Roberts Clyde- Watercolor' ->
+    'Roberts Clyde'); place-name false positives are fine — it is recorded
+    as a claim to check, not a fact."""
+    for m in _LISTING_NAME.finditer(lot_text or ""):
+        words = [w for w in re.split(r"[\s,-]+", m.group(1)) if w]
+        while words and words[0].lower() in _NAME_STOPWORDS:
+            words.pop(0)
+        while words and words[-1].lower() in _NAME_STOPWORDS:
+            words.pop()
+        if len(words) >= 2:
+            return " ".join(words[:4])
+    return None
+
+
 def _tier(score: float) -> str:
     if score >= TIER_A_MIN:
         return "A"
@@ -224,6 +250,17 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
                 score = max(0.0, min(10.0, float(a.get("interest_score", 0))))
             except (TypeError, ValueError):
                 score = 0.0
+            # a seller-named artist is a checkable research lead regardless of
+            # whether the screener recognizes the name — record it and bump
+            claim = listing_artist_claim(row["lot_text"])
+            sig_text = (str(a["sig_text"])[:250] if a.get("sig_text") else None)
+            if claim:
+                tag = f"listing: {claim}"
+                if not sig_text:
+                    sig_text = tag
+                elif "listing:" not in sig_text:
+                    sig_text = f"{sig_text} | {tag}"
+                score = min(10.0, score + 0.75)
             medium = a.get("medium_guess") or {}
             period = a.get("period_guess") or {}
             from .config import WORK_CATEGORIES
@@ -240,7 +277,7 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
                  str(medium.get("value", ""))[:120], str(medium.get("basis", ""))[:300],
                  str(period.get("value", ""))[:120], str(period.get("basis", ""))[:300],
                  str(a.get("subject", ""))[:300], str(a.get("quality_notes", ""))[:600],
-                 (str(a["sig_text"])[:300] if a.get("sig_text") else None),
+                 sig_text,
                  score, _tier(score),
                  1 if flags.get("sig_visible") else 0,
                  1 if flags.get("label_visible") else 0,

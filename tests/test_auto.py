@@ -100,6 +100,18 @@ def test_nonart_gate_files_confident_nonart_only(conn):
     assert status[painting]["status"] == "queued"
 
 
+def test_listing_artist_claim():
+    from wallhunter.stage2 import listing_artist_claim
+    assert listing_artist_claim('Roberts Clyde- Watercolor "Stonington Maine"') \
+        == "Roberts Clyde"
+    assert listing_artist_claim("87 Nancy Stonington SE AK Watercolor") \
+        == "Nancy Stonington"
+    assert listing_artist_claim("Made on Earth Magnolia Framed Wall Art") is None
+    assert listing_artist_claim("Vintage Oil Painting Large Canvas") is None
+    assert listing_artist_claim("") is None
+    assert listing_artist_claim(None) is None
+
+
 def test_stage2_queue_is_best_first(conn):
     from wallhunter.stage2 import pending_works_best_first
     conn.execute("INSERT INTO sales (id, title) VALUES (7, 'S')")
