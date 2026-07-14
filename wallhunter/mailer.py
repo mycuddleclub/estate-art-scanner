@@ -78,18 +78,25 @@ def send_exclusives_email(exclusives: list[dict],
         deep_html = (f"<h3 style='margin:14px 0 4px'>&#127919; Deep finds"
                      f" ({len(deep_flags)})</h3>" + items)
     if exclusives:
-        shown = exclusives[:40]  # soonest-ending first (pre-sorted)
-        rows = "".join(
-            f"<li style='margin:6px 0'><b>{e(a['house'])}</b> — "
-            f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
-            f" <span style='color:#78716c'>[{e(a['platform'])}]"
-            f"{' ' + e(a['info']) if a.get('info') else ''}</span></li>"
-            for a in shown)
-        more = (f"<p style='color:#78716c;font-size:12px'>+"
-                f"{len(exclusives) - len(shown)} more in the 14-day window"
-                " (deep scan covers them on rotation)</p>"
-                if len(exclusives) > len(shown) else "")
-        body_core = f"<ul style='padding-left:18px'>{rows}</ul>{more}"
+        # full list per Daniel — grouped by end date to stay scannable
+        sections = []
+        current_day = object()
+        for a in exclusives:  # pre-sorted soonest-ending first
+            day = (a.get("ends") or "")[:10] or "no date"
+            if day != current_day:
+                if sections:
+                    sections.append("</ul>")
+                label = day if day == "no date" else day[5:].replace("-", "/")
+                sections.append(
+                    f"<h4 style='margin:12px 0 2px;color:#44403c'>Ends"
+                    f" {label}</h4><ul style='padding-left:18px;margin:4px 0'>")
+                current_day = day
+            sections.append(
+                f"<li style='margin:4px 0'><b>{e(a['house'])}</b> — "
+                f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
+                f" <span style='color:#78716c'>[{e(a['platform'])}]</span></li>")
+        sections.append("</ul>")
+        body_core = "".join(sections)
     else:
         body_core = "<p>No off-radar auctions found today.</p>"
     body = f"""<html><body style="background:#f5f5f4;padding:16px">
