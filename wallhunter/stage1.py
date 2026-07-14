@@ -93,15 +93,27 @@ def run_stage1(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
         parsed, cost = _detect_one(client, meter, b64)
         return row, img, parsed, cost
 
+    # Incremental submission (see stage2): never queue more than `workers`
+    # jobs, so tripping the cost cap stops API spend within the in-flight set
+    # instead of paying for every remaining photo and discarding the results.
+    row_iter = iter(rows)
+    in_flight: dict = {}
+
+    def submit_next(pool) -> bool:
+        try:
+            nxt = next(row_iter)
+        except StopIteration:
+            return False
+        in_flight[pool.submit(job, nxt)] = nxt
+        return True
+
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(job, row): row for row in rows}
-        for fut in as_completed(futures):
-            row = futures[fut]
-            if capped:
-                conn.execute("UPDATE photos SET stage1_status='skipped_cost' WHERE id=?",
-                             (row["id"],))
-                stats["skipped_cost"] += 1
-                continue
+        for _ in range(workers):
+            if not submit_next(pool):
+                break
+        while in_flight:
+            fut = next(as_completed(list(in_flight)))
+            row = in_flight.pop(fut)
             try:
                 row, img, parsed, cost = fut.result()
             except CostCapExceeded:
@@ -116,6 +128,8 @@ def run_stage1(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
                 stats["failed"] += 1
                 conn.commit()
                 print(f"  photo {row['id']} failed: {str(e)[:120]}")
+                if not capped:
+                    submit_next(pool)
                 continue
 
             for art in parsed.get("artworks", []):
@@ -145,4 +159,12 @@ def run_stage1(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
             if stats["photos"] % 20 == 0:
                 print(f"  stage1: {stats['photos']}/{len(rows)} photos, "
                       f"{stats['detections']} detections, ${meter.total:.2f}")
+            if not capped:
+                submit_next(pool)
+
+    if capped:
+        cur = conn.execute("UPDATE photos SET stage1_status='skipped_cost'"
+                           " WHERE sale_id=? AND stage1_status='pending'", (sale_id,))
+        stats["skipped_cost"] += cur.rowcount
+        conn.commit()
     return stats

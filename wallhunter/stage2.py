@@ -175,24 +175,40 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
                                    row["description"] or "", row["prominence"] or "featured")
         return row, parsed, cost
 
+    # Submit incrementally: pre-loading every job into the pool means the
+    # workers keep making (billed) API calls after the cap trips, with the
+    # results discarded. Keep at most `workers` jobs in flight and stop
+    # submitting the moment the meter caps; the rest stay 'queued' for resume.
+    row_iter = iter(rows)
+    in_flight: dict = {}
+
+    def submit_next(pool) -> bool:
+        try:
+            nxt = next(row_iter)
+        except StopIteration:
+            return False
+        in_flight[pool.submit(job, nxt)] = nxt
+        return True
+
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(job, row): row for row in rows}
-        for fut in as_completed(futures):
-            row = futures[fut]
-            if capped:
-                stats["skipped_cost"] += 1
-                continue
+        for _ in range(workers):
+            if not submit_next(pool):
+                break
+        while in_flight:
+            fut = next(as_completed(list(in_flight)))
+            row = in_flight.pop(fut)
             try:
                 row, a, cost = fut.result()
             except CostCapExceeded:
                 capped = True
-                stats["skipped_cost"] += 1
                 continue
             except Exception as e:
                 conn.execute("UPDATE works SET status='failed' WHERE id=?", (row["work_id"],))
                 stats["failed"] += 1
                 conn.commit()
                 print(f"  work {row['work_id']} failed: {str(e)[:120]}")
+                if not capped:
+                    submit_next(pool)
                 continue
 
             flags = a.get("flags") or {}
@@ -231,4 +247,10 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
             stats["screened"] += 1
             if stats["screened"] % 10 == 0:
                 print(f"  stage2: {stats['screened']}/{len(rows)} works, ${meter.total:.2f}")
+            if not capped:
+                submit_next(pool)
+
+    stats["skipped_cost"] = conn.execute(
+        "SELECT COUNT(*) n FROM works WHERE sale_id=? AND status='queued'",
+        (sale_id,)).fetchone()["n"]
     return stats

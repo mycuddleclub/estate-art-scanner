@@ -111,6 +111,46 @@ def test_stage2_queue_is_best_first(conn):
     assert order == [signed_painting, labeled_ceramic, plain_print]
 
 
+def test_stage2_stops_spending_after_cost_cap(conn, monkeypatch):
+    """Regression: the pool must not keep executing (billed) jobs after the
+    cap trips. Live incident 2026-07-14: 778 pre-submitted jobs kept calling
+    the API after an ~80-work cap, spending ~$11 on discarded results."""
+    from wallhunter import stage2
+    from wallhunter.config import CostCapExceeded, CostMeter
+
+    conn.execute("INSERT INTO sales (id, title) VALUES (20, 'S')")
+    conn.execute("INSERT INTO photos (id, sale_id, file_hash) VALUES (200, 20, 'h')")
+    for i in range(40):
+        cur = conn.execute(
+            "INSERT INTO detections (photo_id, bbox_x, bbox_y, bbox_w, bbox_h,"
+            " coarse_type, crop_hash, dhash, crop_area) VALUES"
+            " (200,0,0,1,1,'painting','c','0',100)")
+        conn.execute("INSERT INTO works (sale_id, best_detection_id, status)"
+                     " VALUES (20, ?, 'queued')", (cur.lastrowid,))
+    conn.commit()
+
+    calls = {"n": 0}
+
+    def fake_screen(client, meter, crop, ctx, desc, prom):
+        calls["n"] += 1
+        meter.total += 1.0
+        if meter.total >= meter.cap:
+            raise CostCapExceeded("cap")
+        return ({"interest_score": 5, "category": "painting", "flags": {},
+                 "medium_guess": {}, "period_guess": {}}, 1.0)
+
+    monkeypatch.setattr(stage2, "_screen_one", fake_screen)
+    monkeypatch.setattr(stage2.anthropic, "Anthropic", lambda: object())
+    monkeypatch.setattr(stage2, "downscale_jpeg_b64", lambda *a, **k: "x")
+    monkeypatch.setattr(stage2, "load", lambda h: object())
+
+    stats = stage2.run_stage2(conn, 20, CostMeter(5.0), workers=3)
+    # cap trips on the 5th call; a few in-flight extras are fine,
+    # but nowhere near all 40 (the leak executed every job)
+    assert calls["n"] <= 5 + 3, f"pool kept spending after cap: {calls['n']} calls"
+    assert stats["skipped_cost"] >= 30
+
+
 def test_taste_boosts_activate_at_threshold(conn):
     from wallhunter.taste import category_boosts
     for i in range(10):
