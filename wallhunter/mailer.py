@@ -69,9 +69,18 @@ def send_digest(conn, sale_ids: list[int], cost: float) -> bool:
 
     sales = conn.execute(
         f"SELECT id, title, location, ends_at, url, context_score, context_note,"
+        f" identity_name, identity_verdict, identity_evidence,"
         f" (SELECT COUNT(*) FROM works WHERE sale_id=sales.id AND status='screened') n"
         f" FROM sales WHERE id IN ({ph})", sale_ids).fetchall()
     e = lambda s: html.escape(str(s or ""))
+    from .dossier import NOTABLE
+    banners = "".join(
+        f"""<div style="background:#fef2f2;border:2px solid #dc2626;border-radius:8px;
+             padding:12px 16px;margin:10px 0;font-family:Arial;font-size:14px">
+        &#128293; <b>NAMED COLLECTION:</b> &ldquo;{e(s['identity_name'])}&rdquo;
+        ({e(s['identity_verdict'])}) — {e(s['identity_evidence'])}<br>
+        <a href="{e(s['url'])}">{e(s['title'])}</a>, ends {e((s['ends_at'] or '?')[:10])}</div>"""
+        for s in sales if (s["identity_verdict"] or "") in NOTABLE)
     sale_lines = "".join(
         f"<li><a href='{e(s['url'])}'>{e(s['title'])}</a> — {e(s['location'])},"
         f" ends {e((s['ends_at'] or '?')[:10])} &middot; {s['n']} works"
@@ -87,6 +96,7 @@ def send_digest(conn, sale_ids: list[int], cost: float) -> bool:
 <p style="font-family:Arial;font-size:13px;color:#57534e">
   {len(works)} A/B-tier works &middot; run cost ${cost:.2f} &middot;
   open <b>Wall Hunter.command</b> on the Desktop to review the full queue</p>
+{banners}
 <ul style="font-family:Arial;font-size:13px">{sale_lines}</ul>
 <table>{rows}</table>
 </div></body></html>"""

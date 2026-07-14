@@ -8,10 +8,13 @@ per day. Capped runs resume automatically the next morning.
 
 import sys
 
+from datetime import datetime, timezone
+
 from . import db
 from .config import REPO_ROOT, CostCapExceeded, CostMeter, anthropic_api_key
 from .context import score_sale_context
 from .dedupe import run_dedupe
+from .dossier import research_sale_identity
 from .ingest import add_estatesales
 from .mailer import send_digest
 from .stage1 import run_stage1
@@ -20,6 +23,7 @@ from .stage2 import run_stage2
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 MIN_PHOTOS = 20
+REFRESH_GROWTH_MIN = 5   # re-ingest an active sale when it gained this many photos
 
 
 PHOTO_RANK_SATURATION = 400
@@ -41,6 +45,41 @@ def pick_new_sales(active: list[dict], known_ids: set[int],
         -min(s.get("pictureCount") or 0, PHOTO_RANK_SATURATION),
         s.get("pictureCount") or 0))
     return [s["id"] for s in candidates[:max_new]]
+
+
+def sales_needing_refresh(ours: list[dict], details: list[dict],
+                          min_growth: int = REFRESH_GROWTH_MIN) -> list[int]:
+    """Pure (unit-tested): active ingested sales whose platform photo count
+    grew past what we hold -> re-ingest the delta."""
+    held = {s["id"]: s["held_photos"] for s in ours}
+    out = []
+    for d in details:
+        sid = d.get("id")
+        if sid in held and (d.get("pictureCount") or 0) >= held[sid] + min_growth:
+            out.append(sid)
+    return out
+
+
+def refresh_grown_sales(conn) -> list[int]:
+    """Check active (not-yet-ended) EstateSales.net sales for late-added
+    photos; delta-ingest any that grew. Costs one details call per 50 sales."""
+    from estatesales_client import get_sale_details_batch
+    now_iso = datetime.now(timezone.utc).isoformat()
+    ours = [dict(r) for r in conn.execute(
+        "SELECT s.id, (SELECT COUNT(*) FROM photos p WHERE p.sale_id=s.id) held_photos"
+        " FROM sales s WHERE s.platform='estatesales.net'"
+        " AND (s.ends_at IS NULL OR s.ends_at >= ?)", (now_iso[:19],))]
+    if not ours:
+        return []
+    details = get_sale_details_batch([s["id"] for s in ours])
+    grown = sales_needing_refresh(ours, details)
+    for sid in grown:
+        print(f"== sale {sid} added photos — delta-ingesting ==")
+        try:
+            add_estatesales(conn, sid)   # delta-aware: fetches only new photos
+        except Exception as e:
+            print(f"   refresh of {sid} failed: {str(e)[:120]}")
+    return grown
 
 
 def _process_sale(conn, sale_id: int, meter: CostMeter) -> dict:
@@ -76,6 +115,7 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
         try:
             if ingest:
                 add_estatesales(conn, sid)
+                research_sale_identity(conn, sid, meter)
                 score_sale_context(conn, sid, meter)
             stats = _process_sale(conn, sid, meter)
             print(f"   {stats} (${meter.total:.2f})")
@@ -89,6 +129,26 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
         finally:
             spent += meter.total
         return daily_cap - spent >= 0.25
+
+    # 0. late-added photos: delta-ingest active sales that grew; their new
+    #    'pending' photos make them "unfinished" and step 1 processes them
+    try:
+        refresh_grown_sales(conn)
+    except Exception as e:
+        print(f"photo refresh failed: {str(e)[:120]}")
+
+    # 0.5 backfill identity research for sales that predate the feature
+    #     (free unless a name pattern fires; those cost ~$0.15 each, once)
+    id_meter = CostMeter(0.75)
+    for r in conn.execute("SELECT id FROM sales WHERE identity_verdict IS NULL"
+                          " AND id > 0").fetchall():
+        try:
+            research_sale_identity(conn, r["id"], id_meter)
+        except CostCapExceeded:
+            break
+        except Exception as e:
+            print(f"identity backfill {r['id']} failed: {str(e)[:100]}")
+    spent += id_meter.total
 
     # 1. resume sales left unfinished by an earlier capped run
     unfinished = [r["id"] for r in conn.execute(

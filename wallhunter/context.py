@@ -64,7 +64,8 @@ def score_sale_context(conn, sale_id: int, meter: CostMeter,
         note = str(parsed.get("note", ""))[:200]
     except Exception as e:
         score, note = 0.0, f"context scoring failed: {str(e)[:80]}"
-    conn.execute("UPDATE sales SET context_score=?, context_note=? WHERE id=?",
-                 (score, note, sale_id))
+    # never lower a score already pinned high (e.g. by named-collection research)
+    conn.execute("UPDATE sales SET context_score=MAX(COALESCE(context_score,0), ?),"
+                 " context_note=? WHERE id=?", (score, note, sale_id))
     conn.commit()
     return score

@@ -98,6 +98,9 @@ MIGRATIONS = [
     "ALTER TABLE works ADD COLUMN category TEXT",
     "ALTER TABLE sales ADD COLUMN description TEXT",
     "ALTER TABLE sales ADD COLUMN context_note TEXT",
+    "ALTER TABLE sales ADD COLUMN identity_name TEXT",
+    "ALTER TABLE sales ADD COLUMN identity_verdict TEXT",
+    "ALTER TABLE sales ADD COLUMN identity_evidence TEXT",
 ]
 
 
