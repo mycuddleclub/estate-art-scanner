@@ -36,6 +36,17 @@ def test_flag_reason():
     assert flag_reason(None, {"high_bid_usd": None}) is None
 
 
+def test_is_art_signal():
+    from wallhunter.deep import is_art_signal
+    assert is_art_signal({"title": "July Fine Art Antiques Auction",
+                          "house": "Prime Auction Gallery"})
+    assert is_art_signal({"title": "Weekly Consignment", "house": "Kosi Galleries"})
+    assert is_art_signal({"title": "Krupicka Estate Collection", "house": "Zalesky"})
+    assert not is_art_signal({"title": "Grand Mix Auction July14",
+                              "house": "Empire Furniture LLC"})
+    assert not is_art_signal({"title": "Pallet Returns Blowout", "house": "Bidable"})
+
+
 def test_research_artist_propagates_cost_cap(conn, monkeypatch):
     """Regression: CostCapExceeded was swallowed by the broad except and
     recorded as 'research failed' — live incident: $8.96 spend vs $1.50 cap."""

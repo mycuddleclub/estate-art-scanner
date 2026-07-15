@@ -23,6 +23,19 @@ FLAG_TIERS = {"strong", "listed"}
 MIN_RATIO = 8.0
 MIN_MARKET_HIGH = 400.0
 
+ART_SIGNAL = re.compile(
+    r"fine art|gallery|galleries|estate|antique|painting|artwork|"
+    r"art auction|collection|artist|decorative arts|americana|folk art",
+    re.I)
+
+
+def is_art_signal(auction: dict) -> bool:
+    """Pure (unit-tested): does the auction title or house name suggest real
+    art inventory rather than liquidation stock?"""
+    return bool(ART_SIGNAL.search(f"{auction.get('title', '')} "
+                                  f"{auction.get('house', '')}"))
+
+
 _BID = re.compile(r"(?:High Bid|Current Bid)[:\s]*([\d,.]+)\s*USD", re.I)
 _BIDS_N = re.compile(r"(\d+)\s+Bids?", re.I)
 _EST = re.compile(r"([\d,.]+\s*-\s*[\d,.]+\s*USD)", re.I)
@@ -106,10 +119,14 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
               max_auctions: int | None = None) -> tuple[list[dict], dict]:
     from playwright.sync_api import sync_playwright
 
-    # soonest-ending first (act-now relevance); deep_lots dedupe means each
-    # night's quota advances through the window rather than rescanning
+    # two-band priority: auctions whose title/house signals actual art
+    # (galleries, fine art, estates) first, then the liquidator tail — both
+    # soonest-ending first. Live lesson 2026-07-14: pure date order spent the
+    # whole nightly quota on Empire-Furniture-grade junk while the fine-art
+    # sales sat days out. deep_lots dedupe still advances coverage nightly.
     hibid = sorted((a for a in exclusives if a["platform"] == "hibid"),
-                   key=lambda a: a.get("ends") or "9999")
+                   key=lambda a: (0 if is_art_signal(a) else 1,
+                                  a.get("ends") or "9999"))
     hibid = hibid[:max_auctions or 25]
     meter = CostMeter(research_cap_usd)
     flagged = []
