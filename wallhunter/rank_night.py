@@ -78,8 +78,34 @@ def main(top_n: int = 150):
             (a["url"], a["house"], a["title"], a.get("ends"),
              db.now() + " skipped-backlog"))
     conn.commit()
-    print(f"done: {stats} | {len(flags)} flags stored (email at 7:45)"
-          f" | {len(skipped)} low-ranked backlog auctions marked skipped")
+    print(f"done: {stats} | {len(skipped)} low-ranked backlog auctions"
+          " marked skipped")
+    send_unsent_flags(conn, stats)
+
+
+def send_unsent_flags(conn, stats: dict | None = None) -> int:
+    """Flags-only email of everything found but not yet sent."""
+    from .mailer import send_exclusives_email
+    flags = [
+        {"url": r["lot_url"], "title": r["title"], "house": r["house"],
+         "high_bid_usd": r["high_bid_usd"], "estimate": r["estimate"],
+         "artist": r["artist"] or r["artist_key"] or "?",
+         "reason": r["info"], "market_note": r["market_note"] or "",
+         "evidence": (r["evidence"] or "")[:200]}
+        for r in conn.execute(
+            "SELECT dl.*, a.artist, a.market_note, a.evidence"
+            " FROM deep_lots dl LEFT JOIN artists a"
+            "   ON a.artist_key = dl.artist_key"
+            " WHERE dl.emailed=0 AND dl.info != ''"
+            " ORDER BY dl.first_seen DESC")]
+    if not flags:
+        print("no unsent flags")
+        return 0
+    if send_exclusives_email(None, deep_flags=flags, deep_stats=stats):
+        conn.execute("UPDATE deep_lots SET emailed=1"
+                     " WHERE emailed=0 AND info != ''")
+        conn.commit()
+    return len(flags)
 
 
 if __name__ == "__main__":

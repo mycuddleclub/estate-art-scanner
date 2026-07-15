@@ -54,9 +54,10 @@ def _work_row(w) -> str:
   {sig}</td></tr>"""
 
 
-def send_exclusives_email(exclusives: list[dict],
+def send_exclusives_email(exclusives: list[dict] | None,
                           deep_flags: list[dict] | None = None,
                           deep_stats: dict | None = None) -> bool:
+    """exclusives=None -> flags-only email (no calendar section)."""
     """Standalone Off-Radar Auctions email (separate program from the
     estate-sale digest, per Daniel's request)."""
     user, pw, to = _smtp_config()
@@ -86,10 +87,12 @@ def send_exclusives_email(exclusives: list[dict],
               <b>{e(f['artist'])}</b> — {e(f['reason'])}<br>
               <span style="color:#57534e;font-size:12px">{e(f['market_note'])}
               {e(f['evidence'])}</span></div>"""
-            for f in deep_flags[:12])
+            for f in deep_flags[:25])
         deep_html += (f"<h3 style='margin:14px 0 4px'>&#127919; Deep finds"
                       f" ({len(deep_flags)})</h3>" + items)
-    if exclusives:
+    if exclusives is None:
+        body_core = ""  # flags-only email
+    elif exclusives:
         # full list per Daniel — grouped by end date to stay scannable
         sections = []
         current_day = object()
@@ -122,7 +125,12 @@ Junk genres and your blocked houses are filtered out.</p>
 {body_core}
 </div></body></html>"""
     msg = MIMEText(body, "html")
-    msg["Subject"] = f"\U0001F575 Off-Radar Auctions — {len(exclusives)} today"
+    if exclusives is None:
+        msg_subject = (f"\U0001F3AF Off-Radar Deep — {len(deep_flags or [])}"
+                       f" flagged lots")
+    else:
+        msg_subject = f"\U0001F575 Off-Radar Auctions — {len(exclusives)} today"
+    msg["Subject"] = msg_subject
     msg["From"] = user
     msg["To"] = to
     try:
