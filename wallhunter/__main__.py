@@ -181,14 +181,14 @@ def main():
                    help="send the Off-Radar Auctions email")
     p.add_argument("--deep", action="store_true",
                    help="per-lot artist intelligence on each off-radar auction")
-    p.add_argument("--research-cap", type=float, default=3.0,
+    p.add_argument("--research-cap", type=float, default=6.0,
                    help="max USD for researching new artist names")
     p.add_argument("--max-auctions", type=int, default=None)
     p.set_defaults(fn=cmd_exclusives)
 
     p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")
     p.add_argument("--max-new", type=int, default=2)
-    p.add_argument("--daily-cap", type=float, default=5.0)
+    p.add_argument("--daily-cap", type=float, default=10.0)
     p.add_argument("--per-sale-cap", type=float, default=None,
                    help="max spend per sale per day (default: daily-cap / 2)")
     p.add_argument("--no-email", action="store_true")
