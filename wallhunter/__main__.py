@@ -92,15 +92,32 @@ def cmd_exclusives(conn, args):
         # refresh shared knowledge from sibling tools when readable
         import_checker_cache(conn)
         import_artscout_cache(conn)
-        deep_flags, deep_stats = deep_scan(conn, exclusives,
-                                           research_cap_usd=args.research_cap,
-                                           max_auctions=args.max_auctions)
+        _, deep_stats = deep_scan(conn, exclusives,
+                                  research_cap_usd=args.research_cap,
+                                  max_auctions=args.max_auctions)
+        # email from the store, not the run: flags found by runs that didn't
+        # email (e.g. the overnight backfill) go out on the next send
+        deep_flags = [
+            {"url": r["lot_url"], "title": r["title"], "house": r["house"],
+             "high_bid_usd": r["high_bid_usd"], "estimate": r["estimate"],
+             "artist": r["artist"] or r["artist_key"] or "?",
+             "reason": r["info"], "market_note": r["market_note"] or "",
+             "evidence": (r["evidence"] or "")[:200]}
+            for r in conn.execute(
+                "SELECT dl.*, a.artist, a.market_note, a.evidence"
+                " FROM deep_lots dl LEFT JOIN artists a"
+                "   ON a.artist_key = dl.artist_key"
+                " WHERE dl.emailed=0 AND dl.info != ''"
+                " ORDER BY dl.first_seen DESC")]
         for f in deep_flags:
             print(f"🎯 {f['artist']}: {f['title'][:60]} — {f['reason']}\n    {f['url']}")
     if args.email:
         from .mailer import send_exclusives_email
-        send_exclusives_email(exclusives, deep_flags=deep_flags,
-                              deep_stats=deep_stats)
+        if send_exclusives_email(exclusives, deep_flags=deep_flags,
+                                 deep_stats=deep_stats) and deep_flags:
+            conn.execute("UPDATE deep_lots SET emailed=1"
+                         " WHERE emailed=0 AND info != ''")
+            conn.commit()
 
 
 def cmd_auto(conn, args):
