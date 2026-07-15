@@ -23,6 +23,21 @@ FLAG_TIERS = {"strong", "listed"}
 MIN_RATIO = 8.0
 MIN_MARKET_HIGH = 400.0
 
+import os
+
+# lot titles containing these words are skipped outright (per Daniel:
+# mass-market prints aren't worth flags; his print interest is originals-
+# adjacent fine prints, which sellers rarely title just "Print")
+SKIP_TITLE_WORDS = re.compile(
+    "|".join(rf"\b{w.strip()}\w*" for w in os.environ.get(
+        "WH_SKIP_TITLE_WORDS", "print,giclee,poster,reproduction").split(",")
+        if w.strip()), re.I)
+
+
+def skip_lot(title: str) -> bool:
+    return bool(SKIP_TITLE_WORDS.search(title or ""))
+
+
 ART_SIGNAL = re.compile(
     r"fine art|gallery|galleries|estate|antique|painting|artwork|"
     r"art auction|collection|artist|decorative arts|americana|folk art",
@@ -169,8 +184,11 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
             if not lots:
                 continue
             print(f"  deep: {auction['house'][:36]} — {len(lots)} art lots")
-            new_lots = [l for l in lots if not conn.execute(
-                "SELECT 1 FROM deep_lots WHERE lot_url=?", (l["url"],)).fetchone()]
+            new_lots = [l for l in lots
+                        if not skip_lot(l["title"])
+                        and not conn.execute(
+                            "SELECT 1 FROM deep_lots WHERE lot_url=?",
+                            (l["url"],)).fetchone()]
             per_auction.append((auction, new_lots))
             for lot in new_lots:
                 name = listing_artist_claim(lot["title"])

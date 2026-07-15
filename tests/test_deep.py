@@ -36,6 +36,18 @@ def test_flag_reason():
     assert flag_reason(None, {"high_bid_usd": None}) is None
 
 
+def test_skip_lot_print_filter():
+    from wallhunter.deep import skip_lot
+    assert skip_lot("Framed Terry Redlin Print. 23x18")
+    assert skip_lot("P. Buckley Moss Framed Prints")
+    assert skip_lot("Printed Parrot Model")
+    assert skip_lot("Giclee on canvas, signed")
+    assert skip_lot("Movie Poster Lot")
+    assert not skip_lot("Oil on canvas, signed lower right")
+    assert not skip_lot("Watercolor Stonington Maine")
+    assert not skip_lot("")
+
+
 def test_unscanned_candidates_watermark(conn):
     from wallhunter import db as wdb
     from wallhunter.deep import unscanned_candidates
