@@ -173,7 +173,7 @@ def unscanned_candidates(conn, exclusives: list[dict]) -> list[dict]:
     return candidates
 
 
-def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 6.0,
+def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
               max_auctions: int | None = None) -> tuple[list[dict], dict]:
     from playwright.sync_api import sync_playwright
 

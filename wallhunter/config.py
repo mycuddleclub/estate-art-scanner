@@ -21,7 +21,7 @@ MODEL_PRICES = {
     "claude-sonnet-5": (3.0, 15.0),
 }
 
-RUN_COST_CAP_USD = float(os.environ.get("WH_RUN_COST_CAP_USD", "5"))
+RUN_COST_CAP_USD = float(os.environ.get("WH_RUN_COST_CAP_USD", "25"))
 RATE_LIMIT_SECONDS = float(os.environ.get("WH_RATE_LIMIT_SECONDS", "0.5"))
 STAGE1_MAX_EDGE = 1024      # px, longest side sent to detection
 STAGE2_CROP_MAX_EDGE = 1024

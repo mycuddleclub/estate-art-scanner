@@ -121,7 +121,7 @@ def _process_sale(conn, sale_id: int, meter: CostMeter) -> dict:
             "capped": bool(s1["skipped_cost"] or s2["skipped_cost"])}
 
 
-def run_auto(conn, max_new: int = 50, daily_cap: float = 5.0,
+def run_auto(conn, max_new: int = 50, daily_cap: float = 50.0,
              per_sale_cap: float | None = None, email: bool = True) -> None:
     import os
     os.environ.setdefault("ANTHROPIC_API_KEY", anthropic_api_key())
@@ -174,7 +174,7 @@ def run_auto(conn, max_new: int = 50, daily_cap: float = 5.0,
 
     # 0.5 backfill identity research for sales that predate the feature
     #     (free unless a name pattern fires; those cost ~$0.15 each, once)
-    id_meter = CostMeter(0.75)
+    id_meter = CostMeter(5.0)
     for r in conn.execute("SELECT id FROM sales WHERE identity_verdict IS NULL"
                           " AND id > 0").fetchall():
         try:
