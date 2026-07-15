@@ -226,11 +226,13 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 6.0,
     print(f"  deep: {len(unknown_names)} new names -> {len(persons)} person-like,"
           f" {len(rejected)} product-like (skipped)")
     from .config import CostCapExceeded
+    researched_n = 0
     for n in persons:
         if not budget_left:
             break
         try:
             research_artist(conn, n, meter)
+            researched_n += 1
         except CostCapExceeded:
             print(f"  deep: research budget cap hit (${meter.total:.2f})"
                   f" — remaining names carry to tomorrow")
@@ -260,8 +262,10 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 6.0,
         "auctions": len(per_auction),
         "lots": sum(len(lots) for _, lots in per_auction),
         "new_names": len(unknown_names),
-        "researched": len(persons),
+        "researched": researched_n,
         "spend": round(meter.total, 2),
+        "capped": not budget_left,
+        "names_deferred": max(0, len(persons) - researched_n),
     }
     print(f"deep: {len(flagged)} flagged lots, research spend ${meter.total:.2f}")
     return flagged, stats

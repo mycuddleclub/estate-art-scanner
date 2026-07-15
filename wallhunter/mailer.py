@@ -66,6 +66,15 @@ def send_exclusives_email(exclusives: list[dict] | None,
         return False
     e = lambda s: html.escape(str(s or ""))
     deep_html = ""
+    if deep_stats and deep_stats.get("capped"):
+        deep_html += (
+            f"<div style='background:#fffbeb;border:2px solid #f59e0b;"
+            f"border-radius:8px;padding:10px 14px;margin:0 0 8px;"
+            f"font-weight:bold'>&#9888;&#65039; RESEARCH BUDGET CAP HIT"
+            f" (${deep_stats.get('spend', 0):.2f} spent) —"
+            f" {deep_stats.get('names_deferred', 0)} artist names deferred"
+            f" to the next run. Unusually high spend may mean an unusually"
+            f" rich day or a malfunction — glance at the numbers below.</div>")
     if deep_stats:
         # always show the tally, so "checked, nothing found" is visibly
         # different from "didn't check"
@@ -138,14 +147,15 @@ Junk genres and your blocked houses are filtered out.</p>
             server.starttls()
             server.login(user, pw)
             server.send_message(msg)
-        print(f"exclusives email sent to {to} ({len(exclusives)} auctions)")
+        print(f"exclusives email sent to {to}: {msg_subject}")
         return True
     except Exception as ex:
         print(f"exclusives email failed: {ex}")
         return False
 
 
-def send_digest(conn, sale_ids: list[int], cost: float) -> bool:
+def send_digest(conn, sale_ids: list[int], cost: float,
+                cap_events: list[str] | None = None) -> bool:
     user, pw, to = _smtp_config()
     if not all([user, pw, to]):
         print("digest: SMTP not configured (SMTP_USER/SMTP_PASSWORD/EMAIL_TO) — skipping email")
@@ -186,6 +196,9 @@ def send_digest(conn, sale_ids: list[int], cost: float) -> bool:
 
     body = f"""<html><body style="background:#f5f5f4;padding:16px">
 <div style="max-width:720px;margin:0 auto;background:#fff;border-radius:10px;padding:22px">
+{"".join(f'''<div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:8px;
+  padding:10px 14px;margin:0 0 10px;font-family:Arial;font-size:13px;font-weight:bold">
+  &#9888;&#65039; BUDGET CAP: {html.escape(ev)}</div>''' for ev in (cap_events or []))}
 <h2 style="font-family:Arial;margin:0">&#128269; Wall Hunter — morning digest</h2>
 <p style="font-family:Arial;font-size:13px;color:#57534e">
   {len(works)} A/B-tier works &middot; run cost ${cost:.2f} &middot;

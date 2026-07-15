@@ -134,6 +134,7 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
     per_sale_cap = per_sale_cap or max(1.0, daily_cap / 2)
     spent = 0.0
     touched: list[int] = []
+    cap_events: list[str] = []
 
     def process_with_slice(sid: int, *, ingest: bool = False) -> bool:
         """Run one sale within its budget slice. Returns False when the
@@ -154,6 +155,9 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
         except CostCapExceeded:
             print(f"   sale {sid} hit its budget slice (${meter.total:.2f})"
                   " — best works screened, tail resumes tomorrow")
+            cap_events.append(
+                f"Sale {sid} hit its ${meter.cap:.2f} slice — best works"
+                " screened, remainder resumes next run")
             touched.append(sid)
         except Exception as e:
             print(f"   sale {sid} failed: {str(e)[:150]}")
@@ -217,6 +221,10 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
             if not process_with_slice(sid, ingest=True):
                 break
 
+    if daily_cap - spent < 0.25:
+        cap_events.append(
+            f"Daily budget exhausted (${spent:.2f} of ${daily_cap:.2f}) —"
+            " remaining sales resume next run")
     print(f"== auto done: {len(touched)} sales, ${spent:.2f} ==")
     if email and touched:
-        send_digest(conn, touched, spent)
+        send_digest(conn, touched, spent, cap_events=cap_events)
