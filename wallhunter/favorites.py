@@ -33,6 +33,24 @@ def find_favorite_auctions(conn, auctions: list[dict]) -> list[dict]:
     return out
 
 
+def harvest_favorites(conn) -> list[dict]:
+    """Dedicated per-fragment HiBid search: the main harvest queries 'art',
+    which a favorite's auction title may not contain (e.g. 'Caplans Online
+    Auction 4/22'). One cheap GraphQL query per favorite guarantees their
+    auctions are always seen."""
+    from .exclusives import harvest_hibid
+    frags = favorite_fragments(conn)
+    found: dict[str, dict] = {}
+    for frag in frags:
+        try:
+            for a in harvest_hibid(query=frag):
+                if match_favorite(a.get("house"), [frag]):
+                    found[a["url"]] = a
+        except Exception as e:
+            print(f"favorite harvest '{frag}' failed: {str(e)[:80]}")
+    return list(found.values())
+
+
 def add_favorite(conn, fragment: str, note: str = "") -> None:
     conn.execute(
         "INSERT OR REPLACE INTO favorite_houses (fragment, note, added_at)"

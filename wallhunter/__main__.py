@@ -78,10 +78,17 @@ def cmd_report(conn, args):
 
 def cmd_exclusives(conn, args):
     from .exclusives import find_exclusives
-    from .favorites import find_favorite_auctions
+    from .favorites import find_favorite_auctions, harvest_favorites
     exclusives, all_auctions = find_exclusives(force_refresh=args.refresh,
                                                with_all=True)
+    # dedicated searches so favorites are seen even when their titles don't
+    # match the main 'art' query; merged for both the banner and deep scan
+    fav_harvest = harvest_favorites(conn)
+    known_urls = {a["url"] for a in all_auctions}
+    all_auctions += [a for a in fav_harvest if a["url"] not in known_urls]
     favorites = find_favorite_auctions(conn, all_auctions)
+    excl_urls = {a["url"] for a in exclusives}
+    exclusives += [a for a in favorites if a["url"] not in excl_urls]
     for a in favorites:
         print(f"⭐ FAVORITE: {a['house']} — {a['title']}  {a.get('info','')}\n"
               f"    {a['url']}")
