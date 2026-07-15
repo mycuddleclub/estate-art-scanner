@@ -36,6 +36,26 @@ def test_flag_reason():
     assert flag_reason(None, {"high_bid_usd": None}) is None
 
 
+def test_unscanned_candidates_watermark(conn):
+    from wallhunter import db as wdb
+    from wallhunter.deep import unscanned_candidates
+    exclusives = [
+        {"platform": "hibid", "url": "u1", "title": "Fine Art Sale",
+         "house": "Gallery A", "ends": "2026-07-20"},
+        {"platform": "hibid", "url": "u2", "title": "Grand Mix",
+         "house": "Liquidators", "ends": "2026-07-16"},
+        {"platform": "hibid", "url": "u3", "title": "Estate Auction",
+         "house": "B", "ends": "2026-07-18"},
+        {"platform": "bidsquare", "url": "u4", "title": "x", "house": "C"},
+    ]
+    conn.execute("INSERT INTO deep_auctions (sale_url, scanned_at)"
+                 " VALUES ('u3', ?)", (wdb.now(),))
+    conn.commit()
+    got = unscanned_candidates(conn, exclusives)
+    # u3 already scanned; u4 not hibid; art-signal (u1) before liquidator (u2)
+    assert [a["url"] for a in got] == ["u1", "u2"]
+
+
 def test_is_art_signal():
     from wallhunter.deep import is_art_signal
     assert is_art_signal({"title": "July Fine Art Antiques Auction",

@@ -111,6 +111,10 @@ MIGRATIONS = [
         market_note TEXT,
         evidence TEXT,
         researched_at TEXT)""",
+    """CREATE TABLE IF NOT EXISTS deep_auctions (
+        sale_url TEXT PRIMARY KEY,
+        house TEXT, title TEXT, ends TEXT,
+        art_lots INTEGER, scanned_at TEXT)""",
     """CREATE TABLE IF NOT EXISTS deep_lots (
         lot_url TEXT PRIMARY KEY,
         sale_url TEXT, house TEXT, title TEXT,

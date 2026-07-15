@@ -115,19 +115,34 @@ def flag_reason(artist_row, lot: dict) -> str | None:
     return None
 
 
+SAFETY_CEILING = 400  # bounds a runaway night, not a quota
+
+
+def unscanned_candidates(conn, exclusives: list[dict]) -> list[dict]:
+    """Watermark selection (unit-tested): HiBid auctions in the window not
+    yet in deep_auctions, art-signal houses first, then soonest-ending."""
+    candidates = [a for a in exclusives if a["platform"] == "hibid"
+                  and not conn.execute(
+                      "SELECT 1 FROM deep_auctions WHERE sale_url=?",
+                      (a["url"],)).fetchone()]
+    candidates.sort(key=lambda a: (0 if is_art_signal(a) else 1,
+                                   a.get("ends") or "9999"))
+    return candidates
+
+
 def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
               max_auctions: int | None = None) -> tuple[list[dict], dict]:
     from playwright.sync_api import sync_playwright
 
-    # two-band priority: auctions whose title/house signals actual art
-    # (galleries, fine art, estates) first, then the liquidator tail — both
-    # soonest-ending first. Live lesson 2026-07-14: pure date order spent the
-    # whole nightly quota on Empire-Furniture-grade junk while the fine-art
-    # sales sat days out. deep_lots dedupe still advances coverage nightly.
-    hibid = sorted((a for a in exclusives if a["platform"] == "hibid"),
-                   key=lambda a: (0 if is_art_signal(a) else 1,
-                                  a.get("ends") or "9999"))
-    hibid = hibid[:max_auctions or 75]
+    # Watermark model (Daniel's design): every auction in the window is
+    # scanned exactly ONCE, as it enters — the nightly workload is one day's
+    # inflow (plus anything listed late into the window). deep_auctions is
+    # the watermark.
+    candidates = unscanned_candidates(conn, exclusives)
+    hibid = candidates[:max_auctions or SAFETY_CEILING]
+    already = sum(1 for a in exclusives if a["platform"] == "hibid") - len(candidates)
+    print(f"  deep: {len(candidates)} unscanned auctions in window"
+          f" ({already} already covered), running {len(hibid)}")
     meter = CostMeter(research_cap_usd)
     flagged = []
     budget_left = True
@@ -144,7 +159,13 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
             except Exception as e:
                 print(f"  deep: {auction['house'][:30]} harvest failed:"
                       f" {str(e)[:80]}")
-                continue
+                continue  # NOT marked scanned — retried tomorrow
+            conn.execute(
+                "INSERT OR REPLACE INTO deep_auctions (sale_url, house, title,"
+                " ends, art_lots, scanned_at) VALUES (?,?,?,?,?,?)",
+                (auction["url"], auction["house"], auction["title"],
+                 auction.get("ends"), len(lots), db.now()))
+            conn.commit()
             if not lots:
                 continue
             print(f"  deep: {auction['house'][:36]} — {len(lots)} art lots")
