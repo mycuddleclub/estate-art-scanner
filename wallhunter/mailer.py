@@ -109,7 +109,7 @@ def send_exclusives_email(exclusives: list[dict] | None,
               <b>{e(f['artist'])}</b> — {e(f['reason'])}<br>
               <span style="color:#57534e;font-size:12px">{e(f['market_note'])}
               {e(f['evidence'])}</span></div>"""
-            for f in deep_flags[:25])
+            for f in deep_flags)  # all of them — Daniel: never truncate finds
         deep_html += (f"<h3 style='margin:14px 0 4px'>&#127919; Deep finds"
                       f" ({len(deep_flags)})</h3>" + items)
     if exclusives is None:
