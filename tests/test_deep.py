@@ -48,6 +48,19 @@ def test_skip_lot_print_filter():
     assert not skip_lot("")
 
 
+def test_skip_lot_attribution_hedges():
+    from wallhunter.deep import skip_lot
+    assert skip_lot("Oil Painting Attributed to John Sloan")
+    assert skip_lot("Landscape After Corot, oil on board")
+    assert skip_lot("Bronze in the Manner of Remington")
+    assert skip_lot("Portrait, School of Rembrandt")
+    assert skip_lot("Still Life, Circle of Peale")
+    assert skip_lot("Follower of Bierstadt Mountain Scene")
+    # exact-word 'after' must not hit stems or compounds
+    assert not skip_lot("Afternoon Light, signed watercolor")
+    assert not skip_lot("Afterglow by J. Smith, oil")
+
+
 def test_unscanned_candidates_watermark(conn):
     from wallhunter import db as wdb
     from wallhunter.deep import unscanned_candidates

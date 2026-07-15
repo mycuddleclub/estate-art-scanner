@@ -25,13 +25,28 @@ MIN_MARKET_HIGH = 400.0
 
 import os
 
-# lot titles containing these words are skipped outright (per Daniel:
-# mass-market prints aren't worth flags; his print interest is originals-
-# adjacent fine prints, which sellers rarely title just "Print")
-SKIP_TITLE_WORDS = re.compile(
-    "|".join(rf"\b{w.strip()}\w*" for w in os.environ.get(
-        "WH_SKIP_TITLE_WORDS", "print,giclee,poster,reproduction").split(",")
-        if w.strip()), re.I)
+# lot titles containing these are skipped outright (per Daniel): mass-market
+# prints, and the attribution-hedge family ("after X", "attributed to X" =
+# not actually by the artist — flagging them against the artist's market
+# would be exactly wrong). Terms ending in * match stems (print* -> prints,
+# printed); plain terms match exact words (after != afternoon).
+_DEFAULT_SKIP = ("print*,giclee*,poster*,reproduction*,"
+                 "attributed to,after,manner of,school of,style of,"
+                 "circle of,follower of")
+
+
+def _skip_regex(spec: str) -> re.Pattern:
+    parts = []
+    for term in (t.strip() for t in spec.split(",") if t.strip()):
+        if term.endswith("*"):
+            parts.append(rf"\b{re.escape(term[:-1])}\w*")
+        else:
+            parts.append(rf"\b{re.escape(term)}\b")
+    return re.compile("|".join(parts), re.I)
+
+
+SKIP_TITLE_WORDS = _skip_regex(os.environ.get("WH_SKIP_TITLE_WORDS",
+                                              _DEFAULT_SKIP))
 
 
 def skip_lot(title: str) -> bool:
