@@ -1,6 +1,7 @@
 """Stage 2 — per-work screening (Sonnet): medium, period, quality, flags, score."""
 
 import json
+import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -132,6 +133,52 @@ def _tier(score: float) -> str:
     return "C"
 
 
+TRIAGE_MODEL = os.environ.get("WH_TRIAGE_MODEL", "claude-haiku-4-5-20251001")
+TRIAGE_THRESHOLD = float(os.environ.get("WH_TRIAGE_THRESHOLD", "5.0"))
+# stage-1 signals that bypass triage straight to the full Sonnet screen —
+# recall protection: the uncatalogued signed oil that motivated this build
+# must never be filed by the cheap tier
+ESCALATE_TYPES = {"painting", "drawing"}
+
+TRIAGE_PROMPT = """Quick triage of one artwork found at an estate sale, for a collector
+hunting overlooked fine/folk/self-taught art. From this crop alone, rate how
+much this deserves an expert's closer look.
+Return ONLY JSON:
+{"promise": 0.0-10.0, "category": "painting|work_on_paper|print|photograph|sculpture|ceramics|textile|glass|jewelry|metalware|furniture|decor|book|other",
+ "note": "one line: what it appears to be and why it does/doesn't merit closer study"}
+High promise: hand-made surface, age, quality of execution, anything ambiguous
+enough to need a better eye. Low promise: mass-produced prints/posters,
+factory decor, commercial reproductions."""
+
+
+def _triage_one(client, meter: CostMeter, crop_b64: str) -> tuple[dict, float]:
+    resp = client.messages.create(
+        model=TRIAGE_MODEL, max_tokens=250,
+        messages=[{"role": "user", "content": [
+            {"type": "image", "source": {"type": "base64",
+             "media_type": "image/jpeg", "data": crop_b64}},
+            {"type": "text", "text": TRIAGE_PROMPT}]}])
+    cost = meter.add(TRIAGE_MODEL, resp.usage)
+    txt = _text_of(resp)
+    m = _JSON.search(txt)
+    parsed = json.loads(m.group(0)) if m else {}
+    return parsed, cost
+
+
+def needs_full_screen(row, triage: dict | None) -> bool:
+    """Pure (unit-tested): escalation policy for the two-tier screen."""
+    if row["sig_visible"] or row["label_visible"] or row["uncertain"]:
+        return True
+    if (row["coarse_type"] or "").lower() in ESCALATE_TYPES:
+        return True
+    if triage is None:  # triage failed — fail toward the expensive/safe path
+        return True
+    try:
+        return float(triage.get("promise", 10)) >= TRIAGE_THRESHOLD
+    except (TypeError, ValueError):
+        return True
+
+
 # stage-1 non-art types -> queue category; confident matches skip the
 # expensive deep screen entirely ("don't go deep on the obviously-not-art")
 NONART_CATEGORY = {
@@ -173,6 +220,7 @@ def pending_works_best_first(conn, sale_id: int):
     the next day's resume."""
     return conn.execute(
         "SELECT w.id AS work_id, d.crop_hash, d.description, d.prominence, d.uncertain,"
+        "       d.sig_visible, d.label_visible, d.coarse_type,"
         "       d.bbox_w * d.bbox_h AS bbox_frac,"
         "       p.file_hash AS photo_hash, p.lot_text"
         " FROM works w JOIN detections d ON d.id = w.best_detection_id"
@@ -198,16 +246,31 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
 
     def job(row):
         crop_b64 = downscale_jpeg_b64(load(row["crop_hash"]), STAGE2_CROP_MAX_EDGE)
+        cost = 0.0
+        # tier 1: cheap Haiku triage, unless stage-1 flags force escalation
+        triage = None
+        if not (row["sig_visible"] or row["label_visible"] or row["uncertain"]
+                or (row["coarse_type"] or "").lower() in ESCALATE_TYPES):
+            try:
+                triage, t_cost = _triage_one(client, meter, crop_b64)
+                cost += t_cost
+            except CostCapExceeded:
+                raise
+            except Exception:
+                triage = None  # triage failure -> full screen (fail-safe)
+        if not needs_full_screen(row, triage):
+            return row, {"_triaged": True, **triage}, cost
+        # tier 2: full Sonnet screen
         # when the crop is essentially the whole photo (lot-per-photo auction
         # catalogs), the context image adds nothing but input tokens
         ctx_b64 = None
         if (row["bbox_frac"] or 0) < 0.75:
             ctx_b64 = downscale_jpeg_b64(load(row["photo_hash"]),
                                          STAGE2_CONTEXT_MAX_EDGE, quality=70)
-        parsed, cost = _screen_one(client, meter, crop_b64, ctx_b64,
-                                   row["description"] or "", row["prominence"] or "featured",
-                                   lot_text=row["lot_text"])
-        return row, parsed, cost
+        parsed, s_cost = _screen_one(client, meter, crop_b64, ctx_b64,
+                                     row["description"] or "", row["prominence"] or "featured",
+                                     lot_text=row["lot_text"])
+        return row, parsed, cost + s_cost
 
     # Submit incrementally: pre-loading every job into the pool means the
     # workers keep making (billed) API calls after the cap trips, with the
@@ -241,6 +304,31 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
                 stats["failed"] += 1
                 conn.commit()
                 print(f"  work {row['work_id']} failed: {str(e)[:120]}")
+                if not capped:
+                    submit_next(pool)
+                continue
+
+            if a.get("_triaged"):
+                # filed by the cheap tier: below threshold, no risk flags
+                from .config import WORK_CATEGORIES
+                cat = str(a.get("category", "other")).strip().lower()
+                if cat not in WORK_CATEGORIES:
+                    cat = "other"
+                try:
+                    t_score = max(0.0, min(TRIAGE_THRESHOLD - 0.1,
+                                           float(a.get("promise", 0))))
+                except (TypeError, ValueError):
+                    t_score = 0.0
+                conn.execute(
+                    "UPDATE works SET category=?, subject=?, quality_notes=?,"
+                    " interest_score=?, tier=?, stage2_cost_usd=?,"
+                    " status='screened' WHERE id=?",
+                    (cat, str(a.get("note", ""))[:300],
+                     "triage (haiku): below full-screen threshold",
+                     t_score, _tier(t_score), cost, row["work_id"]))
+                conn.commit()
+                stats["screened"] += 1
+                stats["triaged"] = stats.get("triaged", 0) + 1
                 if not capped:
                     submit_next(pool)
                 continue

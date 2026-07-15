@@ -100,6 +100,23 @@ def test_nonart_gate_files_confident_nonart_only(conn):
     assert status[painting]["status"] == "queued"
 
 
+def test_needs_full_screen_escalation_policy():
+    from wallhunter.stage2 import needs_full_screen
+    base = {"sig_visible": 0, "label_visible": 0, "uncertain": 0,
+            "coarse_type": "print"}
+    # risk flags always escalate, triage irrelevant
+    assert needs_full_screen({**base, "sig_visible": 1}, {"promise": 0})
+    assert needs_full_screen({**base, "label_visible": 1}, {"promise": 0})
+    assert needs_full_screen({**base, "uncertain": 1}, {"promise": 0})
+    assert needs_full_screen({**base, "coarse_type": "painting"}, {"promise": 0})
+    # triage decides for unflagged non-paintings
+    assert not needs_full_screen(base, {"promise": 2.0})
+    assert needs_full_screen(base, {"promise": 7.5})
+    # failed/garbled triage fails toward the expensive path
+    assert needs_full_screen(base, None)
+    assert needs_full_screen(base, {"promise": "??"})
+
+
 def test_listing_artist_claim():
     from wallhunter.stage2 import listing_artist_claim
     assert listing_artist_claim('Roberts Clyde- Watercolor "Stonington Maine"') \
