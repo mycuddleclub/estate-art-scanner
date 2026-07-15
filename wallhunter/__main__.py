@@ -82,7 +82,7 @@ def cmd_exclusives(conn, args):
     for a in exclusives:
         print(f"[{a['platform']}] {a['house']} — {a['title']}"
               f"{'  (' + a['info'] + ')' if a['info'] else ''}\n    {a['url']}")
-    deep_flags = None
+    deep_flags = deep_stats = None
     if args.deep:
         import os
         from .artists import import_artscout_cache, import_checker_cache
@@ -92,14 +92,15 @@ def cmd_exclusives(conn, args):
         # refresh shared knowledge from sibling tools when readable
         import_checker_cache(conn)
         import_artscout_cache(conn)
-        deep_flags = deep_scan(conn, exclusives,
-                               research_cap_usd=args.research_cap,
-                               max_auctions=args.max_auctions)
+        deep_flags, deep_stats = deep_scan(conn, exclusives,
+                                           research_cap_usd=args.research_cap,
+                                           max_auctions=args.max_auctions)
         for f in deep_flags:
             print(f"🎯 {f['artist']}: {f['title'][:60]} — {f['reason']}\n    {f['url']}")
     if args.email:
         from .mailer import send_exclusives_email
-        send_exclusives_email(exclusives, deep_flags=deep_flags)
+        send_exclusives_email(exclusives, deep_flags=deep_flags,
+                              deep_stats=deep_stats)
 
 
 def cmd_auto(conn, args):

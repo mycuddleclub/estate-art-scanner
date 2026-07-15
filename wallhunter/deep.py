@@ -103,7 +103,7 @@ def flag_reason(artist_row, lot: dict) -> str | None:
 
 
 def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
-              max_auctions: int | None = None) -> list[dict]:
+              max_auctions: int | None = None) -> tuple[list[dict], dict]:
     from playwright.sync_api import sync_playwright
 
     # soonest-ending first (act-now relevance); deep_lots dedupe means each
@@ -185,5 +185,12 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
                                 "market_note": row["market_note"] or "",
                                 "evidence": (row["evidence"] or "")[:200]})
         conn.commit()
+    stats = {
+        "auctions": len(per_auction),
+        "lots": sum(len(lots) for _, lots in per_auction),
+        "new_names": len(unknown_names),
+        "researched": len(persons),
+        "spend": round(meter.total, 2),
+    }
     print(f"deep: {len(flagged)} flagged lots, research spend ${meter.total:.2f}")
-    return flagged
+    return flagged, stats

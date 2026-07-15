@@ -55,7 +55,8 @@ def _work_row(w) -> str:
 
 
 def send_exclusives_email(exclusives: list[dict],
-                          deep_flags: list[dict] | None = None) -> bool:
+                          deep_flags: list[dict] | None = None,
+                          deep_stats: dict | None = None) -> bool:
     """Standalone Off-Radar Auctions email (separate program from the
     estate-sale digest, per Daniel's request)."""
     user, pw, to = _smtp_config()
@@ -64,6 +65,17 @@ def send_exclusives_email(exclusives: list[dict],
         return False
     e = lambda s: html.escape(str(s or ""))
     deep_html = ""
+    if deep_stats:
+        # always show the tally, so "checked, nothing found" is visibly
+        # different from "didn't check"
+        deep_html = (
+            f"<p style='background:#f0fdf4;border:1px solid #86efac;"
+            f"border-radius:8px;padding:8px 14px'>&#127919; <b>Deep scan:</b>"
+            f" {deep_stats.get('auctions', 0)} auctions &middot;"
+            f" {deep_stats.get('lots', 0)} art lots checked &middot;"
+            f" {deep_stats.get('researched', 0)} new artists researched"
+            f" (${deep_stats.get('spend', 0):.2f}) &middot;"
+            f" <b>{len(deep_flags or [])} flags</b></p>")
     if deep_flags:
         items = "".join(
             f"""<div style="background:#fef2f2;border:2px solid #dc2626;border-radius:8px;
@@ -75,8 +87,8 @@ def send_exclusives_email(exclusives: list[dict],
               <span style="color:#57534e;font-size:12px">{e(f['market_note'])}
               {e(f['evidence'])}</span></div>"""
             for f in deep_flags[:12])
-        deep_html = (f"<h3 style='margin:14px 0 4px'>&#127919; Deep finds"
-                     f" ({len(deep_flags)})</h3>" + items)
+        deep_html += (f"<h3 style='margin:14px 0 4px'>&#127919; Deep finds"
+                      f" ({len(deep_flags)})</h3>" + items)
     if exclusives:
         # full list per Daniel — grouped by end date to stay scannable
         sections = []
