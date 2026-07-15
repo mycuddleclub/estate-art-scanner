@@ -15,14 +15,6 @@
     "first_seen": "2026-07-13T18:20:02.091107+00:00",
     "last_photo_count": 0
   },
-  "4997196": {
-    "zip": "48105",
-    "city": "Ann Arbor",
-    "state": "MI",
-    "name": "Mid Century, Pottery. John Deere  Tractors, TOOLS Ann Arbor Estate Sale",
-    "first_seen": "2026-07-14T09:01:03.113463+00:00",
-    "last_photo_count": 0
-  },
   "4997367": {
     "zip": "60091",
     "city": "Wilmette",
@@ -31,12 +23,28 @@
     "first_seen": "2026-07-14T09:01:03.113562+00:00",
     "last_photo_count": 0
   },
-  "4997745": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Mid Century Home in Bloomfield Hills",
-    "first_seen": "2026-07-14T09:01:03.113612+00:00",
+  "4998237": {
+    "zip": "92067",
+    "city": "Rancho Santa Fe",
+    "state": "CA",
+    "name": "Blue Waters By Appointmnt Estate Sale",
+    "first_seen": "2026-07-15T09:05:57.029246+00:00",
+    "last_photo_count": 0
+  },
+  "4999395": {
+    "zip": "90272",
+    "city": "Pacific Palisades",
+    "state": "CA",
+    "name": "Exquisite Contemporary Estate in Pacific Palisades",
+    "first_seen": "2026-07-15T09:05:57.029493+00:00",
+    "last_photo_count": 2
+  },
+  "4999821": {
+    "zip": "07920",
+    "city": "Basking Ridge",
+    "state": "NJ",
+    "name": "ONLINE AUCTION - BASKING RIDGE - NJ",
+    "first_seen": "2026-07-15T09:05:57.029554+00:00",
     "last_photo_count": 1
   }
 }
