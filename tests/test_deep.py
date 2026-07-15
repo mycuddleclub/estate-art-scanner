@@ -61,6 +61,25 @@ def test_skip_lot_attribution_hedges():
     assert not skip_lot("Afterglow by J. Smith, oil")
 
 
+def test_skip_lot_le_limited_edition():
+    from wallhunter.deep import skip_lot
+    # uppercase standalone LE / L.E. = limited edition -> skip
+    assert skip_lot("Thomas Kinkade LE Canvas 24x36")
+    assert skip_lot("Signed L.E. 45/500 Serigraph")
+    assert skip_lot("LE Bronze Sculpture 12/250")
+    assert skip_lot("Wyland L.E 88/950")
+    # French name particle (title case) must survive
+    assert not skip_lot("Le Pho Oil On Silk, Signed")
+    assert not skip_lot("Le Corbusier Style Chaise LC4")  # wait — 'style of'?
+    # ('style' alone isn't a hedge term; only the phrase 'style of' is)
+    assert not skip_lot("Henri Le Sidaner Garden Scene Watercolor")
+    # LE inside ordinary words must not match
+    assert not skip_lot("Estate Sale Oil Painting")
+    assert not skip_lot("Stolen Moments, signed oil")
+    assert not skip_lot("Ole Miss Stadium Painting")
+    assert not skip_lot("Lemon Still Life Watercolor")
+
+
 def test_skip_lot_etching():
     from wallhunter.deep import skip_lot
     assert skip_lot("Mikulas Kravjansky Signed Etching")

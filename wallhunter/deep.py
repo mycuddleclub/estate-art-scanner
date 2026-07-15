@@ -48,9 +48,17 @@ def _skip_regex(spec: str) -> re.Pattern:
 SKIP_TITLE_WORDS = _skip_regex(os.environ.get("WH_SKIP_TITLE_WORDS",
                                               _DEFAULT_SKIP))
 
+# Case-SENSITIVE standalone tokens: "LE" / "L.E." = limited edition (per
+# Daniel), but only uppercase and free-standing — "Le Pho" and "Le Corbusier"
+# are name particles (title case) and sale/stolen/lemon never match because
+# the token may not touch other letters.
+SKIP_CASE_TOKENS = re.compile(
+    r"(?<![A-Za-z])(?:LE|L\.E\.?)(?![A-Za-z])")
+
 
 def skip_lot(title: str) -> bool:
-    return bool(SKIP_TITLE_WORDS.search(title or ""))
+    t = title or ""
+    return bool(SKIP_TITLE_WORDS.search(t) or SKIP_CASE_TOKENS.search(t))
 
 
 ART_SIGNAL = re.compile(
