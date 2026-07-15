@@ -78,7 +78,7 @@ def send_exclusives_email(exclusives: list[dict] | None,
     if deep_stats:
         # always show the tally, so "checked, nothing found" is visibly
         # different from "didn't check"
-        deep_html = (
+        deep_html += (
             f"<p style='background:#f0fdf4;border:1px solid #86efac;"
             f"border-radius:8px;padding:8px 14px'>&#127919; <b>Deep scan:</b>"
             f" {deep_stats.get('auctions', 0)} auctions &middot;"
