@@ -127,7 +127,7 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 3.0,
     hibid = sorted((a for a in exclusives if a["platform"] == "hibid"),
                    key=lambda a: (0 if is_art_signal(a) else 1,
                                   a.get("ends") or "9999"))
-    hibid = hibid[:max_auctions or 25]
+    hibid = hibid[:max_auctions or 75]
     meter = CostMeter(research_cap_usd)
     flagged = []
     budget_left = True
