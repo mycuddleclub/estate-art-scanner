@@ -121,7 +121,7 @@ def _process_sale(conn, sale_id: int, meter: CostMeter) -> dict:
             "capped": bool(s1["skipped_cost"] or s2["skipped_cost"])}
 
 
-def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
+def run_auto(conn, max_new: int = 50, daily_cap: float = 5.0,
              per_sale_cap: float | None = None, email: bool = True) -> None:
     import os
     os.environ.setdefault("ANTHROPIC_API_KEY", anthropic_api_key())

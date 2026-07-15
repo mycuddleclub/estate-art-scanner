@@ -239,7 +239,7 @@ def main():
     p.set_defaults(fn=cmd_favorite)
 
     p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")
-    p.add_argument("--max-new", type=int, default=2)
+    p.add_argument("--max-new", type=int, default=50)
     p.add_argument("--daily-cap", type=float, default=10.0)
     p.add_argument("--per-sale-cap", type=float, default=None,
                    help="max spend per sale per day (default: daily-cap / 2)")
