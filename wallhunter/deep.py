@@ -214,8 +214,12 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 6.0,
     # pass 2: penny-cheap gate — only person-like names get web research;
     # product-like strings are cached tier 'none' so they never recur
     verdicts = classify_person_names(list(unknown_names.values()), meter)
-    persons = [n for n, ok in verdicts.items() if ok]
-    rejected = [n for n, ok in verdicts.items() if not ok]
+    persons = [n for n, ok in verdicts.items() if ok is True]
+    rejected = [n for n, ok in verdicts.items() if ok is False]
+    deferred = sum(1 for ok in verdicts.values() if ok is None)
+    if deferred:
+        print(f"  deep: {deferred} names unclassified (batch failures)"
+              " — deferred to next run")
     for n in rejected:
         conn.execute(
             "INSERT OR IGNORE INTO artists (artist_key, artist, source, tier,"

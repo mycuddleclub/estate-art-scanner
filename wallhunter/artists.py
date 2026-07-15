@@ -126,29 +126,45 @@ Strings:
 Reply with ONLY lines like "1:P" or "2:X", one per string."""
 
 
-def classify_person_names(names: list[str], meter: CostMeter) -> dict[str, bool]:
-    """Batch Haiku gate before spending web-research money. Fail-open (treat
-    as person) so a classifier outage can't silently drop real artists."""
+def classify_person_names(names: list[str], meter: CostMeter) -> dict[str, bool | None]:
+    """Batch Haiku gate before spending web-research money.
+
+    Returns True (person-like), False (product-like), or None (unclassified —
+    the batch failed even after retry). Callers must treat None as DEFER, not
+    research: live incident 2026-07-14, 73 rapid batches rate-limited, the
+    old fail-open flooded ~3,400 unfiltered names into capped research."""
+    import time as _time
     if not names:
         return {}
     client = anthropic.Anthropic()
-    numbered = "\n".join(f"{i+1}. {n}" for i, n in enumerate(names))
-    try:
-        resp = client.messages.create(
-            model=CLASSIFY_MODEL, max_tokens=800,
-            messages=[{"role": "user",
-                       "content": CLASSIFY_PROMPT.format(numbered=numbered)}])
-        meter.add(CLASSIFY_MODEL, resp.usage)
-        txt = "".join(b.text for b in resp.content
-                      if getattr(b, "type", "") == "text")
-        verdicts = dict(re.findall(r"(\d+)\s*:\s*([PX])", txt.upper()))
-        return {n: verdicts.get(str(i + 1), "P") == "P"
-                for i, n in enumerate(names)}
-    except CostCapExceeded:
-        raise
-    except Exception as e:
-        print(f"   name classifier failed ({str(e)[:80]}) — failing open")
-        return {n: True for n in names}
+    out: dict[str, bool | None] = {}
+    for start in range(0, len(names), 50):
+        batch = names[start:start + 50]
+        numbered = "\n".join(f"{i+1}. {n}" for i, n in enumerate(batch))
+        verdicts = None
+        for attempt in range(3):
+            try:
+                resp = client.messages.create(
+                    model=CLASSIFY_MODEL, max_tokens=800,
+                    messages=[{"role": "user",
+                               "content": CLASSIFY_PROMPT.format(numbered=numbered)}])
+                meter.add(CLASSIFY_MODEL, resp.usage)
+                txt = "".join(b.text for b in resp.content
+                              if getattr(b, "type", "") == "text")
+                verdicts = dict(re.findall(r"(\d+)\s*:\s*([PX])", txt.upper()))
+                break
+            except CostCapExceeded:
+                raise
+            except Exception as e:
+                if attempt == 2:
+                    print(f"   classifier batch @{start} failed 3x"
+                          f" ({str(e)[:60]}) — deferring {len(batch)} names")
+                else:
+                    _time.sleep(3 * (attempt + 1))  # 429s: back off and retry
+        for i, n in enumerate(batch):
+            out[n] = (verdicts.get(str(i + 1), "P") == "P") if verdicts else None
+        _time.sleep(0.5)  # pace the batches; 73 back-to-back triggered 429s
+    return out
 
 
 RESEARCH_PROMPT = """Research the artist "{name}". Search auction records and market
