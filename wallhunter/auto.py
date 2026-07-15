@@ -189,12 +189,18 @@ def run_auto(conn, max_new: int = 2, daily_cap: float = 5.0,
     unfinished = [r["id"] for r in conn.execute(
         "SELECT DISTINCT s.id FROM sales s WHERE s.platform='estatesales.net' AND ("
         " EXISTS (SELECT 1 FROM photos p WHERE p.sale_id=s.id"
-        "         AND p.stage1_status IN ('pending','skipped_cost'))"
-        " OR EXISTS (SELECT 1 FROM works w WHERE w.sale_id=s.id AND w.status='queued'))")]
+        "         AND p.stage1_status IN ('pending','skipped_cost','failed'))"
+        " OR EXISTS (SELECT 1 FROM works w WHERE w.sale_id=s.id"
+        "            AND w.status IN ('queued','failed')))")]
     budget_ok = True
     for sid in unfinished:
+        # re-queue cost-capped AND failed items — 'failed' is usually a
+        # transient network/API error (e.g. internet outage mid-run)
         conn.execute("UPDATE photos SET stage1_status='pending'"
-                     " WHERE sale_id=? AND stage1_status='skipped_cost'", (sid,))
+                     " WHERE sale_id=? AND stage1_status IN"
+                     " ('skipped_cost','failed')", (sid,))
+        conn.execute("UPDATE works SET status='queued'"
+                     " WHERE sale_id=? AND status='failed'", (sid,))
         conn.commit()
         print(f"== resuming sale {sid} ==")
         budget_ok = process_with_slice(sid)

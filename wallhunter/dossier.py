@@ -115,7 +115,11 @@ def research_sale_identity(conn, sale_id: int, meter: CostMeter) -> str | None:
     except CostCapExceeded:
         raise  # budget stop must propagate, not be recorded as a verdict
     except Exception as e:
-        evidence = f"research failed: {str(e)[:150]}"
+        # transient failure: leave identity_verdict NULL so a later run
+        # retries, instead of caching a useless 'unknown'
+        print(f"   identity research for '{name}' failed transiently"
+              f" ({str(e)[:80]}) — will retry")
+        return None
 
     is_notable = verdict in NOTABLE and confidence in ("high", "medium")
     conn.execute(

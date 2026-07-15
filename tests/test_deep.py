@@ -182,6 +182,24 @@ def test_research_artist_propagates_cost_cap(conn, monkeypatch):
     assert artists.lookup(conn, "Someone New") is None
 
 
+def test_research_transient_failure_not_cached(conn, monkeypatch):
+    """Network outages must not poison the artist store with failure rows."""
+    import pytest
+    from wallhunter import artists
+    from wallhunter.config import CostMeter
+
+    class FakeClient:
+        class messages:
+            @staticmethod
+            def create(**kw):
+                raise ConnectionError("network is down")
+
+    monkeypatch.setattr(artists.anthropic, "Anthropic", lambda: FakeClient)
+    with pytest.raises(ConnectionError):
+        artists.research_artist(conn, "Jane Outage", CostMeter(5.0))
+    assert artists.lookup(conn, "Jane Outage") is None  # nothing cached
+
+
 def test_import_checker_cache_shape(conn, tmp_path, monkeypatch):
     from wallhunter import artists
     fake = {"entries": {

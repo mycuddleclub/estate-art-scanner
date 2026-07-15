@@ -217,7 +217,12 @@ def research_artist(conn, name: str, meter: CostMeter):
         # a "failed research" result (that swallowed the cap: live $8.96
         # spend against a $1.50 cap on 2026-07-14)
     except Exception as e:
-        evidence = f"research failed: {str(e)[:120]}"
+        # transient failure (network outage, API error): do NOT cache a
+        # verdict — leave the name unknown so it's researched properly on a
+        # later run. Caching failures poisoned 37 names on 2026-07-14.
+        print(f"   research of '{name}' failed transiently ({str(e)[:80]})"
+              " — will retry on a future run")
+        raise
     conn.execute(
         "INSERT OR REPLACE INTO artists (artist_key, artist, source, tier,"
         " market_high_usd, market_note, evidence, researched_at)"
