@@ -111,6 +111,10 @@ MIGRATIONS = [
         market_note TEXT,
         evidence TEXT,
         researched_at TEXT)""",
+    """CREATE TABLE IF NOT EXISTS favorite_houses (
+        fragment TEXT PRIMARY KEY,      -- case-insensitive substring of house name
+        note TEXT,
+        added_at TEXT)""",
     """CREATE TABLE IF NOT EXISTS deep_auctions (
         sale_url TEXT PRIMARY KEY,
         house TEXT, title TEXT, ends TEXT,

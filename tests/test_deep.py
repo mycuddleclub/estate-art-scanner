@@ -61,6 +61,48 @@ def test_skip_lot_attribution_hedges():
     assert not skip_lot("Afterglow by J. Smith, oil")
 
 
+def test_skip_lot_etching():
+    from wallhunter.deep import skip_lot
+    assert skip_lot("Mikulas Kravjansky Signed Etching")
+    assert skip_lot("Pair of etchings, framed")
+    assert not skip_lot("Oil sketch of fishing boats")
+
+
+def test_favorites_matching(conn):
+    from wallhunter.favorites import (add_favorite, find_favorite_auctions,
+                                      match_favorite)
+    add_favorite(conn, "caplan", "consistently good art")
+    frags = ["caplan"]
+    assert match_favorite("Caplan's Auction Company", frags) == "caplan"
+    assert match_favorite("CAPLANS AUCTION", frags) == "caplan"
+    assert match_favorite("Empire Furniture", frags) is None
+    auctions = [
+        {"platform": "hibid", "house": "Caplan's Auction Company",
+         "title": "Online Auction", "url": "u1", "ends": "2026-07-22"},
+        {"platform": "hibid", "house": "Other House", "title": "x",
+         "url": "u2", "ends": "2026-07-16"},
+    ]
+    got = find_favorite_auctions(conn, auctions)
+    assert len(got) == 1 and got[0]["url"] == "u1"
+
+
+def test_unscanned_candidates_favorites_first(conn):
+    from wallhunter.deep import unscanned_candidates
+    from wallhunter.favorites import add_favorite
+    add_favorite(conn, "caplan")
+    exclusives = [
+        {"platform": "hibid", "url": "a", "title": "Fine Art Sale",
+         "house": "Gallery A", "ends": "2026-07-16"},
+        {"platform": "hibid", "url": "b", "title": "Weekly Sale",
+         "house": "Caplan's Auction Company", "ends": "2026-07-25"},
+        {"platform": "hibid", "url": "c", "title": "Grand Mix",
+         "house": "Liquidators", "ends": "2026-07-15"},
+    ]
+    got = [x["url"] for x in unscanned_candidates(conn, exclusives)]
+    # favorite (even ending latest) > art-signal > tail
+    assert got == ["b", "a", "c"]
+
+
 def test_unscanned_candidates_watermark(conn):
     from wallhunter import db as wdb
     from wallhunter.deep import unscanned_candidates

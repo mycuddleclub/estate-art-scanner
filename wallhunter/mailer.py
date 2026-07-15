@@ -56,7 +56,8 @@ def _work_row(w) -> str:
 
 def send_exclusives_email(exclusives: list[dict] | None,
                           deep_flags: list[dict] | None = None,
-                          deep_stats: dict | None = None) -> bool:
+                          deep_stats: dict | None = None,
+                          favorites: list[dict] | None = None) -> bool:
     """exclusives=None -> flags-only email (no calendar section)."""
     """Standalone Off-Radar Auctions email (separate program from the
     estate-sale digest, per Daniel's request)."""
@@ -66,6 +67,18 @@ def send_exclusives_email(exclusives: list[dict] | None,
         return False
     e = lambda s: html.escape(str(s or ""))
     deep_html = ""
+    if favorites:
+        rows = "".join(
+            f"<li style='margin:5px 0'><b>{e(a['house'])}</b> — "
+            f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
+            f" <span style='color:#78716c'>{e(a.get('info', ''))}</span></li>"
+            for a in favorites)
+        deep_html += (
+            f"<div style='background:#fdf4ff;border:2px solid #a855f7;"
+            f"border-radius:8px;padding:10px 14px;margin:0 0 8px'>"
+            f"&#11088; <b>FAVORITE HOUSES have {len(favorites)} auction(s)"
+            f" in the window:</b><ul style='margin:6px 0 0;padding-left:18px'>"
+            f"{rows}</ul></div>")
     if deep_stats and deep_stats.get("capped"):
         deep_html += (
             f"<div style='background:#fffbeb;border:2px solid #f59e0b;"

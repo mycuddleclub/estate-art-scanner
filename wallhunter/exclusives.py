@@ -263,7 +263,11 @@ def _load_cache() -> dict | None:
     return None
 
 
-def find_exclusives(force_refresh: bool = False) -> list[dict]:
+def find_exclusives(force_refresh: bool = False,
+                    with_all: bool = False):
+    """Returns exclusives; with_all=True returns (exclusives, all_auctions)
+    where all_auctions is the full pre-diff harvest (favorites matching needs
+    it — a favorite house counts even when it's also on LA)."""
     from playwright.sync_api import sync_playwright
     from .blocklist import blocked_match
 
@@ -313,4 +317,4 @@ def find_exclusives(force_refresh: bool = False) -> list[dict]:
     exclusives.sort(key=lambda a: a.get("ends") or "9999")
     print(f"exclusives: {len(exclusives)}/{len(auctions)} auctions are"
           " off-LA/Invaluable, non-junk, non-blocked")
-    return exclusives
+    return (exclusives, auctions) if with_all else exclusives

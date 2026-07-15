@@ -78,7 +78,13 @@ def cmd_report(conn, args):
 
 def cmd_exclusives(conn, args):
     from .exclusives import find_exclusives
-    exclusives = find_exclusives(force_refresh=args.refresh)
+    from .favorites import find_favorite_auctions
+    exclusives, all_auctions = find_exclusives(force_refresh=args.refresh,
+                                               with_all=True)
+    favorites = find_favorite_auctions(conn, all_auctions)
+    for a in favorites:
+        print(f"⭐ FAVORITE: {a['house']} — {a['title']}  {a.get('info','')}\n"
+              f"    {a['url']}")
     for a in exclusives:
         print(f"[{a['platform']}] {a['house']} — {a['title']}"
               f"{'  (' + a['info'] + ')' if a['info'] else ''}\n    {a['url']}")
@@ -114,10 +120,26 @@ def cmd_exclusives(conn, args):
     if args.email:
         from .mailer import send_exclusives_email
         if send_exclusives_email(exclusives, deep_flags=deep_flags,
-                                 deep_stats=deep_stats) and deep_flags:
+                                 deep_stats=deep_stats,
+                                 favorites=favorites) and deep_flags:
             conn.execute("UPDATE deep_lots SET emailed=1"
                          " WHERE emailed=0 AND info != ''")
             conn.commit()
+
+
+def cmd_favorite(conn, args):
+    from .favorites import add_favorite, favorite_fragments, remove_favorite
+    if args.remove:
+        n = remove_favorite(conn, args.remove)
+        print(f"removed {n} entry")
+    elif args.fragment:
+        add_favorite(conn, args.fragment, args.note)
+        print(f"added favorite fragment: {args.fragment.lower()!r}")
+    for r in conn.execute("SELECT fragment, note, added_at FROM favorite_houses"
+                          " ORDER BY fragment"):
+        print(f"  ⭐ {r['fragment']:<30} {r['note'] or ''}")
+    if not favorite_fragments(conn):
+        print("  (no favorites yet)")
 
 
 def cmd_auto(conn, args):
@@ -185,6 +207,13 @@ def main():
                    help="max USD for researching new artist names")
     p.add_argument("--max-auctions", type=int, default=None)
     p.set_defaults(fn=cmd_exclusives)
+
+    p = sub.add_parser("favorite", help="manage favorite auction houses (greenlist)")
+    p.add_argument("fragment", nargs="?", help="house-name fragment to add")
+    p.add_argument("--note", default="", help="why this house is good")
+    p.add_argument("--remove", metavar="FRAGMENT")
+    p.add_argument("--list", action="store_true", dest="list_all")
+    p.set_defaults(fn=cmd_favorite)
 
     p = sub.add_parser("auto", help="morning batch: resume + new watchlist sales + digest")
     p.add_argument("--max-new", type=int, default=2)

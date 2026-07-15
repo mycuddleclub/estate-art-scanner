@@ -30,7 +30,7 @@ import os
 # not actually by the artist — flagging them against the artist's market
 # would be exactly wrong). Terms ending in * match stems (print* -> prints,
 # printed); plain terms match exact words (after != afternoon).
-_DEFAULT_SKIP = ("print*,giclee*,poster*,reproduction*,"
+_DEFAULT_SKIP = ("print*,giclee*,poster*,reproduction*,etching*,"
                  "attributed to,after,manner of,school of,style of,"
                  "circle of,follower of")
 
@@ -150,13 +150,18 @@ SAFETY_CEILING = 400  # bounds a runaway night, not a quota
 
 def unscanned_candidates(conn, exclusives: list[dict]) -> list[dict]:
     """Watermark selection (unit-tested): HiBid auctions in the window not
-    yet in deep_auctions, art-signal houses first, then soonest-ending."""
+    yet in deep_auctions — favorite houses first, then art-signal houses,
+    then the tail; soonest-ending within each band."""
+    from .favorites import favorite_fragments, match_favorite
+    frags = favorite_fragments(conn)
     candidates = [a for a in exclusives if a["platform"] == "hibid"
                   and not conn.execute(
                       "SELECT 1 FROM deep_auctions WHERE sale_url=?",
                       (a["url"],)).fetchone()]
-    candidates.sort(key=lambda a: (0 if is_art_signal(a) else 1,
-                                   a.get("ends") or "9999"))
+    candidates.sort(key=lambda a: (
+        0 if match_favorite(a.get("house"), frags) else
+        (1 if is_art_signal(a) else 2),
+        a.get("ends") or "9999"))
     return candidates
 
 
