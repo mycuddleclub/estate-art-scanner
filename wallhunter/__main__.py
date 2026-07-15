@@ -135,16 +135,31 @@ def cmd_exclusives(conn, args):
 
 
 def cmd_favorite(conn, args):
+    import re as _re
+
     from .favorites import add_favorite, favorite_fragments, remove_favorite
     if args.remove:
         n = remove_favorite(conn, args.remove)
         print(f"removed {n} entry")
     elif args.fragment:
-        add_favorite(conn, args.fragment, args.note)
-        print(f"added favorite fragment: {args.fragment.lower()!r}")
-    for r in conn.execute("SELECT fragment, note, added_at FROM favorite_houses"
-                          " ORDER BY fragment"):
-        print(f"  ⭐ {r['fragment']:<30} {r['note'] or ''}")
+        # accept a pasted <house>.hibid.com URL: derive subdomain + fragment
+        m = _re.search(r"(?:https?://)?([a-z0-9-]+)\.hibid\.com", args.fragment)
+        if m:
+            sub_domain = m.group(1)
+            frag = _re.sub(r"(auction|auctions|gallery|co)$", "", sub_domain)\
+                .strip("-") or sub_domain
+            add_favorite(conn, frag, args.note, subdomain=sub_domain)
+            print(f"added favorite: fragment {frag!r},"
+                  f" subdomain {sub_domain}.hibid.com")
+        else:
+            add_favorite(conn, args.fragment, args.note)
+            print(f"added favorite fragment: {args.fragment.lower()!r}"
+                  " (no subdomain — matching by name only; paste their"
+                  " <house>.hibid.com URL to enable direct harvesting)")
+    for r in conn.execute("SELECT fragment, note, subdomain FROM"
+                          " favorite_houses ORDER BY fragment"):
+        sub_txt = f" [{r['subdomain']}.hibid.com]" if r["subdomain"] else ""
+        print(f"  ⭐ {r['fragment']:<24}{sub_txt} {r['note'] or ''}")
     if not favorite_fragments(conn):
         print("  (no favorites yet)")
 
@@ -216,7 +231,8 @@ def main():
     p.set_defaults(fn=cmd_exclusives)
 
     p = sub.add_parser("favorite", help="manage favorite auction houses (greenlist)")
-    p.add_argument("fragment", nargs="?", help="house-name fragment to add")
+    p.add_argument("fragment", nargs="?",
+                   help="house-name fragment, or a <house>.hibid.com URL")
     p.add_argument("--note", default="", help="why this house is good")
     p.add_argument("--remove", metavar="FRAGMENT")
     p.add_argument("--list", action="store_true", dest="list_all")

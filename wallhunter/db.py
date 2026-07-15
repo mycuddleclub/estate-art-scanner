@@ -102,6 +102,7 @@ MIGRATIONS = [
     "ALTER TABLE sales ADD COLUMN identity_verdict TEXT",
     "ALTER TABLE sales ADD COLUMN identity_evidence TEXT",
     "ALTER TABLE photos ADD COLUMN lot_text TEXT",
+    "ALTER TABLE favorite_houses ADD COLUMN subdomain TEXT",
     """CREATE TABLE IF NOT EXISTS artists (
         artist_key TEXT PRIMARY KEY,
         artist TEXT NOT NULL,

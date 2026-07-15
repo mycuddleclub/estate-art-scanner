@@ -33,28 +33,59 @@ def find_favorite_auctions(conn, auctions: list[dict]) -> list[dict]:
     return out
 
 
+_SUBDOMAIN_Q = """query { auctionSearch(input: {status: OPEN},
+  pageNumber: 1, pageLength: 100) { pagedResults {
+    results { auction { id eventName eventDateBegin eventDateEnd
+                        auctioneer { name } } } } } }"""
+
+
 def harvest_favorites(conn) -> list[dict]:
-    """Dedicated per-fragment HiBid search: the main harvest queries 'art',
-    which a favorite's auction title may not contain (e.g. 'Caplans Online
-    Auction 4/22'). One cheap GraphQL query per favorite guarantees their
-    auctions are always seen."""
-    from .exclusives import harvest_hibid
-    frags = favorite_fragments(conn)
+    """Every favorite house's OPEN auctions, via its HiBid subdomain GraphQL
+    (Host-scoped to the house — no 'art' query, no 14-day window: a favorite
+    gets flagged whenever it has anything at all)."""
+    import requests
+
+    from .exclusives import UA
     found: dict[str, dict] = {}
-    for frag in frags:
+    rows = conn.execute("SELECT fragment, subdomain FROM favorite_houses"
+                        " WHERE subdomain IS NOT NULL").fetchall()
+    for r in rows:
         try:
-            for a in harvest_hibid(query=frag):
-                if match_favorite(a.get("house"), [frag]):
-                    found[a["url"]] = a
+            resp = requests.post(
+                f"https://{r['subdomain']}.hibid.com/graphql", timeout=30,
+                headers={"User-Agent": UA, "Content-Type": "application/json"},
+                json={"query": _SUBDOMAIN_Q})
+            resp.raise_for_status()
+            results = (resp.json()["data"]["auctionSearch"]["pagedResults"]
+                       or {}).get("results", [])
         except Exception as e:
-            print(f"favorite harvest '{frag}' failed: {str(e)[:80]}")
+            print(f"favorite '{r['fragment']}' subdomain harvest failed:"
+                  f" {str(e)[:80]}")
+            continue
+        for res in results:
+            a = res.get("auction") or {}
+            if not a.get("id"):
+                continue
+            ends = (a.get("eventDateEnd") or "")[:10]
+            found[f"https://hibid.com/catalog/{a['id']}/_"] = {
+                "platform": "hibid",
+                "title": (a.get("eventName") or "").strip()[:120],
+                "house": ((a.get("auctioneer") or {}).get("name")
+                          or r["fragment"]).strip()[:80],
+                "url": f"https://hibid.com/catalog/{a['id']}/_",
+                "info": f"ends {ends}" if ends else "",
+                "ends": a.get("eventDateEnd"),
+            }
     return list(found.values())
 
 
-def add_favorite(conn, fragment: str, note: str = "") -> None:
+def add_favorite(conn, fragment: str, note: str = "",
+                 subdomain: str | None = None) -> None:
     conn.execute(
-        "INSERT OR REPLACE INTO favorite_houses (fragment, note, added_at)"
-        " VALUES (?,?,?)", (fragment.strip().lower(), note, db.now()))
+        "INSERT OR REPLACE INTO favorite_houses (fragment, note, subdomain,"
+        " added_at) VALUES (?,?,?,?)",
+        (fragment.strip().lower(), note,
+         (subdomain or "").strip().lower() or None, db.now()))
     conn.commit()
 
 
