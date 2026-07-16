@@ -30,7 +30,7 @@ import os
 # not actually by the artist — flagging them against the artist's market
 # would be exactly wrong). Terms ending in * match stems (print* -> prints,
 # printed); plain terms match exact words (after != afternoon).
-_DEFAULT_SKIP = ("print*,giclee*,poster*,reproduction*,etching*,"
+_DEFAULT_SKIP = ("print*,giclee*,poster*,reproduction*,etching*,litho*,"
                  "attributed to,after,manner of,school of,style of,"
                  "circle of,follower of")
 

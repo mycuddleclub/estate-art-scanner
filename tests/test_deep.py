@@ -87,6 +87,15 @@ def test_skip_lot_etching():
     assert not skip_lot("Oil sketch of fishing boats")
 
 
+def test_skip_lot_litho():
+    from wallhunter.deep import skip_lot
+    assert skip_lot("Signed Chagall Lithograph 45/300")
+    assert skip_lot("Litho after Miro")
+    assert skip_lot("Color lithography exhibition piece")
+    assert not skip_lot("Oil painting, lithe figure study")
+    assert not skip_lot("Monolith Desert Landscape, signed")
+
+
 def test_favorites_matching(conn):
     from wallhunter.favorites import (add_favorite, find_favorite_auctions,
                                       match_favorite)
