@@ -79,6 +79,24 @@ def test_institutional_flag_reason():
     assert institutional_flag_reason(None, {"high_bid_usd": None}) is None
 
 
+def test_awards_grant_strong_standing():
+    from wallhunter.authority import institutional_standing
+    assert institutional_standing({"museum_count": 0, "aaa_papers": 0,
+                                   "awards": ["Guggenheim Fellow"]}) == "strong"
+    # historic sales are evidence only — never standing on their own
+    assert institutional_standing({"museum_count": 0, "aaa_papers": 0,
+                                   "awards": [], "historic_sales": 40}) is None
+
+
+def test_describe_includes_awards_and_history():
+    from wallhunter.authority import describe
+    s = describe({"museums": ["moma"], "aaa_papers": 0,
+                  "awards": ["Guggenheim Fellow"], "historic_sales": 12,
+                  "birth_year": 1940, "death_year": None})
+    assert "MoMA" in s and "Guggenheim Fellow" in s
+    assert "12 historic auction records" in s and "(1940-)" in s
+
+
 def test_lookup_neutral_on_missing_db(tmp_path):
     """Empty library must be neutral: lookups return None, no exceptions."""
     from wallhunter import authority

@@ -57,6 +57,19 @@ CREATE TABLE IF NOT EXISTS sources_meta (
   records INTEGER,
   note TEXT
 );
+
+CREATE TABLE IF NOT EXISTS market_history (
+  artist_id INTEGER NOT NULL REFERENCES artists_authority(id),
+  source TEXT NOT NULL,
+  records INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(artist_id, source)
+);
+
+CREATE TABLE IF NOT EXISTS distinctions (
+  artist_id INTEGER NOT NULL REFERENCES artists_authority(id),
+  distinction TEXT NOT NULL,
+  UNIQUE(artist_id, distinction)
+);
 """
 
 # Institutions whose holdings count toward the "major museum" signal.
@@ -190,6 +203,11 @@ def lookup(conn, name: str) -> dict | None:
     a["museums"] = [h["institution"] for h in hold]
     a["museum_count"] = sum(1 for h in hold if h["institution"] in MAJOR_MUSEUMS)
     a["works_held"] = sum(h["works"] for h in hold)
+    a["awards"] = [r["distinction"] for r in conn.execute(
+        "SELECT distinction FROM distinctions WHERE artist_id=?", (a["id"],))]
+    a["historic_sales"] = (conn.execute(
+        "SELECT SUM(records) s FROM market_history WHERE artist_id=?",
+        (a["id"],)).fetchone()["s"]) or 0
     a["ambiguous"] = len(rows) > 1
     return a
 
@@ -197,13 +215,18 @@ def lookup(conn, name: str) -> dict | None:
 def institutional_standing(auth: dict | None) -> str | None:
     """Pure (unit-tested): map authority info to a flag-worthiness tier.
 
-    'strong'  — AAA papers, or work in >=3 major museums
+    'strong'  — AAA papers, a major distinction (Guggenheim/MacArthur/
+                biennial), or work in >=3 major museums
     'listed'  — work in >=1 major museum
     None      — no institutional standing (NEUTRAL: not a negative signal)
+
+    Historic sales records (Getty Provenance Index) are evidence, not
+    standing: they enrich descriptions but never flag on their own.
     """
     if not auth:
         return None
-    if auth.get("aaa_papers") or auth.get("museum_count", 0) >= 3:
+    if auth.get("aaa_papers") or auth.get("museum_count", 0) >= 3 \
+            or auth.get("awards"):
         return "strong"
     if auth.get("museum_count", 0) >= 1:
         return "listed"
@@ -223,6 +246,11 @@ def describe(auth: dict) -> str:
         bits.append("in " + ", ".join(names.get(m, m) for m in shown))
     if auth.get("aaa_papers"):
         bits.append("papers at Archives of American Art")
+    for aw in (auth.get("awards") or [])[:3]:
+        bits.append(aw)
+    if auth.get("historic_sales"):
+        bits.append(f"{auth['historic_sales']} historic auction records"
+                    " (Getty PI)")
     life = ""
     if auth.get("birth_year"):
         life = f" ({auth['birth_year']}-{auth.get('death_year') or ''})"

@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import tarfile
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
@@ -390,6 +391,141 @@ def import_si_unit(conn, unit: str, aaa=False, force=False):
     _record(conn, source, n)
 
 
+# ------------------------------------------------- Getty Provenance Index
+
+GPI_BASE = ("https://jpgt-or-prd-provenance-index-csv.s3.us-west-2"
+            ".amazonaws.com/")
+GPI_FILES = ([f"sales_catalogs/sales_contents_{i}.csv" for i in range(1, 14)]
+             + ["knoedler/knoedler.csv", "goupil/goupil.csv"])
+ATTRIB_HEDGE = re.compile(
+    r"copy|school|circle|manner|after|imitator|follower|style|attributed",
+    re.I)
+
+
+def import_provenance(conn, force=False):
+    """Historic auction/stockbook records (1650-1945): count per artist,
+    joined by ULAN id when present, else by authority name. Rows with
+    attribution hedges ('school of', 'copy after'...) are not counted."""
+    import codecs
+    if _done(conn, "getty-pi", force):
+        return
+    by_ulan: dict[str, int] = {}
+    by_name: dict[str, tuple[str, int]] = {}
+    for path in GPI_FILES:
+        try:
+            resp = urllib.request.urlopen(GPI_BASE + path, timeout=600)
+            reader = csv.DictReader(codecs.iterdecode(resp, "utf-8",
+                                                      errors="replace"))
+            cols = [c for c in (reader.fieldnames or [])
+                    if re.match(r"art(ist)?_authority_\d+$", c)]
+            n_rows = 0
+            for row in reader:
+                for col in cols:
+                    idx = col.rsplit("_", 1)[1]
+                    hedge = (row.get(f"attrib_mod_auth_{idx}") or "") + \
+                        (row.get(f"attrib_mod_{idx}") or "")
+                    if hedge and ATTRIB_HEDGE.search(hedge):
+                        continue
+                    ulan = (row.get(f"artist_ulan_{idx}") or "").strip()
+                    if ulan and re.match(r"\d{9}$", ulan):
+                        by_ulan[ulan] = by_ulan.get(ulan, 0) + 1
+                        continue
+                    name = clean_person_name(row.get(col) or "")
+                    if name:
+                        k = name.lower()
+                        by_name[k] = (name, by_name.get(k, ("", 0))[1] + 1)
+                n_rows += 1
+            print(f"    getty-pi: {path.split('/')[-1]}: {n_rows:,} rows",
+                  flush=True)
+        except Exception as e:
+            print(f"    getty-pi: {path} failed ({str(e)[:70]}) — continuing",
+                  flush=True)
+    n = 0
+    for ulan, cnt in by_ulan.items():
+        row = conn.execute("SELECT id FROM artists_authority WHERE ulan_id=?",
+                           (ulan,)).fetchone()
+        if row:
+            conn.execute(
+                "INSERT INTO market_history (artist_id, source, records)"
+                " VALUES (?,?,?) ON CONFLICT(artist_id, source)"
+                " DO UPDATE SET records=records+excluded.records",
+                (row["id"], "getty-pi", cnt))
+            n += 1
+    for name, cnt in by_name.values():
+        aid = authority.upsert_artist(conn, name, "getty-pi")
+        if aid:
+            conn.execute(
+                "INSERT INTO market_history (artist_id, source, records)"
+                " VALUES (?,?,?) ON CONFLICT(artist_id, source)"
+                " DO UPDATE SET records=records+excluded.records",
+                (aid, "getty-pi", cnt))
+            n += 1
+    conn.commit()
+    _record(conn, "getty-pi", n,
+            f"ulan-joined={len(by_ulan):,} name-joined={len(by_name):,}")
+
+
+# ------------------------------------------------- Wikidata distinctions
+
+WDQS = "https://query.wikidata.org/sparql"
+WD_UA = "WilliamsArtReferenceLibrary/1.0 (williamsdaniel85@gmail.com)"
+VISUAL_OCCS = ("wd:Q1028181 wd:Q1281618 wd:Q33231 wd:Q483501 wd:Q10862983"
+               " wd:Q3391743 wd:Q21550489 wd:Q17505902")
+_EDITION = "((wdt:P179|wdt:P361|wdt:P31)?)"  # person -> edition -> series
+AWARD_SPECS = [
+    ("Guggenheim Fellow", "?p wdt:P166 wd:Q1316544 ."),
+    ("MacArthur Fellow", "?p wdt:P166 wd:Q1543268 ."),
+    ("Venice Biennale", f"?p wdt:P1344/{_EDITION} wd:Q205751 ."),
+    ("Whitney Biennial", f"?p wdt:P1344/{_EDITION} wd:Q677294 ."),
+]
+
+
+def _wdqs(query: str) -> list[dict]:
+    url = WDQS + "?" + urllib.parse.urlencode(
+        {"format": "json", "query": query})
+    req = urllib.request.Request(url, headers={"User-Agent": WD_UA})
+    data = json.load(urllib.request.urlopen(req, timeout=180))
+    return data["results"]["bindings"]
+
+
+def import_wikidata_awards(conn, force=False):
+    if _done(conn, "wikidata-awards", force):
+        return
+    n = 0
+    for label, pattern in AWARD_SPECS:
+        q = f"""SELECT DISTINCT ?p ?pLabel ?b ?d WHERE {{
+          {pattern}
+          ?p wdt:P106 ?occ . VALUES ?occ {{ {VISUAL_OCCS} }}
+          OPTIONAL {{ ?p wdt:P569 ?b }} OPTIONAL {{ ?p wdt:P570 ?d }}
+          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en" }}
+        }} LIMIT 30000"""
+        try:
+            rows = _wdqs(q)
+        except Exception as e:
+            print(f"    wikidata: {label} query failed ({str(e)[:70]})"
+                  " — continuing", flush=True)
+            continue
+        added = 0
+        for r in rows:
+            name = r.get("pLabel", {}).get("value", "")
+            qid = r.get("p", {}).get("value", "").rsplit("/", 1)[-1]
+            if not name or name == qid or JUNK_NAME.search(name):
+                continue  # unlabeled items come back as bare QIDs
+            aid = authority.upsert_artist(
+                conn, name, "wikidata", wikidata_qid=qid,
+                birth_year=_year(r.get("b", {}).get("value")),
+                death_year=_year(r.get("d", {}).get("value")))
+            if aid:
+                conn.execute(
+                    "INSERT OR IGNORE INTO distinctions (artist_id,"
+                    " distinction) VALUES (?,?)", (aid, label))
+                added += 1
+        conn.commit()
+        print(f"    wikidata: {label}: {added:,} artists", flush=True)
+        n += added
+    _record(conn, "wikidata-awards", n)
+
+
 # ---------------------------------------------------------------- driver
 
 def run_imports(raw_dir, sources=None, force=False):
@@ -420,6 +556,10 @@ def run_imports(raw_dir, sources=None, force=False):
         for unit in SI_ART_UNITS:
             import_si_unit(conn, unit, force=force)
         import_si_unit(conn, "aaa", aaa=True, force=force)
+    if want("gpi"):
+        import_provenance(conn, force)
+    if want("awards"):
+        import_wikidata_awards(conn, force)
     print("authority status:", authority.status(conn))
     conn.close()
 
