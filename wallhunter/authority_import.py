@@ -26,10 +26,10 @@ JUNK_NAME = re.compile(
 
 def clean_person_name(raw: str) -> str | None:
     """'Walker, William Aiken, 1838-1921 (painter)' -> 'William Aiken Walker'."""
-    s = re.sub(r"\(.*?\)", " ", raw or "")
+    s = re.sub(r"\(.*?\)|\[.*?\]", " ", raw or "")
     s = re.split(r",\s*(?:b\.|d\.|ca\.|circa|active|fl\.|\d)", s)[0]
     s = re.sub(r"\s+", " ", s).strip(" ,;")
-    if not s or JUNK_NAME.search(s):
+    if not s or JUNK_NAME.search(s) or re.search(r"\d", s):
         return None
     parts = [p.strip() for p in s.split(",") if p.strip()]
     if len(parts) >= 2:  # 'Last, First[, Suffix]' -> 'First Last Suffix'
