@@ -75,6 +75,7 @@ def is_art_signal(auction: dict) -> bool:
 
 
 _BID = re.compile(r"(?:High Bid|Current Bid)[:\s]*([\d,.]+)\s*USD", re.I)
+_REALIZED = re.compile(r"Price Realized[:\s]*([\d,.]+)\s*USD", re.I)
 _BIDS_N = re.compile(r"(\d+)\s+Bids?", re.I)
 _EST = re.compile(r"([\d,.]+\s*-\s*[\d,.]+\s*USD)", re.I)
 
@@ -102,10 +103,13 @@ _LOT_TILE_JS = """() => {
 def parse_tile(tile_text: str) -> dict:
     """Pure (unit-tested): bid, bid count, estimate from tile text."""
     bid = _BID.search(tile_text)
+    realized = _REALIZED.search(tile_text)
     bids_n = _BIDS_N.search(tile_text)
     est = _EST.search(tile_text)
     return {
         "high_bid_usd": float(bid.group(1).replace(",", "")) if bid else None,
+        "realized_usd": (float(realized.group(1).replace(",", ""))
+                         if realized else None),
         "bid_count": int(bids_n.group(1)) if bids_n else None,
         "estimate": est.group(1) if est else None,
     }
@@ -171,6 +175,16 @@ def flag_reason(artist_row, lot: dict) -> str | None:
 
 
 SAFETY_CEILING = 400  # bounds a runaway night, not a quota
+
+_PRICES_CONN = None
+
+
+def _prices_conn():
+    global _PRICES_CONN
+    if _PRICES_CONN is None:
+        from . import prices as prices_mod
+        _PRICES_CONN = prices_mod.connect()
+    return _PRICES_CONN
 
 
 def unscanned_candidates(conn, exclusives: list[dict]) -> list[dict]:
@@ -301,6 +315,15 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
                 reason += f" [{auth_lib.describe(auth)}]"
             if reason is None:
                 reason = institutional_flag_reason(auth, lot)
+            if reason:
+                # Daniel's triage datapoint: local price-DB market summary
+                from . import prices as prices_mod
+                ceiling = (row["market_high_usd"] if row
+                           and (row["tier"] or "") == "strong" else None)
+                mline = prices_mod.summary_line(prices_mod.artist_summary(
+                    _prices_conn(), claim, vetted_ceiling=ceiling))
+                if mline:
+                    reason += f" · {mline}"
             conn.execute(
                 "INSERT OR IGNORE INTO deep_lots (lot_url, sale_url, house,"
                 " title, artist_key, high_bid_usd, bid_count, estimate,"
