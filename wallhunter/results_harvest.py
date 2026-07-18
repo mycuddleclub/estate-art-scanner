@@ -166,6 +166,6 @@ def harvest_results(limit: int = 40) -> dict:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--limit", type=int, default=40)
+    ap.add_argument("--limit", type=int, default=100)
     args = ap.parse_args()
     harvest_results(args.limit)
