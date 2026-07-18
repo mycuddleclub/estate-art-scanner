@@ -125,6 +125,25 @@ def listing_artist_claim(lot_text: str | None) -> str | None:
     return None
 
 
+_AUTH_CONN = None
+
+
+def _authority_info(name: str) -> str | None:
+    """Institutional evidence for a claimed artist ('in the Met, SAAM...'),
+    or None. Never raises — a missing/empty authority.db is neutral."""
+    global _AUTH_CONN
+    try:
+        from . import authority
+        if _AUTH_CONN is None:
+            _AUTH_CONN = authority.connect()
+        a = authority.lookup(_AUTH_CONN, name)
+        if a and authority.institutional_standing(a):
+            return authority.describe(a)
+    except Exception:
+        return None
+    return None
+
+
 def _tier(score: float) -> str:
     if score >= TIER_A_MIN:
         return "A"
@@ -349,6 +368,10 @@ def run_stage2(conn, sale_id: int, meter: CostMeter, workers: int = 3) -> dict:
                 elif "listing:" not in sig_text:
                     sig_text = f"{sig_text} | {tag}"
                 score = min(10.0, score + 0.75)
+                auth_note = _authority_info(claim)
+                if auth_note:
+                    sig_text = f"{sig_text} | authority: {auth_note}"[:400]
+                    score = min(10.0, score + 0.75)
             medium = a.get("medium_guess") or {}
             period = a.get("period_guess") or {}
             from .config import WORK_CATEGORIES

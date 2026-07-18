@@ -136,6 +136,23 @@ def harvest_art_lots(browser, catalog_url: str, max_pages: int = 4) -> list[dict
     return lots
 
 
+def institutional_flag_reason(auth: dict | None, lot: dict) -> str | None:
+    """Pure (unit-tested): flag artists the museums document but the market
+    search can't see. Only 'strong' institutional standing (AAA papers or
+    work in 3+ major museums) qualifies — 'listed' alone enriches evidence
+    but doesn't flag, so common-name noise stays out of the email."""
+    from .authority import describe, institutional_standing
+    if not auth or institutional_standing(auth) != "strong":
+        return None
+    bid = lot.get("high_bid_usd")
+    if bid is None or bid <= 0:
+        return f"museum-documented artist — {describe(auth)} — no bids yet"
+    if bid <= 100:
+        return (f"museum-documented artist — {describe(auth)} — current bid"
+                f" ${bid:,.0f}")
+    return None
+
+
 def flag_reason(artist_row, lot: dict) -> str | None:
     """Pure (unit-tested): why this lot deserves attention, or None."""
     if artist_row is None or (artist_row["tier"] or "") not in FLAG_TIERS:
@@ -225,9 +242,20 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
                     unknown_names.setdefault(artist_key(name), name)
 
     # pass 2: penny-cheap gate — only person-like names get web research;
-    # product-like strings are cached tier 'none' so they never recur
+    # product-like strings are cached tier 'none' so they never recur.
+    # Names the authority library recognizes are confirmed people: they skip
+    # the classifier entirely ($0) and go straight to market research.
+    from . import authority as auth_lib
+    auth_conn = auth_lib.connect()
+    auth_confirmed: list[str] = []
+    for k in list(unknown_names):
+        if auth_lib.lookup(auth_conn, unknown_names[k]) is not None:
+            auth_confirmed.append(unknown_names.pop(k))
+    if auth_confirmed:
+        print(f"  deep: {len(auth_confirmed)} names known to the reference"
+              " library — classifier skipped")
     verdicts = classify_person_names(list(unknown_names.values()), meter)
-    persons = [n for n, ok in verdicts.items() if ok is True]
+    persons = [n for n, ok in verdicts.items() if ok is True] + auth_confirmed
     rejected = [n for n, ok in verdicts.items() if ok is False]
     deferred = sum(1 for ok in verdicts.values() if ok is None)
     if deferred:
@@ -257,23 +285,39 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
         except Exception as e:
             print(f"  deep: research of '{n}' errored ({str(e)[:60]}) — continuing")
 
-    # pass 3: flag against the (now warm) store
+    # pass 3: flag against the (now warm) store + the reference library
     for auction, lots in per_auction:
         for lot in lots:
-            row = lookup(conn, lot["claim"]) if lot.get("claim") else None
+            claim = lot.get("claim")
+            row = lookup(conn, claim) if claim else None
+            auth = auth_lib.lookup(auth_conn, claim) if claim else None
+            if row is None and auth and artist_key(auth["canonical"]) != \
+                    artist_key(claim):
+                # variant bridge: 'Walker, Wm. Aiken' -> canonical name that
+                # the market store may already know
+                row = lookup(conn, auth["canonical"])
             reason = flag_reason(row, lot) if row else None
+            if reason and auth:
+                reason += f" [{auth_lib.describe(auth)}]"
+            if reason is None:
+                reason = institutional_flag_reason(auth, lot)
             conn.execute(
                 "INSERT OR IGNORE INTO deep_lots (lot_url, sale_url, house,"
                 " title, artist_key, high_bid_usd, bid_count, estimate,"
                 " info, first_seen, emailed) VALUES (?,?,?,?,?,?,?,?,?,?,0)",
                 (lot["url"], auction["url"], auction["house"], lot["title"],
-                 row["artist_key"] if row else None, lot["high_bid_usd"],
+                 row["artist_key"] if row else
+                 (artist_key(auth["canonical"]) if auth else None),
+                 lot["high_bid_usd"],
                  lot["bid_count"], lot["estimate"], reason or "", db.now()))
             if reason:
                 flagged.append({**lot, "house": auction["house"],
-                                "artist": row["artist"], "reason": reason,
-                                "market_note": row["market_note"] or "",
-                                "evidence": (row["evidence"] or "")[:200]})
+                                "artist": row["artist"] if row else
+                                auth["canonical"], "reason": reason,
+                                "market_note": (row["market_note"] or "")
+                                if row else "",
+                                "evidence": ((row["evidence"] or "")[:200])
+                                if row else auth_lib.describe(auth)})
         conn.commit()
     stats = {
         "auctions": len(per_auction),
