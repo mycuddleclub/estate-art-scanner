@@ -115,6 +115,18 @@ def upsert_artist(conn, canonical: str, source: str, *, ulan_id=None,
     return aid
 
 
+# period-era first-name abbreviations, common in auction listings
+ABBREV = {"wm": "william", "chas": "charles", "jas": "james", "thos": "thomas",
+          "geo": "george", "jno": "john", "benj": "benjamin",
+          "saml": "samuel", "robt": "robert", "richd": "richard",
+          "edwd": "edward", "jos": "joseph", "fredk": "frederick",
+          "alex": "alexander", "hy": "henry", "eliz": "elizabeth"}
+
+
+def expand_abbrevs(key: str) -> str:
+    return " ".join(ABBREV.get(w, w) for w in key.split())
+
+
 def sorted_key(key: str) -> str:
     """Word-order-insensitive form: 'walker william aiken' for any ordering.
     Bridges 'Walker, William Aiken' (catalogs) vs 'William Aiken Walker'
@@ -153,14 +165,14 @@ def lookup(conn, name: str) -> dict | None:
     key = artist_key(name)
     if len(key) < 4 or " " not in key:
         return None
-    rows = conn.execute(
-        "SELECT a.* FROM name_variants v JOIN artists_authority a"
-        " ON a.id=v.artist_id WHERE v.variant_key=?", (key,)).fetchall()
-    if not rows:
+    rows = []
+    for k in dict.fromkeys((key, expand_abbrevs(key), sorted_key(key),
+                            sorted_key(expand_abbrevs(key)))):
         rows = conn.execute(
             "SELECT a.* FROM name_variants v JOIN artists_authority a"
-            " ON a.id=v.artist_id WHERE v.variant_key=?",
-            (sorted_key(key),)).fetchall()
+            " ON a.id=v.artist_id WHERE v.variant_key=?", (k,)).fetchall()
+        if rows:
+            break
     if not rows:
         return None
     if len(rows) > 1:
