@@ -34,6 +34,13 @@ _EXTRA_STOP = {
     "stunning", "waterfront", "lakefront", "lakeside", "ranch", "farm",
     "warehouse", "storage", "local", "large", "spectacular", "incredible",
     "packed", "loaded", "real", "multi", "big", "sale", "sales", "wonderful",
+    # months, streets, and location fragments are not people
+    "january", "february", "march", "april", "may", "june", "july",
+    "august", "september", "october", "november", "december",
+    "ave", "avenue", "street", "st", "rd", "road", "blvd", "boulevard",
+    "court", "ct", "lane", "ln", "drive", "hwy", "highway", "person",
+    "inhome", "in", "at", "on", "va", "nc", "sc", "ga", "fl", "tx", "ca",
+    "ny", "pa", "oh", "mi", "il", "tn", "ky", "az", "wa", "mo", "wi", "mn",
 }
 
 
