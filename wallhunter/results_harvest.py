@@ -27,7 +27,8 @@ import re
 GENERIC_NAMES = re.compile(
     r"^(native american|african american|american indian|old master|"
     r"folk artist|american school|french school|english school|"
-    r"chinese school|continental school)$|unidentified|unknown artist",
+    r"chinese school|continental school|pair of|set of|lot of|"
+    r"group of|collection of)$|unidentified|unknown artist",
     re.I)
 
 # '"Title" by Artist Name' — the artist follows the 'by', not the quotes
