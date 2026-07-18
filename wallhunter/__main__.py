@@ -95,6 +95,11 @@ def cmd_exclusives(conn, args):
     for a in exclusives:
         print(f"[{a['platform']}] {a['house']} — {a['title']}"
               f"{'  (' + a['info'] + ')' if a['info'] else ''}\n    {a['url']}")
+    # named-person estates go to the top of the email for Daniel's own
+    # double-check; research (person + house as locator) happens in the
+    # deep block where the API key is set
+    from .estate_watch import find_named_estates
+    named_estates = find_named_estates(conn, exclusives, meter=None)
     deep_flags = deep_stats = None
     if args.deep:
         import os
@@ -105,6 +110,13 @@ def cmd_exclusives(conn, args):
         # refresh shared knowledge from sibling tools when readable
         import_checker_cache(conn)
         import_artscout_cache(conn)
+        from .config import CostMeter
+        named_estates = find_named_estates(conn, exclusives,
+                                           meter=CostMeter(5.0))
+        for a in named_estates:
+            mark = "🔥 " if a["notable"] else ""
+            print(f"⚱️ NAMED ESTATE: {mark}{a['person']} — {a['title']}"
+                  f" ({a['house']})\n    {a['url']}")
         _, deep_stats = deep_scan(conn, exclusives,
                                   research_cap_usd=args.research_cap,
                                   max_auctions=args.max_auctions)
@@ -128,7 +140,8 @@ def cmd_exclusives(conn, args):
         from .mailer import send_exclusives_email
         if send_exclusives_email(exclusives, deep_flags=deep_flags,
                                  deep_stats=deep_stats,
-                                 favorites=favorites) and deep_flags:
+                                 favorites=favorites,
+                                 named_estates=named_estates) and deep_flags:
             conn.execute("UPDATE deep_lots SET emailed=1"
                          " WHERE emailed=0 AND info != ''")
             conn.commit()

@@ -126,6 +126,12 @@ MIGRATIONS = [
         artist_key TEXT, high_bid_usd REAL, bid_count INTEGER,
         estimate TEXT, info TEXT,
         first_seen TEXT, emailed INTEGER DEFAULT 0)""",
+    """CREATE TABLE IF NOT EXISTS estate_identities (
+        person TEXT NOT NULL,
+        house TEXT NOT NULL,
+        verdict TEXT, confidence TEXT, evidence TEXT,
+        notable INTEGER DEFAULT 0, checked_at TEXT,
+        UNIQUE(person, house))""",
 ]
 
 

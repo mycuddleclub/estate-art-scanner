@@ -57,7 +57,8 @@ def _work_row(w) -> str:
 def send_exclusives_email(exclusives: list[dict] | None,
                           deep_flags: list[dict] | None = None,
                           deep_stats: dict | None = None,
-                          favorites: list[dict] | None = None) -> bool:
+                          favorites: list[dict] | None = None,
+                          named_estates: list[dict] | None = None) -> bool:
     """exclusives=None -> flags-only email (no calendar section)."""
     """Standalone Off-Radar Auctions email (separate program from the
     estate-sale digest, per Daniel's request)."""
@@ -67,6 +68,27 @@ def send_exclusives_email(exclusives: list[dict] | None,
         return False
     e = lambda s: html.escape(str(s or ""))
     deep_html = ""
+    if named_estates:
+        rows = ""
+        for a in named_estates:
+            if a.get("notable"):
+                tag = (f"<b style='color:#b91c1c'>&#128293; KNOWN"
+                       f" {e(a['verdict']).upper()}</b> — {e(a['evidence'])[:220]}")
+            elif a.get("verdict") is None:
+                tag = "<i style='color:#78716c'>not yet researched</i>"
+            else:
+                tag = (f"<span style='color:#78716c'>researched:"
+                       f" {e(a['verdict'])}</span>")
+            rows += (f"<li style='margin:6px 0'><b>{e(a['person'])}</b> — "
+                     f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
+                     f" <span style='color:#78716c'>({e(a['house'])},"
+                     f" {e(a.get('info', ''))})</span><br>{tag}</li>")
+        deep_html += (
+            f"<div style='background:#fefce8;border:2px solid #ca8a04;"
+            f"border-radius:8px;padding:10px 14px;margin:0 0 8px'>"
+            f"&#9904;&#65039; <b>NAMED ESTATES — worth your own look"
+            f" ({len(named_estates)}):</b>"
+            f"<ul style='margin:6px 0 0;padding-left:18px'>{rows}</ul></div>")
     if favorites:
         rows = "".join(
             f"<li style='margin:5px 0'><b>{e(a['house'])}</b> — "
