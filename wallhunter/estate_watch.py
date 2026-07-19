@@ -13,8 +13,14 @@ free regex; research is ~$0.15/name, capped per run as a tripwire.
 
 import json
 import re
+import time
 
 import anthropic
+
+# seconds between live research calls — consecutive unspaced web searches
+# trip the org search throttle and every verdict degrades to inconclusive
+# (proven fix: the paced overnight backfill ran clean at 20s)
+RESEARCH_PACE_SECONDS = 15
 
 from .config import CostCapExceeded, CostMeter
 from .dossier import (NAME_PATTERNS, RESEARCH_MODEL, WEB_SEARCH_COST_USD,
@@ -180,6 +186,7 @@ def find_named_estates(conn, auctions: list[dict],
             try:
                 row = _research(conn, person, a.get("house") or "", meter,
                                 location=location_for(a))
+                time.sleep(RESEARCH_PACE_SECONDS)
             except CostCapExceeded:
                 print("  estate-watch: research budget cap hit —"
                       " remaining names carry to next run")
