@@ -83,6 +83,7 @@ def named_estate_person(title: str) -> str | None:
     for pat in list(NAME_PATTERNS) + [_NAME_THEN_ESTATE]:
         for m in pat.finditer(t):
             name = re.sub(r"\s+", " ", m.group(1)).strip(" .,'&-")
+            name = re.sub(r"^(?:Late|The)\s+", "", name)
             words = name.split()
             if not words or any(
                     w.lower() in _STOPWORDS or w.lower() in _EXTRA_STOP
