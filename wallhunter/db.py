@@ -126,6 +126,7 @@ MIGRATIONS = [
         artist_key TEXT, high_bid_usd REAL, bid_count INTEGER,
         estimate TEXT, info TEXT,
         first_seen TEXT, emailed INTEGER DEFAULT 0)""",
+    "ALTER TABLE deep_auctions ADD COLUMN location TEXT",
     """CREATE TABLE IF NOT EXISTS estate_identities (
         person TEXT NOT NULL,
         house TEXT NOT NULL,

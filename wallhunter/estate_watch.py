@@ -18,7 +18,40 @@ import anthropic
 
 from .config import CostCapExceeded, CostMeter
 from .dossier import (NAME_PATTERNS, RESEARCH_MODEL, WEB_SEARCH_COST_USD,
-                      _JSON, _STOPWORDS, _text_of, NOTABLE, PROMPT)
+                      _JSON, _STOPWORDS, _text_of, NOTABLE)
+
+# Own prompt, deliberately NOT the dossier's: searches must chase the
+# PERSON in a PLACE (obituaries, donor records, news) — naming the auction
+# house just pulls up the auction's own listing pages (Daniel's catch).
+PROMPT = """Research whether "{name}" — a person in {location} whose personal
+estate is being auctioned — is/was a DOCUMENTED art collector, artist, art
+dealer, gallerist, curator, or art academic. Search obituaries, local news,
+museum donor and collection records, gallery and exhibition history.
+Do NOT search for or cite the estate auction or sale listing itself —
+auction listings are the starting point, never evidence. Common names need
+corroborating detail (location, dates, profession) before a match counts.
+Return ONLY JSON:
+{{"verdict": "collector|artist|dealer|curator|academic|not_notable|unknown",
+ "confidence": "high|medium|low",
+ "evidence": "one or two sentences citing what you found and where, or why nothing matched"}}
+Be conservative: verdict other than not_notable/unknown requires specific,
+checkable evidence about THIS person, not just a name coincidence."""
+
+# 'Greenville NC' / 'Jonesborough, TN' inside a title
+_TITLE_LOC = re.compile(
+    r"\b([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?),?\s+"
+    r"(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|"
+    r"MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|"
+    r"WA|WV|WI|WY)\b")
+
+
+def location_for(auction: dict) -> str:
+    if auction.get("location"):
+        return auction["location"]
+    m = _TITLE_LOC.search(auction.get("title") or "")
+    if m:
+        return f"{m.group(1)}, {m.group(2)}"
+    return "the United States (exact city unknown)"
 
 # 'Pfendler Estate Auction' — name BEFORE the word estate (dossier's
 # patterns only cover 'estate of X' and 'the X collection')
@@ -69,7 +102,8 @@ def _lookup(conn, person: str, house: str):
         (person, house)).fetchone()
 
 
-def _research(conn, person: str, house: str, meter: CostMeter):
+def _research(conn, person: str, house: str, meter: CostMeter,
+              location: str = ""):
     """One conservative web-research verdict, cached forever. Transient
     failures cache nothing (retried next run); CostCapExceeded propagates."""
     from . import db as wdb
@@ -81,7 +115,8 @@ def _research(conn, person: str, house: str, meter: CostMeter):
             tools=[{"type": "web_search_20260209", "name": "web_search",
                     "max_uses": 3}],
             messages=[{"role": "user", "content": PROMPT.format(
-                name=person, location=f"an auction held by {house}")}])
+                name=person,
+                location=location or "the United States (exact city unknown)")}])
         meter.add(RESEARCH_MODEL, resp.usage)
         searches = getattr(getattr(resp.usage, "server_tool_use", None),
                            "web_search_requests", 0) or 0
@@ -134,7 +169,8 @@ def find_named_estates(conn, auctions: list[dict],
         row = _lookup(conn, person, a.get("house") or "")
         if row is None and researchable and meter is not None:
             try:
-                row = _research(conn, person, a.get("house") or "", meter)
+                row = _research(conn, person, a.get("house") or "", meter,
+                                location=location_for(a))
             except CostCapExceeded:
                 print("  estate-watch: research budget cap hit —"
                       " remaining names carry to next run")

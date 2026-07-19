@@ -76,7 +76,8 @@ _AUCTION_SEARCH_Q = """query($searchText: String, $pageNum: Int, $pageLength: In
       filteredCount
       results { auction {
         id eventName eventDateBegin eventDateEnd
-        auctioneer { name }
+        eventCity eventState
+        auctioneer { name city state }
       } }
     }
   }
@@ -127,6 +128,9 @@ def harvest_hibid(browser=None, query: str = "art",
             house = ((a.get("auctioneer") or {}).get("name") or "").strip()
             if not house:
                 continue
+            auctr = a.get("auctioneer") or {}
+            city = (a.get("eventCity") or auctr.get("city") or "").strip()
+            state = (a.get("eventState") or auctr.get("state") or "").strip()
             auctions.append({
                 "platform": "hibid",
                 "title": (a.get("eventName") or "").strip()[:120],
@@ -134,6 +138,7 @@ def harvest_hibid(browser=None, query: str = "art",
                 "url": f"https://hibid.com/catalog/{a['id']}/_",
                 "info": f"ends {ends:%m/%d}",
                 "ends": ends.isoformat(),
+                "location": f"{city}, {state}".strip(", "),
             })
         page_num += 1
         time.sleep(0.4)

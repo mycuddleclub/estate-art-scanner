@@ -236,9 +236,10 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
                 continue  # NOT marked scanned — retried tomorrow
             conn.execute(
                 "INSERT OR REPLACE INTO deep_auctions (sale_url, house, title,"
-                " ends, art_lots, scanned_at) VALUES (?,?,?,?,?,?)",
+                " ends, art_lots, scanned_at, location) VALUES (?,?,?,?,?,?,?)",
                 (auction["url"], auction["house"], auction["title"],
-                 auction.get("ends"), len(lots), db.now()))
+                 auction.get("ends"), len(lots), db.now(),
+                 auction.get("location") or ""))
             conn.commit()
             if not lots:
                 continue
