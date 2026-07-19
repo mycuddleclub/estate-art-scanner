@@ -114,7 +114,9 @@ def harvest_results(limit: int = 40) -> dict:
                 print(f"  results: {auc['house'][:30]} failed"
                       f" ({str(e)[:60]}) — retried next run")
                 continue
-            house_blocked = blocked_match(auc["house"], blocked) is not None
+            from .deep import is_auto_blocked
+            house_blocked = blocked_match(auc["house"], blocked) is not None \
+                or is_auto_blocked(conn, auc["house"])
             n_rec = 0
             for lot in lots:
                 claim = claim_from_title(lot.get("title"))

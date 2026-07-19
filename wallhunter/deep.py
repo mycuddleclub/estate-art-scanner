@@ -61,6 +61,53 @@ def skip_lot(title: str) -> bool:
     return bool(SKIP_TITLE_WORDS.search(t) or SKIP_CASE_TOKENS.search(t))
 
 
+# The fake-mill tell (Daniel's rule, automated): no real regional auction
+# has a catalog full of "original" masterpieces. Honest labels (print/
+# litho/after...) are exempt via skip_lot; favorites are immune.
+BLUE_CHIP = re.compile(
+    r"\b(van gogh|monet|manet|picasso|dali|renoir|rembrandt|matisse|degas|"
+    r"cezanne|c[ée]zanne|gauguin|chagall|modigliani|klimt|schiele|kandinsky|"
+    r"miro|mir[óo]|magritte|warhol|basquiat|haring|pollock|rothko|"
+    r"de kooning|lichtenstein|banksy|kahlo|vermeer|caravaggio|goya|"
+    r"toulouse.?lautrec|munch|hockney|kusama)\b", re.I)
+MILL_MIN_MASTERS = 3   # distinct blue-chip names claimed as originals
+MILL_MIN_CLAIMS = 8    # or this many original-claim lots of any mix
+
+
+def mill_masters(lots: list[dict]) -> tuple[set[str], int]:
+    """Pure (unit-tested): distinct blue-chip names claimed as ORIGINALS
+    (honestly-labeled prints/copies don't count), and the claim count."""
+    names, claims = set(), 0
+    for lot in lots:
+        t = lot.get("title") or ""
+        m = BLUE_CHIP.search(t)
+        if m and not skip_lot(t):
+            names.add(m.group(1).lower())
+            claims += 1
+    return names, claims
+
+
+def is_mill(names: set[str], claims: int) -> bool:
+    return len(names) >= MILL_MIN_MASTERS or claims >= MILL_MIN_CLAIMS
+
+
+def auto_block_house(conn, house: str, sale_url: str, names: set[str],
+                     claims: int):
+    conn.execute(
+        "INSERT OR REPLACE INTO auto_blocked_houses (house, sale_url,"
+        " masters, claims, detected_at) VALUES (?,?,?,?,?)",
+        (house, sale_url, ",".join(sorted(names)), claims, db.now()))
+    conn.commit()
+
+
+def is_auto_blocked(conn, house: str) -> bool:
+    if not house:
+        return False
+    return conn.execute(
+        "SELECT 1 FROM auto_blocked_houses WHERE house=? COLLATE NOCASE",
+        (house.strip(),)).fetchone() is not None
+
+
 ART_SIGNAL = re.compile(
     r"fine art|gallery|galleries|estate|antique|painting|artwork|"
     r"art auction|collection|artist|decorative arts|americana|folk art",
@@ -223,11 +270,16 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
 
     # pass 1: harvest every auction's art lots, collect unknown claimed names
     from .artists import artist_key, classify_person_names
+    from .favorites import favorite_fragments, match_favorite
+    fav_frags = favorite_fragments(conn)
+    auto_blocked_this_run: list[dict] = []
     per_auction: list[tuple[dict, list[dict]]] = []
     unknown_names: dict[str, str] = {}  # key -> display name
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         for auction in hibid:
+            if is_auto_blocked(conn, auction.get("house")):
+                continue
             try:
                 lots = harvest_art_lots(browser, auction["url"])
             except Exception as e:
@@ -243,6 +295,18 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
             conn.commit()
             if not lots:
                 continue
+            names, claims = mill_masters(lots)
+            if is_mill(names, claims) and \
+                    not match_favorite(auction.get("house"), fav_frags):
+                auto_block_house(conn, auction["house"], auction["url"],
+                                 names, claims)
+                auto_blocked_this_run.append(
+                    {"house": auction["house"], "masters": len(names),
+                     "claims": claims, "names": sorted(names)})
+                print(f"  deep: 🚫 AUTO-BLOCKED fake mill:"
+                      f" {auction['house'][:40]} — {len(names)} masters"
+                      f" claimed ({', '.join(sorted(names)[:5])}...)")
+                continue  # marked scanned; lots never researched or flagged
             print(f"  deep: {auction['house'][:36]} — {len(lots)} art lots")
             new_lots = [l for l in lots
                         if not skip_lot(l["title"])
@@ -345,6 +409,7 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
         conn.commit()
     stats = {
         "auctions": len(per_auction),
+        "auto_blocked": auto_blocked_this_run,
         "lots": sum(len(lots) for _, lots in per_auction),
         "new_names": len(unknown_names),
         "researched": researched_n,

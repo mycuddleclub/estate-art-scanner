@@ -106,6 +106,19 @@ def send_exclusives_email(exclusives: list[dict] | None,
             f"&#11088; <b>FAVORITE HOUSES have {len(favorites)} auction(s)"
             f" in the window:</b><ul style='margin:6px 0 0;padding-left:18px'>"
             f"{rows}</ul></div>")
+    if deep_stats and deep_stats.get("auto_blocked"):
+        rows = "".join(
+            f"<li><b>{e(m['house'])}</b> — {m['masters']} blue-chip names"
+            f" claimed as originals ({e(', '.join(m.get('names', [])[:6]))})</li>"
+            for m in deep_stats["auto_blocked"])
+        deep_html += (
+            f"<div style='background:#fff1f2;border:2px solid #e11d48;"
+            f"border-radius:8px;padding:10px 14px;margin:0 0 8px'>"
+            f"&#128683; <b>AUTO-BLOCKED fake mills this run"
+            f" ({len(deep_stats['auto_blocked'])}):</b> catalogs stuffed with"
+            f" 'original' masterpieces. Their lots are excluded from flags and"
+            f" the price DB. Reply to veto, or add to the permanent list:"
+            f"<ul style='margin:6px 0 0;padding-left:18px'>{rows}</ul></div>")
     if deep_stats and deep_stats.get("capped"):
         deep_html += (
             f"<div style='background:#fffbeb;border:2px solid #f59e0b;"

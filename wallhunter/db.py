@@ -127,6 +127,10 @@ MIGRATIONS = [
         estimate TEXT, info TEXT,
         first_seen TEXT, emailed INTEGER DEFAULT 0)""",
     "ALTER TABLE deep_auctions ADD COLUMN location TEXT",
+    """CREATE TABLE IF NOT EXISTS auto_blocked_houses (
+        house TEXT PRIMARY KEY COLLATE NOCASE,
+        sale_url TEXT, masters TEXT, claims INTEGER,
+        detected_at TEXT)""",
     """CREATE TABLE IF NOT EXISTS estate_identities (
         person TEXT NOT NULL,
         house TEXT NOT NULL,
