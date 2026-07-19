@@ -86,9 +86,16 @@ def named_estate_person(title: str) -> str | None:
             name = re.sub(r"\s+", " ", m.group(1)).strip(" .,'&-")
             name = re.sub(r"^(?:Late|The)\s+", "", name)
             words = name.split()
-            if not words or any(
-                    w.lower() in _STOPWORDS or w.lower() in _EXTRA_STOP
-                    for w in words):
+            # trim junk words from either end ('Jan Duggins ABSOLUTE' ->
+            # 'Jan Duggins'); reject only when junk sits inside the name
+            def _junk(w):
+                return w.lower() in _STOPWORDS or w.lower() in _EXTRA_STOP
+            while words and _junk(words[-1]):
+                words.pop()
+            while words and _junk(words[0]):
+                words.pop(0)
+            name = " ".join(words)
+            if not words or any(_junk(w) for w in words):
                 continue
             if len(name) < 4:
                 continue
