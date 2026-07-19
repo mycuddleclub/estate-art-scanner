@@ -68,6 +68,9 @@ def send_exclusives_email(exclusives: list[dict] | None,
         return False
     e = lambda s: html.escape(str(s or ""))
     deep_html = ""
+    # named estates render BELOW the 🎯 target lots (per Daniel 2026-07-19):
+    # built here, appended after the flags section
+    named_html = ""
     if named_estates:
         rows = ""
         for a in named_estates:
@@ -85,9 +88,9 @@ def send_exclusives_email(exclusives: list[dict] | None,
                      f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
                      f" <span style='color:#78716c'>({e(a['house'])},"
                      f" {e(a.get('info', ''))})</span><br>{tag}</li>")
-        deep_html += (
+        named_html = (
             f"<div style='background:#fefce8;border:2px solid #ca8a04;"
-            f"border-radius:8px;padding:10px 14px;margin:0 0 8px'>"
+            f"border-radius:8px;padding:10px 14px;margin:8px 0'>"
             f"&#9904;&#65039; <b>NAMED ESTATES — worth your own look"
             f" ({len(named_estates)}):</b>"
             f"<ul style='margin:6px 0 0;padding-left:18px'>{rows}</ul></div>")
@@ -136,6 +139,7 @@ def send_exclusives_email(exclusives: list[dict] | None,
             for f in deep_flags)  # all of them — Daniel: never truncate finds
         deep_html += (f"<h3 style='margin:14px 0 4px'>&#127919; Deep finds"
                       f" ({len(deep_flags)})</h3>" + items)
+    deep_html += named_html  # named estates land below the target lots
     if exclusives is None:
         body_core = ""  # flags-only email
     elif exclusives:
