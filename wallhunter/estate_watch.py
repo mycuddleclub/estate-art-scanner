@@ -99,6 +99,12 @@ def _research(conn, person: str, house: str, meter: CostMeter):
         print(f"  estate-watch: research of '{person}' failed transiently"
               f" ({str(e)[:70]}) — will retry next run")
         return None
+    if verdict == "unknown" and confidence == "low":
+        # carries no information worth freezing — often means web search
+        # was throttled mid-call. Leave uncached so a later run retries.
+        print(f"  estate-watch: '{person}' inconclusive (search-limited?)"
+              " — will retry next run")
+        return None
     notable = 1 if (verdict in NOTABLE and confidence in ("high", "medium")) \
         else 0
     conn.execute(
