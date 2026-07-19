@@ -67,6 +67,7 @@ _EXTRA_STOP = {
     "stunning", "waterfront", "lakefront", "lakeside", "ranch", "farm",
     "warehouse", "storage", "local", "large", "spectacular", "incredible",
     "packed", "loaded", "real", "multi", "big", "sale", "sales", "wonderful",
+    "absolute", "timed", "online", "reserve", "unreserved", "consignment",
     # months, streets, and location fragments are not people
     "january", "february", "march", "april", "may", "june", "july",
     "august", "september", "october", "november", "december",
