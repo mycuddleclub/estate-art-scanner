@@ -74,6 +74,8 @@ def send_exclusives_email(exclusives: list[dict] | None,
             if a.get("notable"):
                 tag = (f"<b style='color:#b91c1c'>&#128293; KNOWN"
                        f" {e(a['verdict']).upper()}</b> — {e(a['evidence'])[:220]}")
+            elif a.get("verdict") is None and not a.get("researchable", True):
+                tag = "<i style='color:#78716c'>surname only — eyeball it</i>"
             elif a.get("verdict") is None:
                 tag = "<i style='color:#78716c'>not yet researched</i>"
             else:

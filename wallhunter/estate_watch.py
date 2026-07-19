@@ -127,15 +127,19 @@ def find_named_estates(conn, auctions: list[dict],
         person = named_estate_person(a.get("title") or "")
         if not person:
             continue
+        # bare surnames are unresearchable ('Anderson' + a house name can
+        # only ever come back unknown) — they show in the email for
+        # Daniel's own eye but never spend research money
+        researchable = len(person.split()) >= 2
         row = _lookup(conn, person, a.get("house") or "")
-        if row is None and meter is not None:
+        if row is None and researchable and meter is not None:
             try:
                 row = _research(conn, person, a.get("house") or "", meter)
             except CostCapExceeded:
                 print("  estate-watch: research budget cap hit —"
                       " remaining names carry to next run")
                 meter = None
-        out.append({**a, "person": person,
+        out.append({**a, "person": person, "researchable": researchable,
                     "verdict": row["verdict"] if row else None,
                     "notable": bool(row["notable"]) if row else False,
                     "evidence": (row["evidence"] or "") if row else ""})
