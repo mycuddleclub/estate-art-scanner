@@ -31,8 +31,8 @@ import os
 # would be exactly wrong). Terms ending in * match stems (print* -> prints,
 # printed); plain terms match exact words (after != afternoon).
 _DEFAULT_SKIP = ("print*,giclee*,poster*,reproduction*,etching*,litho*,"
-                 "attributed to,after,manner of,school of,style of,"
-                 "circle of,follower of")
+                 "limited edition,attributed to,after,manner of,school of,"
+                 "style of,circle of,follower of")
 
 
 def _skip_regex(spec: str) -> re.Pattern:

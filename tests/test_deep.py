@@ -63,6 +63,9 @@ def test_skip_lot_attribution_hedges():
 
 def test_skip_lot_le_limited_edition():
     from wallhunter.deep import skip_lot
+    # spelled-out phrase, any case
+    assert skip_lot("Thomas Kinkade Limited Edition Canvas")
+    assert skip_lot("Wyland signed LIMITED EDITION 88/950")
     # uppercase standalone LE / L.E. = limited edition -> skip
     assert skip_lot("Thomas Kinkade LE Canvas 24x36")
     assert skip_lot("Signed L.E. 45/500 Serigraph")
