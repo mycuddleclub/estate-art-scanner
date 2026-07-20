@@ -191,11 +191,24 @@ def find_named_estates(conn, auctions: list[dict],
                 print("  estate-watch: research budget cap hit —"
                       " remaining names carry to next run")
                 meter = None
+        seen = conn.execute(
+            "SELECT 1 FROM named_estate_seen WHERE sale_url=?",
+            (a.get("url") or "",)).fetchone() is not None
+        if not seen:
+            from . import db as wdb
+            conn.execute(
+                "INSERT OR IGNORE INTO named_estate_seen (sale_url,"
+                " first_seen) VALUES (?,?)", (a.get("url") or "", wdb.now()))
+            conn.commit()
         out.append({**a, "person": person, "researchable": researchable,
+                    "new": not seen,
                     "verdict": row["verdict"] if row else None,
                     "notable": bool(row["notable"]) if row else False,
                     "evidence": (row["evidence"] or "") if row else ""})
+    # notable first, then unresearched, then the rest; within each band the
+    # never-before-emailed estates lead, soonest-ending first
     out.sort(key=lambda x: (0 if x["notable"] else
                             (1 if x["verdict"] is None else 2),
+                            0 if x.get("new") else 1,
                             x.get("ends") or "9999"))
     return out

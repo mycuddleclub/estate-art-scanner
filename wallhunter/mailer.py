@@ -84,7 +84,10 @@ def send_exclusives_email(exclusives: list[dict] | None,
             else:
                 tag = (f"<span style='color:#78716c'>researched:"
                        f" {e(a['verdict'])}</span>")
-            rows += (f"<li style='margin:6px 0'><b>{e(a['person'])}</b> — "
+            new_badge = ("<b style='color:#166534'>&#127381; </b>"
+                         if a.get("new") else "")
+            rows += (f"<li style='margin:6px 0'>{new_badge}"
+                     f"<b>{e(a['person'])}</b> — "
                      f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
                      f" <span style='color:#78716c'>({e(a['house'])},"
                      f" {e(a.get('info', ''))})</span><br>{tag}</li>")
