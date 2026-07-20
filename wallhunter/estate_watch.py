@@ -191,19 +191,36 @@ def find_named_estates(conn, auctions: list[dict],
                 print("  estate-watch: research budget cap hit —"
                       " remaining names carry to next run")
                 meter = None
-        seen = conn.execute(
-            "SELECT 1 FROM named_estate_seen WHERE sale_url=?",
-            (a.get("url") or "",)).fetchone() is not None
-        if not seen:
-            from . import db as wdb
+        from . import db as wdb
+        state = conn.execute(
+            "SELECT * FROM named_estate_seen WHERE sale_url=?",
+            (a.get("url") or "",)).fetchone()
+        if state is None:
             conn.execute(
                 "INSERT OR IGNORE INTO named_estate_seen (sale_url,"
                 " first_seen) VALUES (?,?)", (a.get("url") or "", wdb.now()))
             conn.commit()
+        verdict_key = ((row["verdict"] if row else None)
+                       or ("surname_only" if not researchable else "pending"))
+        # email policy (Daniel 2026-07-19): only send rows carrying NEWS —
+        # never sent before, verdict changed since last send, or a single
+        # closing-soon reminder for notables in their final 48h
+        never_sent = state is None or state["last_sent_at"] is None
+        verdict_changed = (not never_sent
+                           and state["last_sent_verdict"] != verdict_key)
+        notable = bool(row["notable"]) if row else False
+        ends = a.get("ends") or ""
+        closing_soon = bool(notable and ends
+                            and ends[:10] <= _in_days(2)
+                            and state is not None
+                            and not state["reminded"])
         out.append({**a, "person": person, "researchable": researchable,
-                    "new": not seen,
+                    "new": never_sent, "verdict_key": verdict_key,
+                    "emailable": never_sent or verdict_changed or closing_soon,
+                    "closing_reminder": closing_soon and not never_sent
+                    and not verdict_changed,
                     "verdict": row["verdict"] if row else None,
-                    "notable": bool(row["notable"]) if row else False,
+                    "notable": notable,
                     "evidence": (row["evidence"] or "") if row else ""})
     # notable first, then unresearched, then the rest; within each band the
     # never-before-emailed estates lead, soonest-ending first
@@ -212,3 +229,21 @@ def find_named_estates(conn, auctions: list[dict],
                             0 if x.get("new") else 1,
                             x.get("ends") or "9999"))
     return out
+
+
+def _in_days(n: int) -> str:
+    from datetime import datetime, timedelta
+    return (datetime.now() + timedelta(days=n)).strftime("%Y-%m-%d")
+
+
+def mark_named_estates_sent(conn, sent: list[dict]):
+    """Call ONLY after the email actually went out (same pattern as the
+    deep-flags emailed=1 update)."""
+    from . import db as wdb
+    for a in sent:
+        conn.execute(
+            "UPDATE named_estate_seen SET last_sent_verdict=?, last_sent_at=?,"
+            " reminded=CASE WHEN ? THEN 1 ELSE reminded END WHERE sale_url=?",
+            (a.get("verdict_key"), wdb.now(),
+             1 if a.get("closing_reminder") else 0, a.get("url") or ""))
+    conn.commit()

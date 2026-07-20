@@ -137,11 +137,16 @@ def cmd_exclusives(conn, args):
         for f in deep_flags:
             print(f"🎯 {f['artist']}: {f['title'][:60]} — {f['reason']}\n    {f['url']}")
     if args.email:
+        from .estate_watch import mark_named_estates_sent
         from .mailer import send_exclusives_email
-        if send_exclusives_email(exclusives, deep_flags=deep_flags,
-                                 deep_stats=deep_stats,
-                                 favorites=favorites,
-                                 named_estates=named_estates) and deep_flags:
+        named_to_send = [a for a in named_estates if a.get("emailable")]
+        sent_ok = send_exclusives_email(exclusives, deep_flags=deep_flags,
+                                        deep_stats=deep_stats,
+                                        favorites=favorites,
+                                        named_estates=named_to_send)
+        if sent_ok:
+            mark_named_estates_sent(conn, named_to_send)
+        if sent_ok and deep_flags:
             conn.execute("UPDATE deep_lots SET emailed=1"
                          " WHERE emailed=0 AND info != ''")
             conn.commit()

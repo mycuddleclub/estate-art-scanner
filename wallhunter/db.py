@@ -130,6 +130,9 @@ MIGRATIONS = [
     """CREATE TABLE IF NOT EXISTS named_estate_seen (
         sale_url TEXT PRIMARY KEY,
         first_seen TEXT)""",
+    "ALTER TABLE named_estate_seen ADD COLUMN last_sent_verdict TEXT",
+    "ALTER TABLE named_estate_seen ADD COLUMN last_sent_at TEXT",
+    "ALTER TABLE named_estate_seen ADD COLUMN reminded INTEGER DEFAULT 0",
     """CREATE TABLE IF NOT EXISTS auto_blocked_houses (
         house TEXT PRIMARY KEY COLLATE NOCASE,
         sale_url TEXT, masters TEXT, claims INTEGER,

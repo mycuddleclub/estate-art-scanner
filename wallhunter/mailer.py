@@ -85,7 +85,10 @@ def send_exclusives_email(exclusives: list[dict] | None,
                 tag = (f"<span style='color:#78716c'>researched:"
                        f" {e(a['verdict'])}</span>")
             new_badge = ("<b style='color:#166534'>&#127381; </b>"
-                         if a.get("new") else "")
+                         if a.get("new") else
+                         ("<b>&#9200; CLOSING SOON </b>"
+                          if a.get("closing_reminder") else
+                          "<b style='color:#78716c'>updated: </b>"))
             rows += (f"<li style='margin:6px 0'>{new_badge}"
                      f"<b>{e(a['person'])}</b> — "
                      f"<a href='{e(a['url'])}'>{e(a['title'])}</a>"
@@ -94,7 +97,7 @@ def send_exclusives_email(exclusives: list[dict] | None,
         named_html = (
             f"<div style='background:#fefce8;border:2px solid #ca8a04;"
             f"border-radius:8px;padding:10px 14px;margin:8px 0'>"
-            f"&#9904;&#65039; <b>NAMED ESTATES — worth your own look"
+            f"&#9904;&#65039; <b>NAMED ESTATES — new &amp; updated only"
             f" ({len(named_estates)}):</b>"
             f"<ul style='margin:6px 0 0;padding-left:18px'>{rows}</ul></div>")
     if favorites:
