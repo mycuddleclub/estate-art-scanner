@@ -7,14 +7,6 @@
     "first_seen": "2026-07-13T18:20:02.090884+00:00",
     "last_photo_count": 3
   },
-  "4997028": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Bloomfield Hills Estate Sale of Longtime Resident",
-    "first_seen": "2026-07-13T18:20:02.091107+00:00",
-    "last_photo_count": 0
-  },
   "4997367": {
     "zip": "60091",
     "city": "Wilmette",
@@ -39,14 +31,6 @@
     "first_seen": "2026-07-15T09:05:57.029554+00:00",
     "last_photo_count": 1
   },
-  "5000331": {
-    "zip": "22101",
-    "city": "Mc Lean",
-    "state": "VA",
-    "name": "$3M Royal Princess McLean Mansion Downsized Auction Lalique \u00b7 Rugs \u00b7 Fine Art \u00b7 Furniture & Decor",
-    "first_seen": "2026-07-16T09:09:24.587614+00:00",
-    "last_photo_count": 1
-  },
   "5000982": {
     "zip": "32789",
     "city": "Winter Park",
@@ -54,14 +38,6 @@
     "name": "Let it Go Lifestyle in Winter Park",
     "first_seen": "2026-07-16T09:09:24.587870+00:00",
     "last_photo_count": 1
-  },
-  "5000661": {
-    "zip": "70118",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "New Orleans Estate Sale",
-    "first_seen": "2026-07-16T09:09:24.587929+00:00",
-    "last_photo_count": 0
   },
   "5000220": {
     "zip": "48009",
@@ -119,14 +95,6 @@
     "first_seen": "2026-07-18T08:45:23.007465+00:00",
     "last_photo_count": 3
   },
-  "5003874": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Curated Luxury: Louis Vuitton, Daum & More",
-    "first_seen": "2026-07-18T08:45:23.007507+00:00",
-    "last_photo_count": 0
-  },
   "5005215": {
     "zip": "70118",
     "city": "New Orleans",
@@ -143,12 +111,60 @@
     "first_seen": "2026-07-20T09:53:24.539732+00:00",
     "last_photo_count": 1
   },
-  "5004834": {
-    "zip": "92067",
-    "city": "Rancho Santa Fe",
-    "state": "CA",
-    "name": "STUNNING ESTATE ~ RANCHO SANTA FE",
-    "first_seen": "2026-07-20T09:53:24.539775+00:00",
-    "last_photo_count": 5
+  "5006127": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Poof! Antiques, Sterling, Crystal & More Bloomfield Hills Estate Sale",
+    "first_seen": "2026-07-21T09:23:37.415679+00:00",
+    "last_photo_count": 7
+  },
+  "5006847": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "Birmingham Estate Sale",
+    "first_seen": "2026-07-21T09:23:37.415751+00:00",
+    "last_photo_count": 1
+  },
+  "5006943": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "Birmingham Estate Sale",
+    "first_seen": "2026-07-21T09:23:37.415794+00:00",
+    "last_photo_count": 1
+  },
+  "5007051": {
+    "zip": "75225",
+    "city": "Dallas",
+    "state": "TX",
+    "name": "~Incredible Preston Hollow Estate Sale! Steinway Piano, Fine Art, Jet Woodworking, Collectibles..",
+    "first_seen": "2026-07-21T09:23:37.415842+00:00",
+    "last_photo_count": 1
+  },
+  "5007237": {
+    "zip": "77006",
+    "city": "Houston",
+    "state": "TX",
+    "name": "MONTROSE ARCHITECTS ESTATE - Contemporary Art & More!",
+    "first_seen": "2026-07-21T09:23:37.415884+00:00",
+    "last_photo_count": 2
+  },
+  "5007006": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "MAGNIFICENT1920'S  7,000 SF BLOOMFIELD HILLS HISTORICAL ESTATE - AN EXCEPTIONAL ESTATE SALE!",
+    "first_seen": "2026-07-21T09:23:37.415929+00:00",
+    "last_photo_count": 0
+  },
+  "5006931": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "Birmingham Estate Sale",
+    "first_seen": "2026-07-21T09:23:37.415972+00:00",
+    "last_photo_count": 3
   }
 }
