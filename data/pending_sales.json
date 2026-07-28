@@ -1,12 +1,4 @@
 {
-  "4997367": {
-    "zip": "60091",
-    "city": "Wilmette",
-    "state": "IL",
-    "name": "The Great Estate-Wilmette",
-    "first_seen": "2026-07-14T09:01:03.113562+00:00",
-    "last_photo_count": 0
-  },
   "4998237": {
     "zip": "92067",
     "city": "Rancho Santa Fe",
@@ -53,14 +45,6 @@
     "state": "KS",
     "name": "Stylish Mission Hills Estate Sale",
     "first_seen": "2026-07-17T09:04:45.448895+00:00",
-    "last_photo_count": 1
-  },
-  "5002860": {
-    "zip": "07920",
-    "city": "Basking Ridge",
-    "state": "NJ",
-    "name": "Blue Moon Estate Sale in Basking Ridge",
-    "first_seen": "2026-07-18T08:45:23.007431+00:00",
     "last_photo_count": 1
   },
   "5005668": {
@@ -127,14 +111,6 @@
     "first_seen": "2026-07-26T09:08:08.339716+00:00",
     "last_photo_count": 3
   },
-  "5013621": {
-    "zip": "66208",
-    "city": "Prairie Village",
-    "state": "KS",
-    "name": "Renowned \"Etc. Antiques\" Shop Owner/Dealer Estate Sale",
-    "first_seen": "2026-07-26T09:08:08.339968+00:00",
-    "last_photo_count": 2
-  },
   "5011860": {
     "zip": "90274",
     "city": "Palos Verdes Peninsula",
@@ -166,5 +142,37 @@
     "name": "ANOTHER GREAT BLMFLD TOWNSHIP SALE",
     "first_seen": "2026-07-26T09:08:08.340080+00:00",
     "last_photo_count": 3
+  },
+  "5015187": {
+    "zip": "48236",
+    "city": "Grosse Pointe Farms",
+    "state": "MI",
+    "name": "Marcia Wilk Estate Sale",
+    "first_seen": "2026-07-28T09:32:02.441629+00:00",
+    "last_photo_count": 0
+  },
+  "5016126": {
+    "zip": "48236",
+    "city": "Grosse Pointe Farms",
+    "state": "MI",
+    "name": "MASSIVE GARAGE SALE",
+    "first_seen": "2026-07-28T09:32:02.441860+00:00",
+    "last_photo_count": 0
+  },
+  "5015448": {
+    "zip": "48098",
+    "city": "Troy",
+    "state": "MI",
+    "name": "Troy Estate Sale",
+    "first_seen": "2026-07-28T09:32:02.441908+00:00",
+    "last_photo_count": 0
+  },
+  "5016666": {
+    "zip": "60091",
+    "city": "Wilmette",
+    "state": "IL",
+    "name": "BALDERDASH ESTATE SALES - WILMETTE - Vintage Household & More!!",
+    "first_seen": "2026-07-28T09:32:02.441942+00:00",
+    "last_photo_count": 0
   }
 }
