@@ -71,9 +71,15 @@ def load_seen_sales() -> set[int]:
 
 
 def save_seen_sales(seen: set[int]):
-    """Persist seen IDs. Cap at 10k to avoid unbounded growth."""
+    """Persist seen IDs. Cap at 200k to avoid unbounded growth.
+
+    At ~500 new sales/day this is >1 year of memory -- far longer than any
+    sale stays live -- so a still-active sale can never roll off the window
+    and get re-reported as new. (The old 10k cap held only ~20 days, and
+    once daily volume grew past it, old-but-live sales rolled off and the
+    nightly email re-sent them.)"""
     DATA_DIR.mkdir(exist_ok=True)
-    SEEN_SALES_FILE.write_text(json.dumps(sorted(seen)[-10000:]))
+    SEEN_SALES_FILE.write_text(json.dumps(sorted(seen)[-200000:]))
 
 
 def load_pending_sales() -> dict:
