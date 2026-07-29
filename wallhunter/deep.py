@@ -389,6 +389,13 @@ def deep_scan(conn, exclusives: list[dict], research_cap_usd: float = 25.0,
                     _prices_conn(), claim, vetted_ceiling=ceiling))
                 if mline:
                     reason += f" · {mline}"
+                # charity-benefit FMVs + live Artsy asks (flagged lots only,
+                # so the network cost stays tiny; both neutral on absence)
+                from . import artsy_client, charity_client
+                for extra in (charity_client.evidence_line(claim),
+                              artsy_client.evidence_line(claim)):
+                    if extra:
+                        reason += f" · {extra}"
             conn.execute(
                 "INSERT OR IGNORE INTO deep_lots (lot_url, sale_url, house,"
                 " title, artist_key, high_bid_usd, bid_count, estimate,"

@@ -70,11 +70,21 @@ CREATE TABLE IF NOT EXISTS distinctions (
   distinction TEXT NOT NULL,
   UNIQUE(artist_id, distinction)
 );
+
+-- Crowd-sourced collection claims (Wikidata P6379). EVIDENCE ONLY, like
+-- market_history: shown in describe/evidence lines, never counted toward
+-- museum_count or standing until the trial period says otherwise.
+CREATE TABLE IF NOT EXISTS wd_collections (
+  artist_id INTEGER NOT NULL REFERENCES artists_authority(id),
+  museum TEXT NOT NULL,
+  museum_qid TEXT NOT NULL,
+  UNIQUE(artist_id, museum_qid)
+);
 """
 
 # Institutions whose holdings count toward the "major museum" signal.
 MAJOR_MUSEUMS = {"met", "nga", "saam", "npg", "aic", "moma", "whitney",
-                 "cleveland", "hmsg", "chndm", "nmafa", "acm"}
+                 "cleveland", "hmsg", "chndm", "nmafa", "acm", "nmaahc"}
 
 
 def connect(path=None) -> sqlite3.Connection:
@@ -208,6 +218,8 @@ def lookup(conn, name: str) -> dict | None:
     a["historic_sales"] = (conn.execute(
         "SELECT SUM(records) s FROM market_history WHERE artist_id=?",
         (a["id"],)).fetchone()["s"]) or 0
+    a["wd_collections"] = [r["museum"] for r in conn.execute(
+        "SELECT museum FROM wd_collections WHERE artist_id=?", (a["id"],))]
     a["ambiguous"] = len(rows) > 1
     return a
 
@@ -242,12 +254,17 @@ def describe(auth: dict) -> str:
                  "npg": "National Portrait Gallery", "aic": "Art Institute of Chicago",
                  "moma": "MoMA", "whitney": "the Whitney", "cleveland": "Cleveland",
                  "hmsg": "Hirshhorn", "chndm": "Cooper Hewitt",
-                 "nmafa": "Nat. Museum of African Art", "acm": "Anacostia"}
+                 "nmafa": "Nat. Museum of African Art", "acm": "Anacostia",
+                 "nmaahc": "NMAAHC"}
         bits.append("in " + ", ".join(names.get(m, m) for m in shown))
     if auth.get("aaa_papers"):
         bits.append("papers at Archives of American Art")
     for aw in (auth.get("awards") or [])[:3]:
         bits.append(aw)
+    wd = [m for m in auth.get("wd_collections", [])
+          ][:4]
+    if wd:
+        bits.append("collections per Wikidata: " + ", ".join(wd))
     if auth.get("historic_sales"):
         bits.append(f"{auth['historic_sales']} historic auction records"
                     " (Getty PI)")

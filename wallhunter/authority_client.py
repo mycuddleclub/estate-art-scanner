@@ -22,13 +22,14 @@ from pathlib import Path
 DB_PATH = Path("/Users/bigpadre/estate-art-scanner/wh_data/authority.db")
 
 _MAJOR = {"met", "nga", "saam", "npg", "aic", "moma", "whitney",
-          "cleveland", "hmsg", "chndm", "nmafa", "acm"}
+          "cleveland", "hmsg", "chndm", "nmafa", "acm", "nmaahc"}
 _NAMES = {"met": "the Met", "nga": "National Gallery", "saam": "SAAM",
           "npg": "National Portrait Gallery",
           "aic": "Art Institute of Chicago", "moma": "MoMA",
           "whitney": "the Whitney", "cleveland": "Cleveland",
           "hmsg": "Hirshhorn", "chndm": "Cooper Hewitt",
-          "nmafa": "Nat. Museum of African Art", "acm": "Anacostia"}
+          "nmafa": "Nat. Museum of African Art", "acm": "Anacostia",
+          "nmaahc": "NMAAHC"}
 _ABBREV = {"wm": "william", "chas": "charles", "jas": "james",
            "thos": "thomas", "geo": "george", "jno": "john",
            "benj": "benjamin", "saml": "samuel", "robt": "robert",
@@ -88,6 +89,12 @@ def lookup(name):
         a["historic_sales"] = (conn.execute(
             "SELECT SUM(records) s FROM market_history WHERE artist_id=?",
             (a["id"],)).fetchone()["s"]) or 0
+        try:
+            a["wd_collections"] = [r["museum"] for r in conn.execute(
+                "SELECT museum FROM wd_collections WHERE artist_id=?",
+                (a["id"],))]
+        except Exception:
+            a["wd_collections"] = []
         return a
     except Exception:
         return None
@@ -116,6 +123,9 @@ def describe(auth):
     if auth.get("aaa_papers"):
         bits.append("papers at Archives of American Art")
     bits.extend((auth.get("awards") or [])[:3])
+    wd = (auth.get("wd_collections") or [])[:4]
+    if wd:
+        bits.append("collections per Wikidata: " + ", ".join(wd))
     if auth.get("historic_sales"):
         bits.append(f"{auth['historic_sales']} historic auction records"
                     " (Getty PI)")
@@ -128,6 +138,14 @@ def describe(auth):
 def evidence_line(name):
     """One-line evidence string for prompts/emails, or '' if unknown."""
     a = lookup(name)
-    if not a or not standing(a):
+    if not a:
         return ""
-    return f"Reference library [{standing(a)}]: {a['canonical']} — {describe(a)}"
+    st = standing(a)
+    if st:
+        return f"Reference library [{st}]: {a['canonical']} — {describe(a)}"
+    # No standing, but real evidence (Wikidata collections, Getty PI sales)
+    # still informs — labeled so the trust level is unmistakable.
+    if a.get("wd_collections") or a.get("historic_sales"):
+        return (f"Reference library [evidence only]: {a['canonical']}"
+                f" — {describe(a)}")
+    return ""

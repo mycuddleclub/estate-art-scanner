@@ -21,7 +21,25 @@ csv.field_size_limit(10_000_000)
 JUNK_NAME = re.compile(
     r"unidentified|unknown|anonymous|^after |, after$|copy after|"
     r"manufactor|manufactur| & co| co\.|company|corporation| inc\b|"
-    r" ltd\b|publisher|printing house", re.I)
+    r" ltd\b|publisher|printing house|gallery|museum|church|university|"
+    r"association|school|center|centre|foundation|society|committee|"
+    r"council|institute|studio\b|press\b|archives", re.I)
+
+# Biographical qualifiers that ride along in comma-separated name strings
+# ("Floyd Newsum, American" / "Powell, Colin, General") — never name parts.
+QUALIFIER_PART = re.compile(
+    r"^(?:african[- ]?american|american|british|english|french|german|dutch|"
+    r"spanish|italian|irish|scottish|welsh|swedish|norwegian|danish|russian|"
+    r"polish|austrian|swiss|belgian|greek|portuguese|mexican|canadian|cuban|"
+    r"brazilian|haitian|jamaican|trinidadian|puerto rican|nigerian|ghanaian|"
+    r"ethiopian|kenyan|senegalese|malian|congolese|liberian|south african|"
+    r"egyptian|moroccan|japanese|chinese|korean|indian|filipino|vietnamese|"
+    r"thai|indonesian|australian|israeli|iranian|turkish|lebanese)$"
+    r"|^(?:dr|gen(?:eral)?|col(?:onel)?|capt(?:ain)?|maj(?:or)?|lt|"
+    r"rev(?:erend)?|bishop|elder|deacon|pastor|rabbi|sir|dame|madam|hon|"
+    r"mrs|mr|miss|ms|judge|senator|congressman|congresswoman|governor|"
+    r"mayor|professor|prof|sgt|sergeant|pvt|private|admiral|commander)\.?$",
+    re.I)
 
 
 def clean_person_name(raw: str) -> str | None:
@@ -32,8 +50,11 @@ def clean_person_name(raw: str) -> str | None:
     if not s or JUNK_NAME.search(s) or re.search(r"\d", s):
         return None
     parts = [p.strip() for p in s.split(",") if p.strip()]
+    parts = parts[:1] + [p for p in parts[1:] if not QUALIFIER_PART.match(p)]
     if len(parts) >= 2:  # 'Last, First[, Suffix]' -> 'First Last Suffix'
         s = " ".join([parts[1], parts[0]] + parts[2:])
+    else:
+        s = parts[0] if parts else ""
     return s if len(s) >= 5 and " " in s else None
 
 
@@ -338,8 +359,11 @@ def import_ulan(conn, rel_dir, force=False):
 # ---------------------------------------------------------------- Smithsonian
 
 SI_BASE = "https://smithsonian-open-access.s3-us-west-2.amazonaws.com/metadata/edan/"
-SI_ART_UNITS = ("saam", "npg", "hmsg", "chndm", "nmafa", "acm")
-ARTIST_LABEL = re.compile(r"artist|painter|sculptor|printmaker|creator", re.I)
+SI_ART_UNITS = ("saam", "npg", "hmsg", "chndm", "nmafa", "acm", "nmaahc")
+ARTIST_LABEL = re.compile(
+    r"artist|painter|sculptor|printmaker|creator|created by"
+    r"|photograph(?:ed)? by|painted by|drawn by|illustrated by|designed by",
+    re.I)
 
 
 def _si_chunks(unit: str):
@@ -389,6 +413,89 @@ def import_si_unit(conn, unit: str, aaa=False, force=False):
             n += 1
     conn.commit()
     _record(conn, source, n)
+
+
+
+
+def import_wikidata_collections(conn, force=False):
+    """Wikidata P6379 'has works in the collection of' — EVIDENCE ONLY.
+
+    Guardrails (agreed 2026-07-25): matches by QID/ULAN cross-reference
+    only, never by name, and never creates artist rows. Claims land in
+    wd_collections, which describe() shows but standing() ignores — the
+    crowd-sourced layer can't inflate flags until the trial says so.
+
+    Pass 1 permanently back-fills wikidata_qid for ULAN-bearing rows via
+    P245; pass 2 fetches P6379 claims for every QID-bearing row.
+    """
+    import time
+    source = "wikidata-collections"
+    if _done(conn, source, force):
+        return
+    rows = conn.execute(
+        "SELECT id, ulan_id FROM artists_authority WHERE"
+        " (wikidata_qid IS NULL OR wikidata_qid='') AND ulan_id IS NOT NULL"
+        " AND ulan_id != ''").fetchall()
+    ulan_to_id = {str(r["ulan_id"]).strip(): r["id"] for r in rows}
+    ulans = list(ulan_to_id)
+    resolved = 0
+    B = 150
+    for i in range(0, len(ulans), B):
+        vals = " ".join(f'"{u}"' for u in ulans[i:i + B])
+        q = "SELECT ?p ?u WHERE { VALUES ?u { %s } ?p wdt:P245 ?u }" % vals
+        try:
+            for r in _wdqs(q):
+                qid = r["p"]["value"].rsplit("/", 1)[-1]
+                u = r["u"]["value"]
+                if u in ulan_to_id and qid.startswith("Q"):
+                    conn.execute(
+                        "UPDATE artists_authority SET wikidata_qid=? WHERE"
+                        " id=? AND (wikidata_qid IS NULL OR wikidata_qid='')",
+                        (qid, ulan_to_id[u]))
+                    resolved += 1
+        except Exception as e:
+            print(f"    {source}: ulan batch {i // B} failed"
+                  f" ({str(e)[:60]}) — continuing", flush=True)
+        if (i // B) % 25 == 0:
+            conn.commit()
+            print(f"    {source}: ULAN->QID {min(i + B, len(ulans)):,}/"
+                  f"{len(ulans):,}, resolved {resolved:,}...", flush=True)
+        time.sleep(0.8)
+    conn.commit()
+    rows = conn.execute(
+        "SELECT id, wikidata_qid q FROM artists_authority WHERE"
+        " wikidata_qid IS NOT NULL AND wikidata_qid != ''").fetchall()
+    qid_to_id = {r["q"]: r["id"] for r in rows
+                 if str(r["q"]).startswith("Q")}
+    qids = list(qid_to_id)
+    n = 0
+    for i in range(0, len(qids), B):
+        vals = " ".join(f"wd:{q}" for q in qids[i:i + B])
+        q = ("SELECT ?p ?m ?mLabel WHERE { VALUES ?p { %s }"
+             " ?p wdt:P6379 ?m . SERVICE wikibase:label"
+             ' { bd:serviceParam wikibase:language "en" } }' % vals)
+        try:
+            for r in _wdqs(q):
+                pq = r["p"]["value"].rsplit("/", 1)[-1]
+                mq = r["m"]["value"].rsplit("/", 1)[-1]
+                label = (r.get("mLabel") or {}).get("value", "")
+                if not label or label == mq or pq not in qid_to_id:
+                    continue
+                conn.execute(
+                    "INSERT OR IGNORE INTO wd_collections (artist_id,"
+                    " museum, museum_qid) VALUES (?,?,?)",
+                    (qid_to_id[pq], label[:90], mq))
+                n += 1
+        except Exception as e:
+            print(f"    {source}: P6379 batch {i // B} failed"
+                  f" ({str(e)[:60]}) — continuing", flush=True)
+        if (i // B) % 25 == 0:
+            conn.commit()
+            print(f"    {source}: collections {min(i + B, len(qids)):,}/"
+                  f"{len(qids):,}, {n:,} claims...", flush=True)
+        time.sleep(0.8)
+    conn.commit()
+    _record(conn, source, n, note=f"qids resolved: {resolved}")
 
 
 # ------------------------------------------------- Getty Provenance Index
@@ -560,6 +667,8 @@ def run_imports(raw_dir, sources=None, force=False):
         import_provenance(conn, force)
     if want("awards"):
         import_wikidata_awards(conn, force)
+    if want("collections"):
+        import_wikidata_collections(conn, force)
     print("authority status:", authority.status(conn))
     conn.close()
 
