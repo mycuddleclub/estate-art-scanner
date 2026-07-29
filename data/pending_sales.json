@@ -1,27 +1,11 @@
 {
-  "4998237": {
-    "zip": "92067",
-    "city": "Rancho Santa Fe",
-    "state": "CA",
-    "name": "Blue Waters By Appointmnt Estate Sale",
-    "first_seen": "2026-07-15T09:05:57.029246+00:00",
-    "last_photo_count": 0
-  },
-  "4999821": {
-    "zip": "07920",
-    "city": "Basking Ridge",
-    "state": "NJ",
-    "name": "ONLINE AUCTION - BASKING RIDGE - NJ",
-    "first_seen": "2026-07-15T09:05:57.029554+00:00",
-    "last_photo_count": 1
-  },
   "5000982": {
     "zip": "32789",
     "city": "Winter Park",
     "state": "FL",
     "name": "Let it Go Lifestyle in Winter Park",
     "first_seen": "2026-07-16T09:09:24.587870+00:00",
-    "last_photo_count": 1
+    "last_photo_count": 9
   },
   "5001351": {
     "zip": "44122",
@@ -119,14 +103,6 @@
     "first_seen": "2026-07-26T09:08:08.339999+00:00",
     "last_photo_count": 3
   },
-  "5012514": {
-    "zip": "46032",
-    "city": "Carmel",
-    "state": "IN",
-    "name": "Estate Sale in Carmel",
-    "first_seen": "2026-07-26T09:08:08.340021+00:00",
-    "last_photo_count": 1
-  },
   "5012649": {
     "zip": "48236",
     "city": "Grosse Pointe Farms",
@@ -151,14 +127,6 @@
     "first_seen": "2026-07-28T09:32:02.441629+00:00",
     "last_photo_count": 0
   },
-  "5016126": {
-    "zip": "48236",
-    "city": "Grosse Pointe Farms",
-    "state": "MI",
-    "name": "MASSIVE GARAGE SALE",
-    "first_seen": "2026-07-28T09:32:02.441860+00:00",
-    "last_photo_count": 0
-  },
   "5015448": {
     "zip": "48098",
     "city": "Troy",
@@ -173,6 +141,30 @@
     "state": "IL",
     "name": "BALDERDASH ESTATE SALES - WILMETTE - Vintage Household & More!!",
     "first_seen": "2026-07-28T09:32:02.441942+00:00",
+    "last_photo_count": 0
+  },
+  "5017440": {
+    "zip": "48301",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Poof! Jewelry, Antiques, Art & More Bloomfield Village Estate Sale",
+    "first_seen": "2026-07-29T09:33:33.069630+00:00",
+    "last_photo_count": 7
+  },
+  "5017932": {
+    "zip": "07042",
+    "city": "Montclair",
+    "state": "NJ",
+    "name": "Montclair 8/7 & 8/8",
+    "first_seen": "2026-07-29T09:33:33.069921+00:00",
+    "last_photo_count": 1
+  },
+  "5017287": {
+    "zip": "78212",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "#623: Alta Vista Estate Sale",
+    "first_seen": "2026-07-29T09:33:33.069993+00:00",
     "last_photo_count": 0
   }
 }
