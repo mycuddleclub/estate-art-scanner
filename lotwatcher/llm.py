@@ -27,12 +27,13 @@ def ensure_model(name: str):
                    capture_output=True, text=True, timeout=600)
 
 
-def _chat(model: str, prompt: str, max_tokens: int, temperature: float = 0.2) -> str:
+def _chat(model: str, prompt: str, max_tokens: int, temperature: float = 0.2,
+          reasoning: str = "low") -> str:
     r = httpx.post(f"{config.LM_BASE}/chat/completions", timeout=300, json={
         "model": model,
         "max_tokens": max_tokens,
         "temperature": temperature,
-        "reasoning_effort": "low",
+        "reasoning_effort": reasoning,
         "messages": [{"role": "user", "content": prompt}],
     })
     r.raise_for_status()
@@ -47,8 +48,7 @@ def _extract_json(text: str) -> dict:
     return json.loads(m.group(0))
 
 
-STAGE1_PROMPT = """/no_think
-You screen auction lots for an art collector. Given ONE lot, output STRICT JSON only:
+STAGE1_PROMPT = """You screen auction lots for an art collector. Given ONE lot, output STRICT JSON only:
 {{"is_art": true/false, "category": "painting|print|drawing|photo|sculpture|ceramics|textile|jewelry|glass|metalware|furniture|decor|book|other|not_art", "artist": "extracted artist name or empty string", "promise": 0-10, "reason": "max 15 words"}}
 
 promise = likelihood this is a collectible fine/folk/self-taught artwork by an identifiable artist worth researching. Signed/attributed works with a plausible artist name score high. Mass reproductions, decor, and junk score low. When uncertain, lean HIGHER (recall over precision).
@@ -62,7 +62,7 @@ def stage1_classify(lot: dict) -> dict:
     text = _chat(config.STAGE1_MODEL, STAGE1_PROMPT.format(
         title=lot["title"][:400],
         estimate=lot["estimate"] or "unknown",
-        bid=lot["bid"] or "none"), max_tokens=700)
+        bid=lot["bid"] or "none"), max_tokens=300, reasoning="none")
     d = _extract_json(text)
     d["promise"] = float(d.get("promise", 0))
     return d
