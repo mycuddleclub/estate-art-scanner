@@ -1,20 +1,4 @@
 {
-  "5001768": {
-    "zip": "66208",
-    "city": "Prairie Village",
-    "state": "KS",
-    "name": "Fun Prairie Village Sale",
-    "first_seen": "2026-07-17T09:04:45.448666+00:00",
-    "last_photo_count": 1
-  },
-  "5001765": {
-    "zip": "66208",
-    "city": "Mission Hills",
-    "state": "KS",
-    "name": "Stylish Mission Hills Estate Sale",
-    "first_seen": "2026-07-17T09:04:45.448895+00:00",
-    "last_photo_count": 1
-  },
   "5005668": {
     "zip": "66208",
     "city": "Prairie Village",
@@ -22,14 +6,6 @@
     "name": "Nice Prairie Village Sale - Pence Estate Sales",
     "first_seen": "2026-07-20T09:53:24.539732+00:00",
     "last_photo_count": 1
-  },
-  "5006127": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Poof! Antiques, Sterling, Crystal & More Bloomfield Hills Estate Sale",
-    "first_seen": "2026-07-21T09:23:37.415679+00:00",
-    "last_photo_count": 7
   },
   "5006847": {
     "zip": "48009",
@@ -134,5 +110,13 @@
     "name": "#623: Alta Vista Estate Sale",
     "first_seen": "2026-07-29T09:33:33.069993+00:00",
     "last_photo_count": 0
+  },
+  "5020272": {
+    "zip": "75225",
+    "city": "Dallas",
+    "state": "TX",
+    "name": "Dallas: Unbeatable Deals by Dayspring",
+    "first_seen": "2026-07-31T09:39:05.636077+00:00",
+    "last_photo_count": 3
   }
 }
