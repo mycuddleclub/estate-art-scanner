@@ -6,7 +6,7 @@ Checker) load this by path, same pattern as authority_client.py:
     import importlib.util as _il
     _spec = _il.spec_from_file_location(
         "prices_client",
-        "/Users/bigpadre/estate-art-scanner/wallhunter/prices_client.py")
+        os.path.expanduser("~/estate-art-scanner/wallhunter/prices_client.py"))
     prices_client = _il.module_from_spec(_spec)
     _spec.loader.exec_module(prices_client)
 
@@ -14,6 +14,7 @@ Dependency-free. Failures are silent and neutral — a missing prices.db
 must never break a consumer.
 """
 
+import os
 import hashlib
 import importlib.util as _il
 import re
@@ -21,7 +22,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path("/Users/bigpadre/estate-art-scanner/wh_data/prices.db")
+DB_PATH = Path(os.path.expanduser("~/estate-art-scanner/wh_data/prices.db"))
 
 _conn = None
 
@@ -82,7 +83,7 @@ def _get_ce():
         try:
             spec = _il.spec_from_file_location(
                 "comp_engine",
-                "/Users/bigpadre/estate-art-scanner/wallhunter/comp_engine.py")
+                os.path.expanduser("~/estate-art-scanner/wallhunter/comp_engine.py"))
             mod = _il.module_from_spec(spec)
             spec.loader.exec_module(mod)
             _ce = mod

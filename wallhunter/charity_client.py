@@ -6,7 +6,7 @@ Checker) load this by path, same pattern as authority_client.py:
     import importlib.util as _il
     _spec = _il.spec_from_file_location(
         "charity_client",
-        "/Users/bigpadre/estate-art-scanner/wallhunter/charity_client.py")
+        os.path.expanduser("~/estate-art-scanner/wallhunter/charity_client.py"))
     charity_client = _il.module_from_spec(_spec)
     _spec.loader.exec_module(charity_client)
 
@@ -19,11 +19,12 @@ Dependency-free, read-only. Failures are silent and neutral — a missing
 DB must never break a consumer, and absence of an artist means nothing.
 """
 
+import os
 import re
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path("/Users/bigpadre/charity_auction_scraper/auction_data.db")
+DB_PATH = Path(os.path.expanduser("~/charity_auction_scraper/auction_data.db"))
 
 _SUFFIX = re.compile(r"\b(?:jr|sr|ii|iii|iv)\b\.?", re.I)
 _index = None  # norm_key -> list[dict], built lazily once per process

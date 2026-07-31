@@ -6,7 +6,7 @@ Appraiser load this by path so there is exactly one implementation:
     import importlib.util as _il
     _spec = _il.spec_from_file_location(
         "authority_client",
-        "/Users/bigpadre/estate-art-scanner/wallhunter/authority_client.py")
+        os.path.expanduser("~/estate-art-scanner/wallhunter/authority_client.py"))
     authority_client = _il.module_from_spec(_spec)
     _spec.loader.exec_module(authority_client)
 
@@ -15,11 +15,12 @@ this machine can use it. The library only ever UPGRADES an artist: lookup
 returning None is neutral and must never cause a skip.
 """
 
+import os
 import re
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path("/Users/bigpadre/estate-art-scanner/wh_data/authority.db")
+DB_PATH = Path(os.path.expanduser("~/estate-art-scanner/wh_data/authority.db"))
 
 _MAJOR = {"met", "nga", "saam", "npg", "aic", "moma", "whitney",
           "cleveland", "hmsg", "chndm", "nmafa", "acm", "nmaahc"}

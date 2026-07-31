@@ -24,7 +24,7 @@ from pathlib import Path
 
 ENDPOINT = "https://metaphysics-cdn.artsy.net/v2"
 CACHE_DB = Path(
-    "/Users/bigpadre/estate-art-scanner/wh_data/artsy_cache.db")
+    os.path.expanduser("~/estate-art-scanner/wh_data/artsy_cache.db"))
 CACHE_DAYS = 30
 TIMEOUT = 12
 

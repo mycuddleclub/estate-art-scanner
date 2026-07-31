@@ -31,10 +31,10 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-DB_PATH = Path("/Users/bigpadre/estate-art-scanner/wh_data/prices.db")
+DB_PATH = Path(os.path.expanduser("~/estate-art-scanner/wh_data/prices.db"))
 FRESH_DAYS = int(os.getenv("MUTUALART_FRESH_DAYS", "90"))
 SCRAPER_PATH = os.getenv(
-    "MUTUALART_SCRAPER", "/Users/bigpadre/art-appraiser/scrape_mutualart.py")
+    "MUTUALART_SCRAPER", os.path.expanduser("~/art-appraiser/scrape_mutualart.py"))
 
 
 def _load(name, path):
@@ -51,7 +51,7 @@ def _load(name, path):
 # (so cache keys match exactly) and its tier-A write path.
 _prices = _load(
     "prices_client",
-    "/Users/bigpadre/estate-art-scanner/wallhunter/prices_client.py")
+    os.path.expanduser("~/estate-art-scanner/wallhunter/prices_client.py"))
 
 _conn = None
 

@@ -19,13 +19,14 @@ and value_lot() add the prices.db read and the model hop on top.
     value_lot(lot, artist, classify_fn, now_year) -> the above, end to end
 """
 
+import os
 import importlib.util as _il
 import math
 import re
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path("/Users/bigpadre/estate-art-scanner/wh_data/prices.db")
+DB_PATH = Path(os.path.expanduser("~/estate-art-scanner/wh_data/prices.db"))
 
 # --- weighting knobs (tunable; documented so the first live crawl can calibrate)
 SIZE_SIGMA = 0.55       # gaussian width on ln(area ratio); ~0.55 => 2x size ~0.6
@@ -414,7 +415,7 @@ def _load(name, path):
 
 _prices = _load(
     "prices_client",
-    "/Users/bigpadre/estate-art-scanner/wallhunter/prices_client.py")
+    os.path.expanduser("~/estate-art-scanner/wallhunter/prices_client.py"))
 
 
 def fetch_comps(artist):
@@ -463,7 +464,7 @@ def value_lot(lot, artist, classify_fn=None, now_year=2026):
     if classify_fn is None:
         _llm = _load(
             "llm_client",
-            "/Users/bigpadre/estate-art-scanner/wallhunter/llm_client.py")
+            os.path.expanduser("~/estate-art-scanner/wallhunter/llm_client.py"))
         classify_fn = getattr(_llm, "classify_work", None) if _llm else None
     subject = {}
     if classify_fn is not None:

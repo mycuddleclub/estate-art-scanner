@@ -6,7 +6,7 @@ load this by path, same pattern as authority_client.py / prices_client.py:
     import importlib.util as _il
     _spec = _il.spec_from_file_location(
         "llm_client",
-        "/Users/bigpadre/estate-art-scanner/wallhunter/llm_client.py")
+        os.path.expanduser("~/estate-art-scanner/wallhunter/llm_client.py"))
     llm_client = _il.module_from_spec(_spec)
     _spec.loader.exec_module(llm_client)
 
