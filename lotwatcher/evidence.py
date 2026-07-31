@@ -82,8 +82,17 @@ def comp_line(lot: dict, artist: str) -> str:
             artist)
         if not est or not est.get("mid"):
             return ""
-        return (f"Comp engine ({est.get('n_comps', '?')} tier-A comps): "
+        line = (f"Comp engine ({est.get('n', '?')} tier-A comps): "
                 f"mid ${est['mid']:,.0f} (range ${est.get('low', 0):,.0f}-"
                 f"${est.get('high', 0):,.0f}), confidence {est.get('confidence', '?')}")
+        vs = est.get("venue_split")
+        if vs and vs["mid_tier"]["mid"] and vs["big3"]["mid"]:
+            line += (f" | mid-tier house est ${vs['mid_tier']['mid']:,.0f}"
+                     f" (n={vs['mid_tier']['n']}) vs big-three est"
+                     f" ${vs['big3']['mid']:,.0f} (n={vs['big3']['n']})")
+        elif est.get("big3_seen"):
+            line += (f" | ARTIST HAS BIG-THREE RESULTS"
+                     f" ({est.get('big3_count', 0)} Christie's/Sotheby's/Phillips comps)")
+        return line
     except Exception:
         return ""

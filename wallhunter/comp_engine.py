@@ -37,6 +37,13 @@ SOLD_ONLY_FOR_VALUE = True   # unsold lots inform demand/confidence, not the med
 MISSING_SIZE_W = 0.6    # neutral partial weight when a size is unknown
 MISSING_YEAR_W = 0.7    # neutral partial weight when a work-year is unknown
 MAX_TREND_CAGR = 0.30   # clamp the fitted artist trend to +/-30%/yr (anti-blowup)
+BIG3 = ("christie", "sotheby", "phillips")   # venue split: the big three
+
+
+def venue_tier(house) -> str:
+    h = (house or "").lower()
+    return "big3" if any(b in h for b in BIG3) else "mid"
+
 
 
 # --------------------------------------------------------------------------- #
@@ -296,7 +303,7 @@ def _weighted_percentile(pairs, q):
 # --------------------------------------------------------------------------- #
 #  the estimate
 # --------------------------------------------------------------------------- #
-def comp_estimate(subject, comps, now_year=2026):
+def comp_estimate(subject, comps, now_year=2026, _stratify=True):
     """Value the subject from a list of comps. PURE — no DB, no model.
 
     subject: {"medium": str, "area_sqin": float|None, "work_year": int|None,
@@ -383,10 +390,32 @@ def comp_estimate(subject, comps, now_year=2026):
             + (f"trend {cagr*100:+.0f}%/yr; " if cagr is not None else "")
             + f"spread {spread:.0%}")
 
-    return {"mid": round(mid), "low": round(low), "high": round(high), "n": n,
-            "n_effective": round(n_eff, 2), "confidence": conf,
-            "medium_category": scat, "trend_cagr": cagr, "used": used_out,
-            "note": note}
+    out = {"mid": round(mid), "low": round(low), "high": round(high), "n": n,
+           "n_effective": round(n_eff, 2), "confidence": conf,
+           "medium_category": scat, "trend_cagr": cagr, "used": used_out,
+           "note": note}
+
+    # Venue split (Daniel's model): what it fetches at a mid-tier house vs at
+    # the big three (if they would take it) — plus the standalone signal that
+    # big-three results exist at all. Same weighting, per venue stratum.
+    if _stratify:
+        big3 = [c for c in comps if venue_tier(c.get("house")) == "big3"]
+        out["big3_seen"] = bool(big3)
+        out["big3_count"] = len(big3)
+        if big3:
+            others = [c for c in comps if venue_tier(c.get("house")) != "big3"]
+            e3 = comp_estimate(subject, big3, now_year, _stratify=False)
+            em = (comp_estimate(subject, others, now_year, _stratify=False)
+                  if others else {"mid": None, "n": 0, "confidence": "none"})
+            out["venue_split"] = {
+                "big3":     {"mid": e3.get("mid"), "low": e3.get("low"),
+                             "high": e3.get("high"), "n": e3.get("n", 0),
+                             "confidence": e3.get("confidence")},
+                "mid_tier": {"mid": em.get("mid"), "low": em.get("low"),
+                             "high": em.get("high"), "n": em.get("n", 0),
+                             "confidence": em.get("confidence")},
+            }
+    return out
 
 
 # --------------------------------------------------------------------------- #
