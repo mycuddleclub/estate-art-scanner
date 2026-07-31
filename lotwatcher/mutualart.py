@@ -10,7 +10,7 @@ import subprocess
 
 from . import store
 
-DAILY_CAP = int(os.environ.get("LW_MUTUALART_DAILY_CAP", "30"))
+DAILY_CAP = int(os.environ.get("LW_MUTUALART_DAILY_CAP", "75"))
 APPRAISER = os.path.expanduser("~/art-appraiser")
 
 
