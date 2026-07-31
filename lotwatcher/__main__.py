@@ -13,7 +13,7 @@ import time
 from playwright.sync_api import sync_playwright
 
 from . import browser as B
-from . import config, digest, funnel, hibid_source, la_source, stage0, store
+from . import config, digest, funnel, hibid_source, la_source, mutualart, stage0, store
 
 CYCLE_HOURS = float(os.environ.get("LW_CYCLE_HOURS", "3"))
 
@@ -63,6 +63,7 @@ def do_cycle(conn, page):
     do_discover(conn, page)
     do_fetch(conn, page)
     funnel.run_stage1(conn)
+    mutualart.run(conn)          # fresh tier-A comps for top candidates
     funnel.run_stage3(conn, la_page=page, detail_fetch_fn=la_source.fetch_detail)
     digest.send_digest(conn)
     print("cycle done:", dict(store.counts(conn)))
