@@ -22,7 +22,7 @@ def do_discover(conn, page) -> int:
     new = 0
     print("== discover: HiBid (GraphQL) ==")
     skipped = 0
-    for a in hibid_source.discover():
+    for a in (hibid_source.discover() if "hibid" in config.PLATFORMS else []):
         if stage0.auction_skippable(a["title"], a["house"]):
             skipped += 1
             continue
@@ -30,7 +30,7 @@ def do_discover(conn, page) -> int:
                                 a["url"], a.get("ends_at")):
             new += 1
     print("== discover: LiveAuctioneers (browser) ==")
-    for a in la_source.discover(page):
+    for a in (la_source.discover(page) if "la" in config.PLATFORMS else []):
         if stage0.auction_skippable(a["title"], a["house"]):
             skipped += 1
             continue
@@ -41,8 +41,10 @@ def do_discover(conn, page) -> int:
 
 
 def do_fetch(conn, page) -> int:
+    plats = ",".join("'" + p + "'" for p in config.PLATFORMS)
     rows = conn.execute(
-        "SELECT * FROM auctions WHERE status='new' ORDER BY discovered_at LIMIT ?",
+        f"SELECT * FROM auctions WHERE status='new' AND platform IN ({plats})"
+        " ORDER BY discovered_at LIMIT ?",
         (config.MAX_AUCTIONS_PER_CYCLE,)).fetchall()
     total = 0
     for i, a in enumerate(rows, 1):

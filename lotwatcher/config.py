@@ -8,6 +8,10 @@ DB_PATH = WH_DATA / "lotwatcher.db"
 LA_PROFILE_DIR = WH_DATA / "la_profile"                # persistent browser profile
 LOG_DIR = Path.home() / "logs"
 
+# which platforms to watch: "hibid,la" (default) — run hibid-only until
+# the LA account login is done in the persistent browser window
+PLATFORMS = set(os.environ.get("LW_PLATFORMS", "hibid,la").split(","))
+
 # --- LiveAuctioneers ---
 LA_SEARCH_URL = "https://www.liveauctioneers.com/catalog/search/"
 LA_MAX_LISTING_PAGES = int(os.environ.get("LW_LA_LISTING_PAGES", "60"))
