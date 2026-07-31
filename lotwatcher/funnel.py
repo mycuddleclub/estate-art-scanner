@@ -85,6 +85,9 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
             except Exception:
                 pass
         ev = evidence.gather(r.get("artist") or "", deep=True)
+        cl = evidence.comp_line({**r, "detail": detail}, r.get("artist") or "")
+        if cl:
+            ev = (ev + "\n" + cl) if ev else cl
         try:
             s3 = llm.stage3_judge({**r, "detail": detail}, s1, ev, auction)
         except Exception as e:

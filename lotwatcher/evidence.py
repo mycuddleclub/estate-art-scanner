@@ -67,3 +67,23 @@ def standing(artist: str) -> str:
     except Exception:
         pass
     return ""
+
+comp_engine = _load("comp_engine")
+
+
+def comp_line(lot: dict, artist: str) -> str:
+    """Weighted comp valuation when the artist has banked tier-A comps.
+    Pure math over prices.db — no model call, no network."""
+    if comp_engine is None or not artist:
+        return ""
+    try:
+        est = comp_engine.value_lot(
+            {"title": lot.get("title", ""), "text": lot.get("detail", "") or ""},
+            artist)
+        if not est or not est.get("mid"):
+            return ""
+        return (f"Comp engine ({est.get('n_comps', '?')} tier-A comps): "
+                f"mid ${est['mid']:,.0f} (range ${est.get('low', 0):,.0f}-"
+                f"${est.get('high', 0):,.0f}), confidence {est.get('confidence', '?')}")
+    except Exception:
+        return ""
