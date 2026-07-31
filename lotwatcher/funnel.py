@@ -69,6 +69,10 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         return 0
     print(f"stage3: {len(rows)} candidates on {config.STAGE3_MODEL}")
     llm.ensure_model(config.STAGE3_MODEL)
+    # comp-engine classify_work must ride the loaded judge model, not force
+    # a qwen swap mid-phase (both cannot fit the 64 GB carve)
+    import os as _os
+    _os.environ["LOCAL_LLM_READ_MODEL"] = config.STAGE3_MODEL
     n = 0
     for row in rows:
         r = dict(row)
