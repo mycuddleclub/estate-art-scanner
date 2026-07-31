@@ -21,19 +21,22 @@ CYCLE_HOURS = float(os.environ.get("LW_CYCLE_HOURS", "3"))
 def do_discover(conn, page) -> int:
     new = 0
     print("== discover: HiBid (GraphQL) ==")
+    skipped = 0
     for a in hibid_source.discover():
-        if stage0.house_blocked(a["house"]):
+        if stage0.auction_skippable(a["title"], a["house"]):
+            skipped += 1
             continue
         if store.upsert_auction(conn, "hibid", a["id"], a["title"], a["house"],
                                 a["url"], a.get("ends_at")):
             new += 1
     print("== discover: LiveAuctioneers (browser) ==")
     for a in la_source.discover(page):
-        if stage0.house_blocked(a["house"]):
+        if stage0.auction_skippable(a["title"], a["house"]):
+            skipped += 1
             continue
         if store.upsert_auction(conn, "la", a["id"], a["title"], a["house"], a["url"]):
             new += 1
-    print(f"discover: {new} new auctions")
+    print(f"discover: {new} new auctions ({skipped} skipped: blocked/non-art genre)")
     return new
 
 
