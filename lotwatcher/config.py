@@ -35,6 +35,9 @@ LM_BASE = "http://localhost:1234/v1"
 LMS_EXE = "/mnt/c/Users/willi/.lmstudio/bin/lms.exe"
 STAGE1_WORKERS = int(os.environ.get("LW_STAGE1_WORKERS", "4"))
 STAGE1_PROMISE_CUTOFF = float(os.environ.get("LW_PROMISE_CUTOFF", "5.0"))
+# lower bar for lots that named a plausible artist (catches contemporary
+# gallery artists not in the historical-skewed authority.db)
+STAGE1_NAMED_CUTOFF = float(os.environ.get("LW_NAMED_CUTOFF", "3.0"))
 MAX_AUCTIONS_PER_CYCLE = int(os.environ.get("LW_MAX_AUCTIONS", "60"))
 MAX_LOTS_PER_AUCTION = int(os.environ.get("LW_MAX_LOTS", "1500"))
 

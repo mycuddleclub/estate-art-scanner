@@ -64,8 +64,14 @@ def run_stage1(conn, limit=100000) -> int:
                 store.update_lot(conn, key, stage="s1")   # stays; retried next cycle
                 continue
             artist = (s1.get("artist") or "").strip()
-            promote = (s1["promise"] >= config.STAGE1_PROMISE_CUTOFF
-                       or (artist and evidence.standing(artist)))
+            named = len(artist.split()) >= 2      # a real person-name to check
+            promote = (
+                s1["promise"] >= config.STAGE1_PROMISE_CUTOFF
+                or (artist and evidence.standing(artist))
+                # named-artist artworks clear a LOWER bar so contemporary
+                # gallery artists (absent from authority.db) reach the
+                # evidence stage instead of being filed blind at stage 1
+                or (named and s1["promise"] >= config.STAGE1_NAMED_CUTOFF))
             store.update_lot(
                 conn, key,
                 s1=json.dumps(s1), category=s1.get("category", "other"),
