@@ -62,15 +62,16 @@ def set_auction_status(conn, key, status, note=None, lots_total=None):
     conn.commit()
 
 
-def add_lot(conn, platform, lot_id, auction_key, title, estimate, bid, url) -> bool:
+def add_lot(conn, platform, lot_id, auction_key, title, estimate, bid, url,
+            detail="") -> bool:
     key = f"{platform}:{lot_id}"
     cur = conn.execute("SELECT 1 FROM lots WHERE key=?", (key,))
     if cur.fetchone():
         return False
     conn.execute(
-        "INSERT INTO lots(key, auction_key, title, estimate, bid, url, updated_at)"
-        " VALUES (?,?,?,?,?,?,?)",
-        (key, auction_key, title, estimate, bid, url, time.time()))
+        "INSERT INTO lots(key, auction_key, title, estimate, bid, url, detail,"
+        " updated_at) VALUES (?,?,?,?,?,?,?,?)",
+        (key, auction_key, title, estimate, bid, url, detail, time.time()))
     return True
 
 

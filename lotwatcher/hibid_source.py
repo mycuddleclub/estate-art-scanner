@@ -78,7 +78,62 @@ _LOT_LINK_JS = """
 """
 
 
-def fetch_lots(page, catalog_url: str) -> list[dict]:
+_LOT_Q = """query($auctionId: Int, $pageNumber: Int!, $pageLength: Int!,
+        $status: AuctionLotStatus, $sortOrder: EventItemSortOrder) {
+  lotSearch(input: {auctionId: $auctionId, status: $status,
+                    sortOrder: $sortOrder, countAsView: false}
+            pageNumber: $pageNumber pageLength: $pageLength
+            sortDirection: DESC) {
+    pagedResults {
+      totalCount
+      results { id itemId lotNumber lead description estimate bidAmount bidQuantity }
+    }
+  }
+}"""
+
+
+def fetch_lots_api(auction_id: str) -> list[dict]:
+    """All lots of one auction via HiBid's own GraphQL — no browser, ~1s.
+    bidAmount is a placeholder (123.45) without auth, so bids stay unknown;
+    estimate + title + full description are real and drive the funnel."""
+    sess = requests.Session()
+    sess.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                         "Content-Type": "application/json"})
+    lots, page_num, total = [], 1, None
+    while True:
+        r = sess.post(config.HIBID_GRAPHQL, timeout=30, json={
+            "query": _LOT_Q,
+            "variables": {"auctionId": int(auction_id), "pageNumber": page_num,
+                          "pageLength": 100, "status": "OPEN",
+                          "sortOrder": "LOT_NUMBER"}})
+        r.raise_for_status()
+        d = r.json()
+        if "errors" in d:
+            raise RuntimeError(str(d["errors"])[:200])
+        pg = d["data"]["lotSearch"]["pagedResults"]
+        total = pg["totalCount"]
+        for it in pg["results"] or []:
+            lid = str(it.get("id") or it.get("itemId") or "")
+            if not lid:
+                continue
+            bid = it.get("bidAmount")
+            if bid in (None, 123.45):        # unauth placeholder
+                bid = ""
+            lots.append({
+                "id": lid,
+                "title": (it.get("lead") or "")[:300],
+                "estimate": (it.get("estimate") or "")[:80],
+                "bid": str(bid) if bid != "" else "",
+                "url": f"https://hibid.com/lot/{lid}",
+                "detail": (it.get("description") or "")[:2500],
+            })
+        if len(lots) >= min(total, config.MAX_LOTS_PER_AUCTION) or not pg["results"]:
+            break
+        page_num += 1
+    return lots
+
+
+def _fetch_lots_browser(page, catalog_url: str) -> list[dict]:
     """Every lot in a HiBid catalog via tile scraping (Angular, needs browser)."""
     lots, seen = [], set()
     for pnum in range(1, config.HIBID_MAX_CATALOG_PAGES + 1):
@@ -129,3 +184,14 @@ def fetch_lots(page, catalog_url: str) -> list[dict]:
         if len(lots) >= config.MAX_LOTS_PER_AUCTION:
             break
     return lots
+
+def fetch_lots(page, catalog_url: str) -> list[dict]:
+    """API-first (fast, rich descriptions); browser tiles as fallback."""
+    import re as _re
+    m = _re.search(r"/catalog/(\d+)", catalog_url)
+    if m:
+        try:
+            return fetch_lots_api(m.group(1))
+        except Exception as e:
+            print(f"    lot API failed ({str(e)[:60]}) — browser fallback")
+    return _fetch_lots_browser(page, catalog_url)

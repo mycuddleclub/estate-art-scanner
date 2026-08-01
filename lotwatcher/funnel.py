@@ -13,12 +13,14 @@ def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
     added = 0
     for l in lots:
         if not store.add_lot(conn, a["platform"], l["id"], a["key"],
-                             l["title"], l["estimate"], l["bid"], l["url"]):
+                             l["title"], l["estimate"], l["bid"], l["url"],
+                             detail=l.get("detail", "")):
             continue
         added += 1
         key = f"{a['platform']}:{l['id']}"
+        band_text = l["title"] + " " + (l.get("detail") or "")[:300]
         store.update_lot(conn, key,
-                         stage=("s1" if stage0.lot_passes(l["title"]) else "junk"))
+                         stage=("s1" if stage0.lot_passes(band_text) else "junk"))
     conn.commit()
     store.set_auction_status(conn, a["key"], "fetched", lots_total=len(lots))
     return added

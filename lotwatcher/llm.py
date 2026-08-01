@@ -54,6 +54,7 @@ STAGE1_PROMPT = """You screen auction lots for an art collector. Given ONE lot, 
 promise = likelihood this is a collectible fine/folk/self-taught artwork by an identifiable artist worth researching. Signed/attributed works with a plausible artist name score high. Mass reproductions, decor, and junk score low. When uncertain, lean HIGHER (recall over precision).
 
 LOT: {title}
+DESCRIPTION: {desc}
 ESTIMATE: {estimate}  CURRENT BID: {bid}
 JSON:"""
 
@@ -61,6 +62,7 @@ JSON:"""
 def stage1_classify(lot: dict) -> dict:
     text = _chat(config.STAGE1_MODEL, STAGE1_PROMPT.format(
         title=lot["title"][:400],
+        desc=(lot.get("detail") or "none")[:600],
         estimate=lot["estimate"] or "unknown",
         bid=lot["bid"] or "none"), max_tokens=300, reasoning="none")
     d = _extract_json(text)
