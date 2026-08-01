@@ -44,7 +44,7 @@ def do_fetch(conn, page) -> int:
     plats = ",".join("'" + p + "'" for p in config.PLATFORMS)
     rows = conn.execute(
         f"SELECT * FROM auctions WHERE status='new' AND platform IN ({plats})"
-        " ORDER BY discovered_at LIMIT ?",
+        " ORDER BY (ends_at IS NULL), ends_at, discovered_at LIMIT ?",
         (config.MAX_AUCTIONS_PER_CYCLE,)).fetchall()
     total = 0
     for i, a in enumerate(rows, 1):

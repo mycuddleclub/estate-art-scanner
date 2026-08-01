@@ -40,6 +40,7 @@ def discover(max_pages: int = 25) -> list[dict]:
             break
         from datetime import datetime, timedelta, timezone
         now = datetime.now(timezone.utc).replace(tzinfo=None)
+        floor = now + timedelta(days=config.MIN_DAYS_OUT)
         horizon = now + timedelta(days=14)
         added = 0
         for wrap in results:
@@ -50,7 +51,7 @@ def discover(max_pages: int = 25) -> list[dict]:
             ends = a.get("eventDateEnd") or ""
             try:
                 end_dt = datetime.fromisoformat(ends.replace("Z", "").split("+")[0])
-                if end_dt < now or end_dt > horizon:
+                if end_dt < floor or end_dt > horizon:
                     continue
             except Exception:
                 pass

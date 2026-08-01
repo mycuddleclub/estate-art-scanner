@@ -21,6 +21,11 @@ LA_AUCTION_DELAY_S = (4.0, 9.0)
 
 # --- HiBid ---
 HIBID_GRAPHQL = "https://hibid.com/graphql"
+# only take auctions ending at least this many days out (review runway);
+# in steady state everything is scanned days ahead, so this mostly trims
+# the initial backfill of about-to-end auctions
+MIN_DAYS_OUT = float(os.environ.get("LW_MIN_DAYS_OUT", "3"))
+
 HIBID_MAX_CATALOG_PAGES = int(os.environ.get("LW_HIBID_CATALOG_PAGES", "40"))
 
 # --- funnel ---
