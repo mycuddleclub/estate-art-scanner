@@ -1,6 +1,7 @@
 """Local model access: direct LM Studio OpenAI endpoint + model swapping.
 Stage 1 (Qwen) and stage 3 (GPT-OSS-120B) can't co-reside in the 64 GB carve,
 so cycles run in phases and swap via the lms CLI (Windows interop)."""
+import os
 import json
 import re
 import subprocess
