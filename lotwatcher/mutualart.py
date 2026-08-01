@@ -18,8 +18,23 @@ def _today_key() -> str:
     return "ma_harvest_" + datetime.date.today().isoformat()
 
 
+# makers/companies are not artists — don't spend MutualArt slots on them
+_MAKER_WORDS = (
+    "glass", "pottery", "porcelain", "crystal", "china", "silver co",
+    "& sons", "& grondahl", "ltd", " inc", " co.", "copenhagen", "rosenthal",
+    "metalcrafters", "woodcarvers", "trifari", "steuben", "royal ",
+    "brothers", "bros.", "manufactory", "works", "guild", "studio s",
+)
+
+
+def _is_maker(name: str) -> bool:
+    n = " " + name.lower() + " "
+    return any(w in n for w in _MAKER_WORDS)
+
+
 def pick_artists(conn, remaining: int) -> list[str]:
-    """Top s3 candidates' artists, best promise first, two-word minimum."""
+    """Top s3 candidates' artists, best promise first, two-word minimum,
+    makers/companies excluded."""
     rows = conn.execute(
         "SELECT artist, MAX(promise) p FROM lots"
         " WHERE stage='s3' AND artist IS NOT NULL AND artist != ''"
@@ -27,7 +42,8 @@ def pick_artists(conn, remaining: int) -> list[str]:
     out = []
     for r in rows:
         a = (r["artist"] or "").strip()
-        if len(a.split()) >= 2 and a.lower() not in (x.lower() for x in out):
+        if (len(a.split()) >= 2 and not _is_maker(a)
+                and a.lower() not in (x.lower() for x in out)):
             out.append(a)
         if len(out) >= remaining:
             break
