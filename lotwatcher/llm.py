@@ -93,7 +93,8 @@ EVIDENCE (local databases — absence is NEUTRAL, never disqualifying):
 
 Output STRICT JSON only:
 {{"flag": "YES/NO", "confidence": "HIGH/MEDIUM/LOW", "score": 0-10, "reasoning": "2-3 sentences: why this is/isn't worth his personal review", "headline": "max 12 words for the email subject line"}}
-Flag YES when: known/listed artist materially underpriced vs evidence, OR strong institutional standing with low bid, OR compelling uncatalogued-original signals. Flag NO for reproductions, decorative mass goods, or fair pricing.
+Flag YES ONLY when there is a SPECIFIC, IDENTIFIABLE artist by name (trained OR self-taught is fine) who is genuinely listed/collected/documented — someone Daniel can research and build a buying case on — AND the lot is materially underpriced vs the evidence or sitting with no/low bids. The artist may be named in the listing or identified from a legible signature in the VISION line.
+Flag NO for: anonymous or undocumented makers even if the piece is old/rare/folk (no name = no case, he does not want these); reproductions and mass-produced prints; decorative mass goods; fairly-priced lots; and speculative "might be something" lots with no identifiable artist. "Old, rare, no bids" is NOT enough — there must be a real, name-able, documented artist behind it.
 Skepticism rules: attribution hedges ("attributed to", "after", "school/style/circle/manner/follower of") lower confidence sharply — flag only with independent evidence. A blue-chip master name (Picasso, Dali, Chagall...) claimed as an ORIGINAL at a regional house is presumptively fake — the fake economy operates on famous names; flag NO unless provenance in the listing is specific and verifiable."""
 
 

@@ -40,7 +40,8 @@ MAX_LOTS_PER_AUCTION = int(os.environ.get("LW_MAX_LOTS", "1500"))
 
 # display-time category filter (never filters detection — Daniel's rule)
 HIDE_CATEGORIES = set(os.environ.get(
-    "WH_HIDE_CATEGORIES", "jewelry,glass,metalware,furniture,decor,book").split(","))
+    "WH_HIDE_CATEGORIES",
+    "jewelry,glass,metalware,furniture,decor,book,print").split(","))
 
 # art-signal band (deep.py precedent, Daniel-approved design): titles that
 # clearly signal art OR are too vague to rule out go to stage 1.

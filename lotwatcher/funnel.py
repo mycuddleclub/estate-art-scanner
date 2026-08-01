@@ -144,6 +144,11 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
                 print(f"  stage3 error: {str(e)[:120]}")
                 continue
             flagged = 1 if str(s3.get("flag", "")).upper().startswith("Y") else 0
+            # hard gate (Daniel 2026-08-01): no identifiable artist = no flag,
+            # no matter how promising — he wants name-able artists he can buy,
+            # not anonymous "might be undervalued" lots
+            if flagged and not (r.get("artist") or "").strip():
+                flagged = 0
             store.update_lot(conn, r["key"], s3=json.dumps(s3), flagged=flagged,
                              stage="done",
                              promise=float(s3.get("score", r["promise"] or 0)))
