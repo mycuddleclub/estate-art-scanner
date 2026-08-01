@@ -8,8 +8,23 @@ from . import config, evidence, llm, stage0, store
 
 def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
     """Fetch every lot of one auction, stage-0 them into the store."""
+    from wallhunter.deep import mill_masters, is_mill
     a = dict(auction_row)
     lots = fetch_lots_fn(page, a["url"])
+
+    # Fake-mill tell (Daniel's rule, ported from deep.py): a regional catalog
+    # full of "original" blue-chip masters is a fraud mill — block the whole
+    # auction before spending a single model token on it.
+    names, claims = mill_masters(lots)
+    if is_mill(names, claims):
+        store.set_auction_status(
+            conn, a["key"], "blocked",
+            note=f"FAKE MILL: {len(names)} masters / {claims} claims"
+                 f" ({', '.join(sorted(names)[:5])})")
+        print(f"    MILL BLOCKED: {a['house'][:40]} — "
+              f"{len(names)} blue-chip names, {claims} original-claims")
+        return 0
+
     added = 0
     for l in lots:
         if not store.add_lot(conn, a["platform"], l["id"], a["key"],

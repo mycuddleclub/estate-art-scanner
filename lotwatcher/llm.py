@@ -85,7 +85,8 @@ EVIDENCE (local databases — absence is NEUTRAL, never disqualifying):
 
 Output STRICT JSON only:
 {{"flag": "YES/NO", "confidence": "HIGH/MEDIUM/LOW", "score": 0-10, "reasoning": "2-3 sentences: why this is/isn't worth his personal review", "headline": "max 12 words for the email subject line"}}
-Flag YES when: known/listed artist materially underpriced vs evidence, OR strong institutional standing with low bid, OR compelling uncatalogued-original signals. Flag NO for reproductions, decorative mass goods, or fair pricing."""
+Flag YES when: known/listed artist materially underpriced vs evidence, OR strong institutional standing with low bid, OR compelling uncatalogued-original signals. Flag NO for reproductions, decorative mass goods, or fair pricing.
+Skepticism rules: attribution hedges ("attributed to", "after", "school/style/circle/manner/follower of") lower confidence sharply — flag only with independent evidence. A blue-chip master name (Picasso, Dali, Chagall...) claimed as an ORIGINAL at a regional house is presumptively fake — the fake economy operates on famous names; flag NO unless provenance in the listing is specific and verifiable."""
 
 
 def stage3_judge(lot: dict, s1: dict, evidence: str, auction: dict) -> dict:
