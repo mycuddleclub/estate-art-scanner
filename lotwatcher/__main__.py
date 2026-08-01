@@ -64,10 +64,19 @@ def do_fetch(conn, page) -> int:
 def do_cycle(conn, page):
     do_discover(conn, page)
     do_fetch(conn, page)
-    funnel.run_stage1(conn)
-    mutualart.run(conn)          # fresh tier-A comps for top candidates
-    funnel.run_stage3(conn, la_page=page, detail_fetch_fn=la_source.fetch_detail)
-    digest.send_digest(conn)
+    # Chunked funnel: screen -> harvest -> judge -> email every ~15k lots, so
+    # digests flow every few hours during catch-up instead of one giant burst
+    # after the whole backlog. Model swaps per chunk cost ~2 min each way.
+    chunk = int(os.environ.get("LW_S1_CHUNK", "15000"))
+    while True:
+        n1 = funnel.run_stage1(conn, limit=chunk)
+        mutualart.run(conn)      # fresh tier-A comps for top candidates
+        n3 = funnel.run_stage3(conn, la_page=page,
+                               detail_fetch_fn=la_source.fetch_detail)
+        digest.send_digest(conn)
+        if n1 == 0 and n3 == 0:
+            break
+        print("chunk done:", dict(store.counts(conn)))
     print("cycle done:", dict(store.counts(conn)))
 
 
