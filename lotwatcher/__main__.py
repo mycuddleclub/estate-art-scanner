@@ -69,11 +69,13 @@ def do_cycle(conn, page):
     # after the whole backlog. Model swaps per chunk cost ~2 min each way.
     chunk = int(os.environ.get("LW_S1_CHUNK", "15000"))
     while True:
-        n1 = funnel.run_stage1(conn, limit=chunk)
-        mutualart.run(conn)      # fresh tier-A comps for top candidates
+        # judge-first: pending candidates (incl. any from the previous chunk)
+        # become flags and EMAIL before the next long screening block
+        mutualart.run(conn)      # fresh tier-A comps for the judgment
         n3 = funnel.run_stage3(conn, la_page=page,
                                detail_fetch_fn=la_source.fetch_detail)
         digest.send_digest(conn)
+        n1 = funnel.run_stage1(conn, limit=chunk)
         if n1 == 0 and n3 == 0:
             break
         print("chunk done:", dict(store.counts(conn)))
