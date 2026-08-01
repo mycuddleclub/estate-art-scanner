@@ -11,6 +11,10 @@ import subprocess
 from . import store
 
 DAILY_CAP = int(os.environ.get("LW_MUTUALART_DAILY_CAP", "75"))
+# per-chunk cap: the deep harvest costs ~6 min/artist, so a full daily batch
+# would sit for hours in front of the judgments. A few artists per chunk keeps
+# comps flowing without ever blocking the digest for long.
+PER_CHUNK = int(os.environ.get("LW_MUTUALART_PER_CHUNK", "6"))
 APPRAISER = os.path.expanduser("~/art-appraiser")
 
 
@@ -52,7 +56,7 @@ def pick_artists(conn, remaining: int) -> list[str]:
 
 def run(conn) -> int:
     used = int(store.get_meta(conn, _today_key(), "0"))
-    remaining = max(0, DAILY_CAP - used)
+    remaining = min(max(0, DAILY_CAP - used), PER_CHUNK)
     if remaining == 0:
         print("mutualart: daily cap reached — skipping")
         return 0
