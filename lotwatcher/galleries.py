@@ -72,11 +72,16 @@ def represented_galleries(artist: str) -> list[str]:
         works = ac.lookup(artist) or []
     except Exception:
         return []
+    # exclude non-representation partners: auction houses, benefit/charity
+    # auctions, and museums list themselves as Artsy "partner" too
+    NOISE = ("auction", "benefit", "phillips", "christie", "sotheby",
+             "bonhams", "freeman", "heritage", "swann", "museum",
+             "artadia", "biennial", "fair", "foundation")
     seen, out = set(), []
     for w in works:
         name = ((w.get("partner") or {}).get("name") or "").strip()
         k = name.lower()
-        if name and k not in seen:
+        if name and k not in seen and not any(n in k for n in NOISE):
             seen.add(k)
             out.append(name)
     return out
