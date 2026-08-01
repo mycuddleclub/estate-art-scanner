@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS lots (
     stage TEXT DEFAULT 's0',           -- s0 | s1 | s3 | done | junk
     s1 TEXT, s3 TEXT,                  -- json blobs
     category TEXT, artist TEXT, promise REAL,
+    img TEXT, vision TEXT,
     flagged INTEGER DEFAULT 0,
     emailed INTEGER DEFAULT 0,
     updated_at REAL
@@ -38,6 +39,12 @@ def connect() -> sqlite3.Connection:
     conn = sqlite3.connect(config.DB_PATH, timeout=60)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    for col in ("img TEXT", "vision TEXT"):
+        try:
+            conn.execute(f"ALTER TABLE lots ADD COLUMN {col}")
+        except Exception:
+            pass
+    conn.commit()
     return conn
 
 
@@ -63,15 +70,15 @@ def set_auction_status(conn, key, status, note=None, lots_total=None):
 
 
 def add_lot(conn, platform, lot_id, auction_key, title, estimate, bid, url,
-            detail="") -> bool:
+            detail="", img="") -> bool:
     key = f"{platform}:{lot_id}"
     cur = conn.execute("SELECT 1 FROM lots WHERE key=?", (key,))
     if cur.fetchone():
         return False
     conn.execute(
         "INSERT INTO lots(key, auction_key, title, estimate, bid, url, detail,"
-        " updated_at) VALUES (?,?,?,?,?,?,?,?)",
-        (key, auction_key, title, estimate, bid, url, detail, time.time()))
+        " img, updated_at) VALUES (?,?,?,?,?,?,?,?,?)",
+        (key, auction_key, title, estimate, bid, url, detail, img, time.time()))
     return True
 
 

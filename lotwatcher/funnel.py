@@ -3,7 +3,7 @@ Phase-batched because both models can't co-reside in the 64 GB VRAM carve."""
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from . import config, evidence, llm, stage0, store
+from . import config, evidence, llm, stage0, store, vision
 
 
 def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
@@ -29,7 +29,7 @@ def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
     for l in lots:
         if not store.add_lot(conn, a["platform"], l["id"], a["key"],
                              l["title"], l["estimate"], l["bid"], l["url"],
-                             detail=l.get("detail", "")):
+                             detail=l.get("detail", ""), img=l.get("img", "")):
             continue
         added += 1
         key = f"{a['platform']}:{l['id']}"
@@ -118,6 +118,14 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         cl = evidence.comp_line({**r, "detail": detail}, r.get("artist") or "")
         if cl:
             ev = (ev + "\n" + cl) if ev else cl
+        # vision: look at the actual photo (Qwen-VL, resident on the 96GB carve)
+        if not _os.environ.get("LW_NO_VISION") and r.get("img"):
+            v = vision.read_lot(r["img"], r.get("title", ""))
+            if v:
+                store.update_lot(conn, r["key"], vision=json.dumps(v))
+                vline = vision.evidence_line(v)
+                if vline:
+                    ev = (ev + "\n" + vline) if ev else vline
         prepared.append((r, s1, detail, ev, auction))
 
     def judge(item):

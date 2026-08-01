@@ -87,6 +87,7 @@ _LOT_Q = """query($auctionId: Int, $pageNumber: Int!, $pageLength: Int!,
     pagedResults {
       totalCount
       results { id itemId lotNumber lead description estimate
+                featuredPicture { fullSizeLocation hdThumbnailLocation thumbnailLocation }
                 lotState { bidCount highBid minBid isClosed } }
     }
   }
@@ -128,6 +129,9 @@ def fetch_lots_api(auction_id: str) -> list[dict]:
                 bid_str = f"no bids (opens ${min_bid:g})"
             else:
                 bid_str = ""
+            fp = it.get("featuredPicture") or {}
+            img = (fp.get("fullSizeLocation") or fp.get("hdThumbnailLocation")
+                   or fp.get("thumbnailLocation") or "")
             lots.append({
                 "id": lid,
                 "title": (it.get("lead") or "")[:300],
@@ -135,6 +139,7 @@ def fetch_lots_api(auction_id: str) -> list[dict]:
                 "bid": bid_str,
                 "url": f"https://hibid.com/lot/{lid}",
                 "detail": (it.get("description") or "")[:2500],
+                "img": img,
             })
         if len(lots) >= min(total, config.MAX_LOTS_PER_AUCTION) or not pg["results"]:
             break
