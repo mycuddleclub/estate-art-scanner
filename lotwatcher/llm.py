@@ -62,7 +62,7 @@ JSON:"""
 def stage1_classify(lot: dict) -> dict:
     text = _chat(config.STAGE1_MODEL, STAGE1_PROMPT.format(
         title=lot["title"][:400],
-        desc=(lot.get("detail") or "none")[:600],
+        desc=(lot.get("detail") or "none")[:250],
         estimate=lot["estimate"] or "unknown",
         bid=lot["bid"] or "none"), max_tokens=300, reasoning="none")
     d = _extract_json(text)
