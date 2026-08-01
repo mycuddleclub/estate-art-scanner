@@ -3,7 +3,7 @@ Phase-batched because both models can't co-reside in the 64 GB VRAM carve."""
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from . import config, evidence, llm, stage0, store, vision
+from . import config, evidence, galleries, llm, stage0, store, vision
 
 
 def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
@@ -118,6 +118,9 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         cl = evidence.comp_line({**r, "detail": detail}, r.get("artist") or "")
         if cl:
             ev = (ev + "\n" + cl) if ev else cl
+        gl = galleries.evidence_line(r.get("artist") or "")
+        if gl:
+            ev = (ev + "\n" + gl) if ev else gl
         # vision: look at the actual photo (Qwen-VL, resident on the 96GB carve)
         if not _os.environ.get("LW_NO_VISION") and r.get("img"):
             v = vision.read_lot(r["img"], r.get("title", ""))

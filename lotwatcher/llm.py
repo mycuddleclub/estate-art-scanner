@@ -86,6 +86,8 @@ listing detail (may be empty): {detail}
 
 STAGE-1 READ: artist claim "{artist}", category {category}, promise {promise}
 
+A GALLERY line means the artist has commercial gallery representation (a real positive signal a dealer backs the work) — weight by tier: Tier-1 mega-gallery (Gagosian/Zwirner/Hauser & Wirth class) is a strong buy signal, Tier-2 launchpad is a solid signal, Tier-3/4 is a modest plus. A folk/self-taught artist picked up by ANY serious gallery is exactly the discovery Daniel wants. Absence of a GALLERY line is NEUTRAL, never a negative.
+
 A VISION line (if present) is the model's own look at the lot PHOTO — a transcribed signature or an image-does-not-match-listing flag is strong primary evidence, weigh it heavily.
 
 EVIDENCE (local databases — absence is NEUTRAL, never disqualifying):
