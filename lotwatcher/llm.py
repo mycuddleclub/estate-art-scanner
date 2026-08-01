@@ -10,8 +10,12 @@ import httpx
 from . import config
 
 
+KEEP_BOTH = os.environ.get("LW_KEEP_BOTH", "0") == "1"
+
+
 def ensure_model(name: str):
-    """Unload whatever is loaded and load `name`. Idempotent-ish, ~30-60s."""
+    """Make `name` servable. With LW_KEEP_BOTH=1 (96 GB carve: both models
+    fit resident) we never unload — just load if missing. Otherwise swap."""
     try:
         r = httpx.get(f"{config.LM_BASE}/models", timeout=10)
         loaded = [m["id"] for m in r.json().get("data", [])]
@@ -21,7 +25,8 @@ def ensure_model(name: str):
     ps = subprocess.run([config.LMS_EXE, "ps"], capture_output=True, text=True, timeout=60)
     if name in (ps.stdout or ""):
         return
-    subprocess.run([config.LMS_EXE, "unload", "--all"], capture_output=True, timeout=120)
+    if not KEEP_BOTH:
+        subprocess.run([config.LMS_EXE, "unload", "--all"], capture_output=True, timeout=120)
     subprocess.run([config.LMS_EXE, "load", name, "--gpu", "max",
                     "--context-length", "8192", "-y"],
                    capture_output=True, text=True, timeout=600)
