@@ -104,7 +104,10 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         conn.commit()
         rows = store.lots_in_stage(conn, "s3", limit)
 
-    def judge(row):
+    # SQLite is single-thread-only: ALL db and evidence-client reads happen
+    # here in the main thread; worker threads make pure HTTP model calls.
+    prepared = []
+    for row in rows:
         r = dict(row)
         auction = conn.execute("SELECT * FROM auctions WHERE key=?",
                                (r["auction_key"],)).fetchone()
@@ -115,13 +118,17 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         cl = evidence.comp_line({**r, "detail": detail}, r.get("artist") or "")
         if cl:
             ev = (ev + "\n" + cl) if ev else cl
+        prepared.append((r, s1, detail, ev, auction))
+
+    def judge(item):
+        r, s1, detail, ev, auction = item
         s3 = llm.stage3_judge({**r, "detail": detail}, s1, ev, auction)
         return r, s3
 
     n = 0
     workers = int(_os.environ.get("LW_STAGE3_WORKERS", "3"))
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = [ex.submit(judge, row) for row in rows]
+        futs = [ex.submit(judge, item) for item in prepared]
         for fut in as_completed(futs):
             try:
                 r, s3 = fut.result()
