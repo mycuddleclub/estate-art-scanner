@@ -73,37 +73,51 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
     # a qwen swap mid-phase (both cannot fit the 64 GB carve)
     import os as _os
     _os.environ["LOCAL_LLM_READ_MODEL"] = config.STAGE3_MODEL
-    n = 0
-    for row in rows:
+
+    # LA detail fetches are serial (one shared browser page), done up front
+    if detail_fetch_fn and la_page is not None:
+        for row in rows:
+            r = dict(row)
+            if r["key"].startswith("la:") and not (r.get("detail") or ""):
+                try:
+                    d = detail_fetch_fn(la_page, r["url"]) or ""
+                    store.update_lot(conn, r["key"], detail=d)
+                except Exception:
+                    pass
+        conn.commit()
+        rows = store.lots_in_stage(conn, "s3", limit)
+
+    def judge(row):
         r = dict(row)
         auction = conn.execute("SELECT * FROM auctions WHERE key=?",
                                (r["auction_key"],)).fetchone()
         auction = dict(auction) if auction else {}
         s1 = json.loads(r["s1"]) if r["s1"] else {}
         detail = r.get("detail") or ""
-        if (not detail and detail_fetch_fn and la_page is not None
-                and r["key"].startswith("la:")):
-            try:
-                detail = detail_fetch_fn(la_page, r["url"]) or ""
-                store.update_lot(conn, r["key"], detail=detail)
-            except Exception:
-                pass
         ev = evidence.gather(r.get("artist") or "", deep=True)
         cl = evidence.comp_line({**r, "detail": detail}, r.get("artist") or "")
         if cl:
             ev = (ev + "\n" + cl) if ev else cl
-        try:
-            s3 = llm.stage3_judge({**r, "detail": detail}, s1, ev, auction)
-        except Exception as e:
-            print(f"  stage3 error {r['key']}: {str(e)[:120]}")
-            continue
-        flagged = 1 if str(s3.get("flag", "")).upper().startswith("Y") else 0
-        store.update_lot(conn, r["key"], s3=json.dumps(s3), flagged=flagged,
-                         stage="done",
-                         promise=float(s3.get("score", r["promise"] or 0)))
-        n += 1
-        if n % 25 == 0:
-            conn.commit()
-            print(f"  stage3 {n}/{len(rows)}")
+        s3 = llm.stage3_judge({**r, "detail": detail}, s1, ev, auction)
+        return r, s3
+
+    n = 0
+    workers = int(_os.environ.get("LW_STAGE3_WORKERS", "3"))
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futs = [ex.submit(judge, row) for row in rows]
+        for fut in as_completed(futs):
+            try:
+                r, s3 = fut.result()
+            except Exception as e:
+                print(f"  stage3 error: {str(e)[:120]}")
+                continue
+            flagged = 1 if str(s3.get("flag", "")).upper().startswith("Y") else 0
+            store.update_lot(conn, r["key"], s3=json.dumps(s3), flagged=flagged,
+                             stage="done",
+                             promise=float(s3.get("score", r["promise"] or 0)))
+            n += 1
+            if n % 25 == 0:
+                conn.commit()
+                print(f"  stage3 {n}/{len(rows)}")
     conn.commit()
     return n
