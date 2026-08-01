@@ -86,7 +86,8 @@ _LOT_Q = """query($auctionId: Int, $pageNumber: Int!, $pageLength: Int!,
             sortDirection: DESC) {
     pagedResults {
       totalCount
-      results { id itemId lotNumber lead description estimate bidAmount bidQuantity }
+      results { id itemId lotNumber lead description estimate
+                lotState { bidCount highBid minBid isClosed } }
     }
   }
 }"""
@@ -116,14 +117,22 @@ def fetch_lots_api(auction_id: str) -> list[dict]:
             lid = str(it.get("id") or it.get("itemId") or "")
             if not lid:
                 continue
-            bid = it.get("bidAmount")
-            if bid in (None, 123.45):        # unauth placeholder
-                bid = ""
+            ls = it.get("lotState") or {}
+            bid_count = ls.get("bidCount") or 0
+            high_bid = ls.get("highBid") or 0
+            min_bid = ls.get("minBid") or 0
+            # current price = high bid if bids exist, else "no bids (opens $X)"
+            if bid_count > 0 and high_bid:
+                bid_str = f"${high_bid:g} ({bid_count} bids)"
+            elif min_bid:
+                bid_str = f"no bids (opens ${min_bid:g})"
+            else:
+                bid_str = ""
             lots.append({
                 "id": lid,
                 "title": (it.get("lead") or "")[:300],
                 "estimate": (it.get("estimate") or "")[:80],
-                "bid": str(bid) if bid != "" else "",
+                "bid": bid_str,
                 "url": f"https://hibid.com/lot/{lid}",
                 "detail": (it.get("description") or "")[:2500],
             })
