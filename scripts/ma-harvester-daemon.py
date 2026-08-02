@@ -44,6 +44,27 @@ def add_used(conn, n):
     conn.commit()
 
 
+def _attempts_table(conn):
+    conn.execute("CREATE TABLE IF NOT EXISTS ma_attempts ("
+                 "akey TEXT PRIMARY KEY, name TEXT, at REAL)")
+    conn.commit()
+
+
+def attempted_recently(conn, days=30):
+    _attempts_table(conn)
+    cut = time.time() - days * 86400
+    return {r[0] for r in conn.execute(
+        "SELECT akey FROM ma_attempts WHERE at > ?", (cut,))}
+
+
+def record_attempts(conn, names):
+    _attempts_table(conn)
+    conn.executemany(
+        "INSERT OR REPLACE INTO ma_attempts (akey, name, at) VALUES (?,?,?)",
+        [(norm_key(n), n[:120], time.time()) for n in names])
+    conn.commit()
+
+
 def harvested_artists():
     try:
         pc = sqlite3.connect(PRICES, timeout=30)
@@ -61,7 +82,7 @@ def norm_key(a):
 
 
 def pick(conn, n):
-    have = harvested_artists()
+    have = harvested_artists() | attempted_recently(conn)
     out = []
     rows = conn.execute(
         "SELECT artist, MAX(flagged) f, MAX(promise) p FROM lots"
@@ -118,6 +139,7 @@ def main():
             print(f"  {ln}", flush=True)
         conn = sqlite3.connect(DB, timeout=60)
         add_used(conn, len(artists))
+        record_attempts(conn, artists)      # never retry these in a loop
         conn.close()
         banked = out.count("banked") and sum(
             int(w.split()[-3]) for w in out.splitlines()
@@ -127,9 +149,9 @@ def main():
             consecutive_zero += 1
         else:
             consecutive_zero = 0
-        if consecutive_zero >= 3:
+        if consecutive_zero >= 6:
             alert("MutualArt harvester STOPPED — possible block/challenge",
-                  "Three consecutive batches banked zero comps. The session may "
+                  "Six consecutive batches banked zero comps. The session may "
                   "be logged out or challenged. Harvester is pausing for 6h.\n\n"
                   "Last output:\n" + out[-1500:])
             consecutive_zero = 0
