@@ -102,8 +102,15 @@ def is_firm(name: str) -> bool:
 
 def _local(name):
     ai = evidence.authority_info(name) or {}
-    tier = galleries.best_tier(name)
-    ceiling = evidence.market_ceiling(name)
+    ceiling = evidence.market_ceiling(name)       # local sqlite, instant
+    # Gallery tiering costs a model call per unknown gallery (~25s), so only
+    # pay it when the cheap arms have NOT already qualified the artist.
+    _st = ai.get("standing", "")
+    _mus = ai.get("museums", "")
+    _qualified = bool(_st) or (ai.get("museum_count", 0) or 0) > 0 \
+        or "collections per" in (_mus or "").lower() \
+        or "papers at" in (_mus or "").lower() or ceiling >= MIN_VALUE
+    tier = 0 if _qualified else galleries.best_tier(name)
     standing = ai.get("standing", "")
     museums = ai.get("museums", "")
     reasons = []

@@ -94,7 +94,7 @@ Return STRICT JSON: {{"tier": 1-4, or 0 if you genuinely do not know this galler
 def _model_classify(name):
     try:
         r = _httpx.post(f"{_cfg.LM_BASE}/chat/completions", timeout=90, json={
-            "model": _cfg.STAGE3_MODEL, "max_tokens": 400, "reasoning_effort": "low",
+            "model": _cfg.STAGE1_MODEL, "max_tokens": 300, "reasoning_effort": "none",
             "messages": [{"role": "user", "content": _CLASSIFY_PROMPT.format(g=name)}]})
         t = r.json()["choices"][0]["message"]["content"] or ""
         m = _re.search(r"\{.*\}", t, _re.S)
