@@ -50,17 +50,98 @@ def _artsy():
     return _ARTSY or None
 
 
-def _tier_of(gallery: str) -> int:
-    g = (gallery or "").lower().strip()
+import json as _json
+import re as _re
+import sqlite3 as _sql
+import time as _time
+
+import httpx as _httpx
+
+from . import config as _cfg
+
+_CACHE_DB = _cfg.WH_DATA / "galleries.db"
+_REFRESH_DAYS = int(os.environ.get("LW_GALLERY_REFRESH_DAYS", "180"))
+_gconn = None
+
+
+def _cache():
+    global _gconn
+    if _gconn is None:
+        _cfg.data_dirs()
+        _gconn = _sql.connect(_CACHE_DB, timeout=30)
+        _gconn.execute("CREATE TABLE IF NOT EXISTS gallery_tier ("
+                       "gkey TEXT PRIMARY KEY, name TEXT, tier INT, "
+                       "confidence TEXT, why TEXT, source TEXT, at REAL)")
+        _gconn.commit()
+    return _gconn
+
+
+def _gkey(name):
+    return _re.sub(r"[^a-z0-9 ]", "", (name or "").lower()).strip()
+
+
+_CLASSIFY_PROMPT = """Classify this art gallery on the Magnus Resch 4-tier model. Use your knowledge of its program, artists, art-fair presence, and reputation.
+Tier 1 = mega/market-maker (Gagosian, Zwirner, Hauser & Wirth, Pace, White Cube).
+Tier 2 = high-power launchpad (Jack Shainman, Perrotin, Casey Kaplan, Lehmann Maupin).
+Tier 3 = respected incubator/feeder gallery (serious program, scholarly shows, major-fair presence, represents museum-collected artists).
+Tier 4 = minor/regional/vanity gallery, little market influence.
+
+Gallery: {g}
+
+Return STRICT JSON: {{"tier": 1-4, or 0 if you genuinely do not know this gallery, "confidence": "high/med/low", "why": "one sentence"}}"""
+
+
+def _model_classify(name):
+    try:
+        r = _httpx.post(f"{_cfg.LM_BASE}/chat/completions", timeout=90, json={
+            "model": _cfg.STAGE3_MODEL, "max_tokens": 400, "reasoning_effort": "low",
+            "messages": [{"role": "user", "content": _CLASSIFY_PROMPT.format(g=name)}]})
+        t = r.json()["choices"][0]["message"]["content"] or ""
+        m = _re.search(r"\{.*\}", t, _re.S)
+        if not m:
+            return None
+        d = _json.loads(m.group(0))
+        return {"tier": int(d.get("tier", 0)), "confidence": d.get("confidence", "low"),
+                "why": d.get("why", "")}
+    except Exception:
+        return None
+
+
+def classify_gallery(name: str) -> dict:
+    """Tier a gallery: hardcoded anchors -> cache -> 120B -> cache.
+    Returns {tier, confidence, why, source}. tier 0 = unknown."""
+    g = (name or "").lower().strip()
     if not g:
-        return 0
+        return {"tier": 0, "confidence": "", "why": "", "source": "empty"}
+    # fast-path anchors (certain, no model call)
     if any(t in g for t in TIER1):
-        return 1
+        return {"tier": 1, "confidence": "high", "why": "anchor", "source": "anchor"}
     if any(t in g for t in TIER2):
-        return 2
+        return {"tier": 2, "confidence": "high", "why": "anchor", "source": "anchor"}
     if any(t in g for t in TIER3):
-        return 3
-    return 4   # represented by *a* gallery, tier unknown = still a plus
+        return {"tier": 3, "confidence": "high", "why": "anchor", "source": "anchor"}
+
+    key = _gkey(name)
+    conn = _cache()
+    row = conn.execute("SELECT tier, confidence, why, source, at FROM gallery_tier"
+                       " WHERE gkey=?", (key,)).fetchone()
+    if row and (_time.time() - (row[4] or 0)) < _REFRESH_DAYS * 86400:
+        return {"tier": row[0], "confidence": row[1], "why": row[2], "source": row[3]}
+
+    d = _model_classify(name)
+    if d is None:
+        # leave uncached (retry next time); web-search fallback plugs in here later
+        return {"tier": 0, "confidence": "low", "why": "unresolved", "source": "none"}
+    d["source"] = "model"
+    conn.execute("INSERT OR REPLACE INTO gallery_tier"
+                 "(gkey,name,tier,confidence,why,source,at) VALUES (?,?,?,?,?,?,?)",
+                 (key, name[:120], d["tier"], d["confidence"], d["why"], "model", _time.time()))
+    conn.commit()
+    return d
+
+
+def _tier_of(gallery: str) -> int:
+    return classify_gallery(gallery).get("tier", 0)
 
 
 def represented_galleries(artist: str) -> list[str]:
