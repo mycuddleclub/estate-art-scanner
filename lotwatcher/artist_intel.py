@@ -24,6 +24,8 @@ import re
 import sqlite3
 import time
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import httpx
 
 from . import config, evidence, galleries
@@ -198,10 +200,6 @@ def _wiki(name):
     """Wikidata + Wikipedia evidence. Returns dict or None.
     Verifies the matched entity is actually an ARTIST (Ron Lee resolved to an
     NBA player), then pulls museum collections from P6379."""
-    gap = time.time() - _last_search[0]
-    if gap < 1.0:
-        time.sleep(1.0 - gap)
-    _last_search[0] = time.time()
     try:
         r = httpx.get("https://www.wikidata.org/w/api.php", headers=_WIKI_UA,
                       timeout=20, params={
@@ -342,19 +340,30 @@ def resolve(names, web_budget=None):
     todo.sort(key=_priority)
 
     # --- WEB: the only path to significance outside the local databases ---
-    used = 0
-    for k, n, base in todo:
-        if used >= budget:
-            base = dict(base)
-            base["deferred"] = True   # undetermined: retry next cycle, never drop
-            out[k] = base
-            continue
-        used += 1
-        d = _web(n)
+    workers = int(os.environ.get("LW_WIKI_WORKERS", "6"))
+    batch = todo[:budget]
+    for k, n, base in todo[budget:]:
+        b = dict(base)
+        b["deferred"] = True          # over budget: retry next cycle, never drop
+        out[k] = b
+
+    results = {}
+    if batch:
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            futs = {ex.submit(_web, n): (k, n, base) for k, n, base in batch}
+            for fut in as_completed(futs):
+                k, n, base = futs[fut]
+                try:
+                    results[k] = fut.result()
+                except Exception:
+                    results[k] = None
+
+    for k, n, base in batch:            # save in the main thread (sqlite)
+        d = results.get(k)
         if not d:
-            base = dict(base)
-            base["deferred"] = True   # search failed — do NOT cache a false drop
-            out[k] = base
+            b = dict(base)
+            b["deferred"] = True      # lookup failed — do NOT cache a false drop
+            out[k] = b
             continue
         museums = (d.get("museums") or "").strip()
         high = float(d.get("auction_high_usd") or 0)
