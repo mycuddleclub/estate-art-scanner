@@ -142,61 +142,124 @@ def _model_batch(names):
 
 
 # --------------------------------------------------------------------------- #
-#  3. WEB — free search, polite, budgeted
+#  3. WIKIDATA / WIKIPEDIA — free, unlimited, no API key, not blockable.
+#     Wikidata P6379 is literally "has works in the collection of <museum>",
+#     which is exactly the museum evidence the gate needs. Search engines were
+#     tried first and are rate-limited/blocked within a few queries.
 # --------------------------------------------------------------------------- #
-def _search(q):
-    """Free web search: DuckDuckGo HTML, Bing fallback. Returns snippet text."""
+_WIKI_UA = {"User-Agent": "LotWatcher/1.0 (private art research; daniel@w.com.se)"}
+_ART_WORDS = ("painter", "artist", "sculptor", "printmaker", "engraver",
+              "illustrator", "photographer", "draughtsman", "draftsman",
+              "ceramicist", "potter", "watercolorist", "lithographer",
+              "etcher", "muralist", "designer", "textile", "weaver")
+
+
+def _wd_labels(qids):
+    if not qids:
+        return []
+    try:
+        r = httpx.get("https://www.wikidata.org/w/api.php", headers=_WIKI_UA,
+                      timeout=25, params={
+                          "action": "wbgetentities", "ids": "|".join(qids[:25]),
+                          "props": "labels", "languages": "en", "format": "json"})
+        out = []
+        for _q, v in (r.json().get("entities") or {}).items():
+            lab = (v.get("labels", {}).get("en") or {}).get("value")
+            if lab:
+                out.append(lab)
+        return out
+    except Exception:
+        return []
+
+
+def _wiki(name):
+    """Wikidata + Wikipedia evidence. Returns dict or None.
+    Verifies the matched entity is actually an ARTIST (Ron Lee resolved to an
+    NBA player), then pulls museum collections from P6379."""
     gap = time.time() - _last_search[0]
-    if gap < 3.0:
-        time.sleep(3.0 - gap)
+    if gap < 1.0:
+        time.sleep(1.0 - gap)
     _last_search[0] = time.time()
-    for attempt in range(2):
+    try:
+        r = httpx.get("https://www.wikidata.org/w/api.php", headers=_WIKI_UA,
+                      timeout=20, params={
+                          "action": "wbsearchentities", "search": name,
+                          "language": "en", "format": "json", "limit": 3})
+        hits = r.json().get("search") or []
+    except Exception:
+        return None
+    if not hits:
+        return {"is_artist": False, "museums": [], "summary": "", "qid": ""}
+
+    for h in hits[:3]:
+        qid = h.get("id")
         try:
-            r = httpx.post("https://html.duckduckgo.com/html/", data={"q": q},
-                           headers=_UA, timeout=25, follow_redirects=True)
-            snips = re.findall(r'class="result__snippet".*?>(.*?)</a>', r.text, re.S)
-            texts = [_html.unescape(re.sub("<[^>]+>", "", s)).strip() for s in snips[:6]]
-            texts = [t for t in texts if t]
-            if texts:
-                return "\n".join(texts)
+            e = httpx.get(
+                f"https://www.wikidata.org/wiki/Special:EntityData/{qid}.json",
+                headers=_WIKI_UA, timeout=25).json()
+            ent = e["entities"][qid]
+        except Exception:
+            continue
+        claims = ent.get("claims", {})
+
+        def _ids(prop):
+            return [c["mainsnak"]["datavalue"]["value"]["id"]
+                    for c in claims.get(prop, [])
+                    if "datavalue" in c.get("mainsnak", {})]
+
+        occ = " ".join(_wd_labels(_ids("P106"))).lower()
+        desc = (ent.get("descriptions", {}).get("en", {}) or {}).get("value", "").lower()
+        is_artist = any(w in occ or w in desc for w in _ART_WORDS)
+        museums = _wd_labels(_ids("P6379"))
+        if not is_artist and not museums:
+            continue                      # wrong entity (e.g. the NBA player)
+        summary = ""
+        try:
+            title = (ent.get("sitelinks", {}).get("enwiki") or {}).get("title")
+            if title:
+                sr = httpx.get(
+                    "https://en.wikipedia.org/api/rest_v1/page/summary/"
+                    + title.replace(" ", "_"), headers=_WIKI_UA, timeout=20)
+                if sr.status_code == 200:
+                    summary = (sr.json().get("extract") or "")[:600]
         except Exception:
             pass
-        time.sleep(4)
-    try:  # Bing fallback
-        r = httpx.get("https://www.bing.com/search", params={"q": q},
-                      headers=_UA, timeout=25, follow_redirects=True)
-        snips = re.findall(r'<p class="b_lineclamp[^"]*">(.*?)</p>', r.text, re.S)
-        texts = [_html.unescape(re.sub("<[^>]+>", "", s)).strip() for s in snips[:6]]
-        return "\n".join(t for t in texts if t)
-    except Exception:
-        return ""
-
-
-_WEB_JUDGE = """From these web search results, assess the artist. Use ONLY what the results support.
-
-Artist: {name}
-Search results:
-{snips}
-
-STRICT JSON: {{"significant": true/false, "museums":"museums named in results, or empty", "auction_high_usd": <highest realized price shown, else 0>, "gallery":"gallery named, or empty", "why":"<=15 words"}}
-significant = museum-collected OR a real documented auction market OR represented by a serious commercial gallery."""
+        return {"is_artist": is_artist, "museums": museums,
+                "summary": summary, "qid": qid}
+    return {"is_artist": False, "museums": [], "summary": "", "qid": ""}
 
 
 def _web(name):
-    snips = _search(f'"{name}" artist auction record museum collection gallery')
-    if not snips:
-        return None
-    try:
-        r = httpx.post(f"{config.LM_BASE}/chat/completions", timeout=180, json={
-            "model": config.STAGE3_MODEL, "max_tokens": 500,
-            "reasoning_effort": "low", "temperature": 0.1,
-            "messages": [{"role": "user", "content": _WEB_JUDGE.format(
-                name=name, snips=snips[:2500])}]})
-        txt = r.json()["choices"][0]["message"].get("content") or ""
-        m = re.search(r"\{.*\}", txt, re.S)
-        return json.loads(m.group(0)) if m else None
-    except Exception:
-        return None
+    """External significance check via Wikidata/Wikipedia (replaces the
+    blocked search engines). Museums are hard evidence; the summary is read by
+    the model only to spot a gallery or a documented auction market."""
+    w = _wiki(name)
+    if w is None:
+        return None                       # transient failure -> defer, no cache
+    museums = w.get("museums") or []
+    out = {"significant": bool(museums), "museums": ", ".join(museums[:6]),
+           "auction_high_usd": 0, "gallery": "",
+           "why": ("museum" if museums else "no museum record")}
+    if w.get("summary") and (w.get("is_artist") or museums):
+        try:
+            r = httpx.post(f"{config.LM_BASE}/chat/completions", timeout=120, json={
+                "model": config.STAGE3_MODEL, "max_tokens": 350,
+                "reasoning_effort": "low", "temperature": 0.1,
+                "messages": [{"role": "user", "content":
+                    "From this encyclopedia summary ONLY (invent nothing), answer about the artist.\n\n"
+                    f"Artist: {name}\nSummary: {w['summary']}\n\n"
+                    'STRICT JSON: {"gallery":"commercial gallery named in the text, else empty",'
+                    '"auction_high_usd": <highest auction price stated in the text, else 0>,'
+                    '"notable": true/false}'}]})
+            t = r.json()["choices"][0]["message"].get("content") or ""
+            m = re.search(r"\{.*\}", t, re.S)
+            if m:
+                d = json.loads(m.group(0))
+                out["gallery"] = (d.get("gallery") or "").strip()
+                out["auction_high_usd"] = float(d.get("auction_high_usd") or 0)
+        except Exception:
+            pass
+    return out
 
 
 # --------------------------------------------------------------------------- #
