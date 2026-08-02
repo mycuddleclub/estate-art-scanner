@@ -109,9 +109,14 @@ def _local(name):
     # Wikidata collections by design (evidence-only), which was blocking real
     # museum artists like Krieghoff (National Gallery of Canada) -- so for THIS
     # gate any documented museum/collection holding counts.
+    # describe() can return ONLY a date range like "(1200-1833)" with no
+    # institutions — that is NOT museum evidence. Require a real holding.
+    mc = ai.get("museum_count", 0) or 0
+    has_wd = ("collections per" in (museums or "").lower()
+              or "papers at" in (museums or "").lower())
     if standing:
         reasons.append("museum" if standing == "strong" else "listed")
-    elif museums:
+    elif mc > 0 or has_wd:
         reasons.append("museum (collections)")
     if 1 <= tier <= 3:
         reasons.append(f"gallery T{tier}")
