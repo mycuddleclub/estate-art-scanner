@@ -68,7 +68,10 @@ def do_cycle(conn, page):
     # digests flow every few hours during catch-up instead of one giant burst
     # after the whole backlog. Model swaps per chunk cost ~2 min each way.
     chunk = int(os.environ.get("LW_S1_CHUNK", "15000"))
-    while True:
+    # Bounded: after this many chunks we return to discover/fetch so fresh
+    # auctions keep flowing even while a large backlog is still draining.
+    max_chunks = int(os.environ.get("LW_CHUNKS_PER_CYCLE", "4"))
+    for _ in range(max_chunks):
         # judge-first: pending candidates (incl. any from the previous chunk)
         # become flags and EMAIL before the next long screening block
         mutualart.run(conn)      # fresh tier-A comps for the judgment

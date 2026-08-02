@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS auctions (
     discovered_at REAL, ends_at TEXT,
     status TEXT DEFAULT 'new',         -- new | fetched | done | blocked | error
     lots_total INTEGER DEFAULT 0,
+    art_density REAL DEFAULT 0,
     note TEXT
 );
 CREATE TABLE IF NOT EXISTS lots (
@@ -44,6 +45,10 @@ def connect() -> sqlite3.Connection:
             conn.execute(f"ALTER TABLE lots ADD COLUMN {col}")
         except Exception:
             pass
+    try:
+        conn.execute("ALTER TABLE auctions ADD COLUMN art_density REAL DEFAULT 0")
+    except Exception:
+        pass
     conn.commit()
     return conn
 

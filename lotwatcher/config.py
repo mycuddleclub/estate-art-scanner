@@ -73,3 +73,28 @@ HARD_NEGATIVE = (
 def data_dirs():
     WH_DATA.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# Unambiguous art vocabulary. Used to measure an AUCTION's art density —
+# deliberately narrow: "print" matches printers and "art" matches artificial,
+# so those weak words are excluded here (they stay in ART_SIGNAL for lot-level
+# recall inside sales already known to carry art).
+STRONG_ART = (
+    "oil on canvas", "oil on board", "oil on panel", "oil painting", "acrylic on",
+    "acrylic painting", "watercolor", "watercolour", "gouache", "tempera",
+    "lithograph", "serigraph", "silkscreen", "screenprint", "etching", "engraving",
+    "woodblock", "woodcut", "linocut", "aquatint", "monotype", "monoprint",
+    "giclee", "giclée", "pastel on", "pastel drawing", "charcoal drawing",
+    "mixed media on", "collage on", "signed lower", "signed upper",
+    "signed and numbered", "artist proof", "artist's proof", "sculpture",
+    "bronze sculpture", "marble sculpture", "original painting", "framed painting",
+    "oil sketch", "still life", "landscape painting", "portrait painting",
+    "abstract painting", "folk art", "outsider art", "works on paper",
+    "limited edition print", "fine art", "hand colored", "hand-colored",
+    "plein air", "canvas board", "stretched canvas", "art glass",
+)
+
+# An auction needs this share of strong-art lots to earn recall-first treatment
+# for its vague lots. Below it, the sale is consumer goods and only explicit
+# art lots are screened. (Audit 2026-08-02: 95% of the queue was yoga socks.)
+ART_DENSITY_MIN = float(os.environ.get("LW_ART_DENSITY", "0.02"))

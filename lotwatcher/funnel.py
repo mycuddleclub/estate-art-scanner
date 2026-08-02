@@ -25,6 +25,17 @@ def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
               f"{len(names)} blue-chip names, {claims} original-claims")
         return 0
 
+    # Auction art density decides how its vague lots are treated (audit
+    # 2026-08-02: screening every liquidation lot wasted ~95% of GPU time).
+    density = stage0.art_density(lots)
+    try:
+        conn.execute("UPDATE auctions SET art_density=? WHERE key=?",
+                     (density, a["key"]))
+    except Exception:
+        pass
+    if density:
+        print(f"    art density {density:.1%}")
+
     added = 0
     for l in lots:
         if not store.add_lot(conn, a["platform"], l["id"], a["key"],
@@ -33,9 +44,10 @@ def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
             continue
         added += 1
         key = f"{a['platform']}:{l['id']}"
-        band_text = l["title"] + " " + (l.get("detail") or "")[:300]
-        store.update_lot(conn, key,
-                         stage=("s1" if stage0.lot_passes(band_text) else "junk"))
+        keep = stage0.lot_passes_density(
+            l["title"], l.get("detail", ""), density,
+            a.get("title", ""), a.get("house", ""))
+        store.update_lot(conn, key, stage=("s1" if keep else "junk"))
     conn.commit()
     store.set_auction_status(conn, a["key"], "fetched", lots_total=len(lots))
     return added
