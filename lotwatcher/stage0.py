@@ -68,8 +68,9 @@ def auction_skippable(title: str, house: str) -> str | None:
 # Auctions that are unambiguously consumer-goods liquidation. Their lots are
 # never art, and they were flooding the screening queue (391k lots, 95% junk).
 LIQUIDATION_AUCTION = (
-    "liquidation", "overstock", "unclaimed parcel", "returned parcel",
-    "returns auction", "amazon return", "shelf pull", "surplus",
+    "liquidation", "overstock", "unclaimed", "returned parcel",
+    "returns auction", "online return", "amazon return", "shelf pull", "surplus",
+    "freight", "truckload", "box lot auction", "bin store",
     "wholesale", "pallet", "closeout", "dollar store", "flea market",
     "storage unit", "self storage", "mini storage",
 )
