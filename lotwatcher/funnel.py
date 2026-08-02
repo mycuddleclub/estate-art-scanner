@@ -3,7 +3,7 @@ Phase-batched because both models can't co-reside in the 64 GB VRAM carve."""
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from . import config, evidence, galleries, llm, stage0, store, vision
+from . import artist_intel, config, evidence, galleries, llm, stage0, store, vision
 
 
 def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
@@ -110,6 +110,40 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         conn.commit()
         rows = store.lots_in_stage(conn, "s3", limit)
 
+    # SIGNIFICANCE PRE-GATE (Daniel 2026-08-02): resolve every candidate
+    # artist ONCE (cached forever) via local DBs -> model knowledge -> free web
+    # search, and DROP lots whose artist is not museum-backed, Tier 1-3
+    # gallery, or >= $2,000 documented auction value. The 120B then only
+    # judges pre-qualified lots — faster AND far less junk.
+    _profiles = {}
+    if not _os.environ.get("LW_NO_GATE"):
+        cand_names = [(dict(r).get("artist") or "").strip() for r in rows]
+        try:
+            _profiles = artist_intel.resolve([n for n in cand_names if n])
+        except Exception as e:
+            print(f"  artist_intel error (gate open this cycle): {str(e)[:100]}")
+            _profiles = {}
+        kept, dropped = [], 0
+        for row in rows:
+            r = dict(row)
+            a = (r.get("artist") or "").strip()
+            pr = _profiles.get(artist_intel._key(a)) if a else None
+            if pr and not pr.get("significant"):
+                store.update_lot(conn, r["key"], stage="done", flagged=0,
+                                 s3=json.dumps({"flag": "NO",
+                                                "reasoning": "artist not significant: "
+                                                             + (pr.get("why") or "no museum, gallery or auction record"),
+                                                "_gate": pr}))
+                dropped += 1
+            else:
+                kept.append(row)
+        conn.commit()
+        if dropped:
+            print(f"  gate: dropped {dropped} insignificant, {len(kept)} to judge")
+        rows = kept
+        if not rows:
+            return 0
+
     # Main thread: all lotwatcher.db + local-sqlite evidence reads (not
     # thread-safe). Build everything EXCEPT vision here.
     base = []
@@ -127,6 +161,19 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         gl = galleries.evidence_line(r.get("artist") or "")
         if gl:
             ev = (ev + "\n" + gl) if ev else gl
+        pr = _profiles.get(artist_intel._key((r.get("artist") or "").strip()))
+        if pr:
+            bits = []
+            if pr.get("museums"):
+                bits.append("museums: " + pr["museums"])
+            if pr.get("gallery"):
+                t = pr.get("gallery_tier") or 0
+                bits.append(f"gallery: {pr['gallery']}" + (f" (Tier {t})" if t else ""))
+            if pr.get("market_high"):
+                bits.append(f"documented auction high ${pr['market_high']:,.0f}")
+            if bits:
+                line = "ARTIST SIGNIFICANCE (" + pr.get("source", "?") + "): " + " | ".join(bits)
+                ev = (ev + "\n" + line) if ev else line
         base.append([r, s1, detail, ev, auction])
 
     prepared = [tuple(b) for b in base]
@@ -189,25 +236,14 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
     for r, s1, detail, ev, auction, s3 in judged:
         f = _flag(s3, r)
         artist = (r.get("artist") or "").strip()
-        gate = {}
+        pr = _profiles.get(artist_intel._key(artist)) if artist else None
+        gate = dict(pr) if pr else {}
         if f:
-            ai = evidence.authority_info(artist)
-            tier = galleries.best_tier(artist)
-            ceiling = evidence.market_ceiling(artist)
-            museum = bool(ai.get("standing"))
-            gallery_ok = 1 <= tier <= 3
-            value_ok = ceiling >= MIN_VALUE
-            gate = {"standing": ai.get("standing", ""),
-                    "museums": ai.get("museums", ""),
-                    "museum_count": ai.get("museum_count", 0),
-                    "gallery_tier": tier, "ceiling": ceiling,
-                    "reason": ("museum" if museum else
-                               "gallery" if gallery_ok else
-                               "value" if value_ok else "")}
-            if not (museum or gallery_ok or value_ok):
-                f = 0                        # insignificant -> drop
+            if pr and not pr.get("significant"):
+                f = 0
             # poster/reproduction kill (Daniel: "thought we got rid of that")
-            if f and _POSTER.search(r.get("title", "")) and not museum and tier == 0:
+            if f and _POSTER.search(r.get("title", "")) and not (
+                    pr and (pr.get("museums") or (pr.get("gallery_tier") or 0) in (1, 2, 3))):
                 f = 0
         v = vmap.get(r["key"])
         vjson = None

@@ -27,16 +27,19 @@ def _signif(s3) -> str:
     g = (s3 or {}).get("_gate") or {}
     bits = []
     if g.get("museums"):
-        bits.append(g["museums"])
+        bits.append("🏛 " + g["museums"])
     elif g.get("standing"):
         bits.append(f"{g['standing']} institutional standing")
-    t = g.get("gallery_tier")
-    if t and 1 <= t <= 3:
+    t = g.get("gallery_tier") or 0
+    if 1 <= t <= 3:
         label = {1: "Tier-1 mega-gallery", 2: "Tier-2 launchpad",
-                 3: "Tier-3 feeder"}[t]
-        bits.append(label)
-    if g.get("ceiling"):
-        bits.append(f"auction ceiling ${g['ceiling']:,.0f}")
+                 3: "Tier-3 feeder gallery"}[t]
+        bits.append("🖼 " + (f"{g['gallery']} — {label}" if g.get("gallery") else label))
+    high = g.get("market_high") or g.get("ceiling")
+    if high:
+        bits.append(f"💰 auction high ${high:,.0f}")
+    if g.get("source") and bits:
+        bits.append(f"<span style='color:#999'>[{g['source']}]</span>")
     if not bits:
         return ""
     return ('<div style="margin-top:5px;color:#0a7;font-size:13px;">'
