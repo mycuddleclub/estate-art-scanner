@@ -9,8 +9,11 @@ is exactly the early catch he wants.
 
 Cascade, cheapest first, every result cached FOREVER (artists are stable):
   1. LOCAL   authority.db museums + banked comps + Artsy galleries   (instant, $0)
-  2. MODEL   the 120B's own knowledge, asked in BATCHES of ~20        (fast, $0)
-  3. WEB     free DuckDuckGo/Bing HTML search, budgeted per cycle     (slow, $0)
+  2. TRIAGE  the 120B batch-rates who is PLAUSIBLY a real listed artist,
+             purely to spend the search budget well — its claims are NEVER
+             accepted as proof (it hallucinated "Ron Lee: MoMA, Zwirner")
+  3. WEB     free DuckDuckGo/Bing search + grounded read = the only way an
+             artist outside the local databases can earn significance
 
 Nothing here ever calls a paid API.
 """
@@ -214,48 +217,32 @@ def resolve(names, web_budget=None):
         else:
             todo.append((k, n, loc))
 
-    # --- model knowledge, batched ---
-    unresolved = []
+    # --- TRIAGE (model): rank who is worth a web search. NOT proof. ---
+    hints = {}
     for i in range(0, len(todo), BATCH):
-        chunk = todo[i:i + BATCH]
-        known = _model_batch([n for _, n, _ in chunk])
-        for k, n, loc in chunk:
-            d = known.get(k)
-            if not d or not d.get("known"):
-                unresolved.append((k, n, loc))
-                continue
-            museums = (d.get("museums") or "").strip()
-            high = float(d.get("auction_high_usd") or 0)
-            gal = (d.get("gallery") or "").strip()
-            tier = galleries.best_tier(n) or (
-                galleries.classify_gallery(gal)["tier"] if gal else 0)
-            why = []
-            if museums:
-                why.append("museum")
-            if 1 <= tier <= 3:
-                why.append(f"gallery T{tier}")
-            if high >= MIN_VALUE:
-                why.append(f"auction ${high:,.0f}")
-            p = {"name": n, "significant": bool(why), "why": " + ".join(why),
-                 "standing": loc["standing"] or ("strong" if museums else ""),
-                 "museums": museums or loc["museums"], "gallery": gal,
-                 "gallery_tier": tier, "market_high": max(high, loc["market_high"]),
-                 "source": "model"}
-            if p["significant"]:
-                _save(p)
-                out[k] = p
-            else:
-                unresolved.append((k, n, p))
+        hints.update(_model_batch([n for _, n, _ in todo[i:i + BATCH]]))
 
-    # --- web search, budgeted, best-effort ---
+    def _priority(item):
+        d = hints.get(item[0]) or {}
+        # plausible real artists first; obvious unknowns last
+        return (0 if d.get("known") else 1,
+                -float(d.get("auction_high_usd") or 0))
+
+    todo.sort(key=_priority)
+
+    # --- WEB: the only path to significance outside the local databases ---
     used = 0
-    for k, n, base in unresolved:
+    for k, n, base in todo:
         if used >= budget:
-            out[k] = base            # not cached: retry in a later cycle
+            base = dict(base)
+            base["deferred"] = True   # undetermined: retry next cycle, never drop
+            out[k] = base
             continue
         used += 1
         d = _web(n)
         if not d:
+            base = dict(base)
+            base["deferred"] = True   # search failed — do NOT cache a false drop
             out[k] = base
             continue
         museums = (d.get("museums") or "").strip()
@@ -271,12 +258,12 @@ def resolve(names, web_budget=None):
         if high >= MIN_VALUE:
             why.append(f"auction ${high:,.0f}")
         p = {"name": n, "significant": bool(why) and bool(d.get("significant")),
-             "why": " + ".join(why) or "web: not significant",
+             "why": " + ".join(why) or "web: no museum, gallery or auction record",
              "standing": base["standing"] or ("strong" if museums else ""),
              "museums": museums or base["museums"], "gallery": gal,
              "gallery_tier": tier, "market_high": max(high, base["market_high"]),
              "source": "web"}
-        _save(p)                      # cache either way — don't re-search
+        _save(p)              # a real determination — cache it forever
         out[k] = p
     return out
 

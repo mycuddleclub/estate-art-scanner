@@ -123,12 +123,14 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         except Exception as e:
             print(f"  artist_intel error (gate open this cycle): {str(e)[:100]}")
             _profiles = {}
-        kept, dropped = [], 0
+        kept, dropped, deferred = [], 0, 0
         for row in rows:
             r = dict(row)
             a = (r.get("artist") or "").strip()
             pr = _profiles.get(artist_intel._key(a)) if a else None
-            if pr and not pr.get("significant"):
+            if pr and pr.get("deferred"):
+                deferred += 1        # undetermined — stays in s3 for next cycle
+            elif pr and not pr.get("significant"):
                 store.update_lot(conn, r["key"], stage="done", flagged=0,
                                  s3=json.dumps({"flag": "NO",
                                                 "reasoning": "artist not significant: "
@@ -138,8 +140,9 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
             else:
                 kept.append(row)
         conn.commit()
-        if dropped:
-            print(f"  gate: dropped {dropped} insignificant, {len(kept)} to judge")
+        if dropped or deferred:
+            print(f"  gate: dropped {dropped} insignificant, {deferred} deferred,"
+                  f" {len(kept)} to judge")
         rows = kept
         if not rows:
             return 0
