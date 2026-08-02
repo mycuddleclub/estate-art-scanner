@@ -86,9 +86,16 @@ def _local(name):
     tier = galleries.best_tier(name)
     ceiling = evidence.market_ceiling(name)
     standing = ai.get("standing", "")
+    museums = ai.get("museums", "")
     reasons = []
+    # Daniel's rule: MUSEUMS PASS AUTOMATICALLY. authority.standing() ignores
+    # Wikidata collections by design (evidence-only), which was blocking real
+    # museum artists like Krieghoff (National Gallery of Canada) -- so for THIS
+    # gate any documented museum/collection holding counts.
     if standing:
         reasons.append("museum" if standing == "strong" else "listed")
+    elif museums:
+        reasons.append("museum (collections)")
     if 1 <= tier <= 3:
         reasons.append(f"gallery T{tier}")
     if ceiling >= MIN_VALUE:
