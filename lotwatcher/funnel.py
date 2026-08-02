@@ -1,6 +1,7 @@
 """The funnel: stage 0 rules -> stage 1 Qwen -> stage 2 evidence -> stage 3 120B.
 Phase-batched because both models can't co-reside in the 64 GB VRAM carve."""
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from . import artist_intel, config, evidence, galleries, llm, stage0, store, vision
@@ -97,6 +98,31 @@ def run_stage1(conn, limit=100000) -> int:
     return done
 
 
+
+_SIG_NOISE = re.compile(
+    r"\b(signed|sgd|illegible|indistinct|lower right|lower left|upper right|"
+    r"upper left|verso|recto|dated|circa|ca|no\.?|titled)\b", re.I)
+
+
+def _clean_signature(sig: str) -> str:
+    """A transcribed signature -> a usable artist name, or '' if unusable.
+    Conservative: needs >=2 name-like tokens (initials allowed), no digits."""
+    if not sig:
+        return ""
+    s = _SIG_NOISE.sub(" ", sig)
+    s = re.sub(r"[\"\u201c\u201d''`]", " ", s)
+    s = re.sub(r"\(.*?\)", " ", s)
+    s = re.sub(r"[0-9]", " ", s)                 # dates are not names
+    s = re.sub(r"[^A-Za-z.\-' ]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip(" .-'")
+    toks = [t for t in s.split() if len(t) > 1 or t.endswith(".")]
+    if len(toks) < 2 or len(toks) > 4:
+        return ""
+    if not any(len(t.strip(".")) >= 3 for t in toks):   # need a real surname
+        return ""
+    return " ".join(t.capitalize() if len(t) > 2 else t.upper() for t in toks)
+
+
 def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
     """120B judgment on candidates, with DB evidence and (LA) detail text."""
     rows = store.lots_in_stage(conn, "s3", limit)
@@ -127,6 +153,55 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
     # search, and DROP lots whose artist is not museum-backed, Tier 1-3
     # gallery, or >= $2,000 documented auction value. The 120B then only
     # judges pre-qualified lots — faster AND far less junk.
+    # ---- VISION RESCUE (Daniel's cataloguing-gap thesis) ----------------
+    # A lot whose signature exists only in the PHOTO has no artist name from
+    # the text screener, so it would be dropped. For strong-art lots with an
+    # image we look at the picture FIRST and try to read the signature; a
+    # recovered name then flows through the normal significance gate.
+    if not _os.environ.get("LW_NO_RESCUE"):
+        rescue_budget = int(_os.environ.get("LW_RESCUE_BUDGET", "40"))
+        cands = []
+        for row in rows:
+            r = dict(row)
+            if len((r.get("artist") or "").strip().split()) >= 2:
+                continue                      # already named
+            if not r.get("img"):
+                continue
+            if not stage0.strong_art(r.get("title", ""), r.get("detail", "")):
+                continue                      # only real art lots are worth it
+            cands.append(r)
+        cands.sort(key=lambda r: -(r.get("promise") or 0))
+        cands = cands[:rescue_budget]
+
+        if cands:
+            print(f"  vision rescue: reading signatures on {len(cands)} unnamed art lots")
+            found = 0
+
+            def _rescue(r):
+                v = vision.read_lot(r["img"], r.get("title", ""))
+                return r, v
+
+            with ThreadPoolExecutor(max_workers=int(
+                    _os.environ.get("LW_VISION_WORKERS", "6"))) as rex:
+                for fut in as_completed([rex.submit(_rescue, r) for r in cands]):
+                    try:
+                        r, v = fut.result()
+                    except Exception:
+                        continue
+                    if not v:
+                        continue
+                    sig = (v.get("signature") or "").strip()
+                    name = _clean_signature(sig) if v.get("signature_legible") else ""
+                    store.update_lot(conn, r["key"], vision=json.dumps(v),
+                                     **({"artist": name} if name else {}))
+                    if name:
+                        found += 1
+                        print(f"    signature -> {name}  ({r['title'][:44]})")
+            conn.commit()
+            print(f"  vision rescue: recovered {found} artist names")
+            if found:
+                rows = store.lots_in_stage(conn, "s3", limit)   # reload w/ names
+
     _profiles = {}
     if not _os.environ.get("LW_NO_GATE"):
         cand_names = [(dict(r).get("artist") or "").strip() for r in rows]
