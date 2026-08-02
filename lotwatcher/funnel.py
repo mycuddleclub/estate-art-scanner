@@ -110,9 +110,9 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         conn.commit()
         rows = store.lots_in_stage(conn, "s3", limit)
 
-    # SQLite is single-thread-only: ALL db and evidence-client reads happen
-    # here in the main thread; worker threads make pure HTTP model calls.
-    prepared = []
+    # Main thread: all lotwatcher.db + local-sqlite evidence reads (not
+    # thread-safe). Build everything EXCEPT vision here.
+    base = []
     for row in rows:
         r = dict(row)
         auction = conn.execute("SELECT * FROM auctions WHERE key=?",
@@ -127,15 +127,31 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         gl = galleries.evidence_line(r.get("artist") or "")
         if gl:
             ev = (ev + "\n" + gl) if ev else gl
-        # vision: look at the actual photo (Qwen-VL, resident on the 96GB carve)
-        if not _os.environ.get("LW_NO_VISION") and r.get("img"):
-            v = vision.read_lot(r["img"], r.get("title", ""))
-            if v:
-                store.update_lot(conn, r["key"], vision=json.dumps(v))
-                vline = vision.evidence_line(v)
-                if vline:
-                    ev = (ev + "\n" + vline) if ev else vline
-        prepared.append((r, s1, detail, ev, auction))
+        base.append([r, s1, detail, ev, auction])
+
+    # Vision in PARALLEL (pure httpx — thread-safe; the serial version was the
+    # judge-stage bottleneck). Both models resident, so this overlaps freely.
+    if not _os.environ.get("LW_NO_VISION"):
+        vworkers = int(_os.environ.get("LW_VISION_WORKERS", "6"))
+
+        def _vis(i):
+            r = base[i][0]
+            if not r.get("img"):
+                return i, None
+            return i, vision.read_lot(r["img"], r.get("title", ""))
+
+        with ThreadPoolExecutor(max_workers=vworkers) as vex:
+            for fut in as_completed([vex.submit(_vis, i) for i in range(len(base))]):
+                i, v = fut.result()
+                if v:
+                    r = base[i][0]
+                    store.update_lot(conn, r["key"], vision=json.dumps(v))
+                    vline = vision.evidence_line(v)
+                    if vline:
+                        base[i][3] = (base[i][3] + "\n" + vline) if base[i][3] else vline
+        conn.commit()
+
+    prepared = [tuple(b) for b in base]
 
     def judge(item):
         r, s1, detail, ev, auction = item
@@ -143,7 +159,7 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         return r, s3
 
     n = 0
-    workers = int(_os.environ.get("LW_STAGE3_WORKERS", "3"))
+    workers = int(_os.environ.get("LW_STAGE3_WORKERS", "6"))
     with ThreadPoolExecutor(max_workers=workers) as ex:
         futs = [ex.submit(judge, item) for item in prepared]
         for fut in as_completed(futs):

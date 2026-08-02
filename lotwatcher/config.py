@@ -33,7 +33,7 @@ STAGE1_MODEL = "qwen3.6-35b-a3b"
 STAGE3_MODEL = "gpt-oss-120b"
 LM_BASE = "http://localhost:1234/v1"
 LMS_EXE = "/mnt/c/Users/willi/.lmstudio/bin/lms.exe"
-STAGE1_WORKERS = int(os.environ.get("LW_STAGE1_WORKERS", "4"))
+STAGE1_WORKERS = int(os.environ.get("LW_STAGE1_WORKERS", "8"))
 STAGE1_PROMISE_CUTOFF = float(os.environ.get("LW_PROMISE_CUTOFF", "5.0"))
 # lower bar for lots that named a plausible artist (catches contemporary
 # gallery artists not in the historical-skewed authority.db)
