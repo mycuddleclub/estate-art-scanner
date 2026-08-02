@@ -48,7 +48,9 @@ def ingest_auction(conn, page, auction_row, fetch_lots_fn) -> int:
         keep = stage0.lot_passes_density(
             l["title"], l.get("detail", ""), density,
             a.get("title", ""), a.get("house", ""))
-        store.update_lot(conn, key, stage=("s1" if keep else "junk"))
+        pri = 1 if stage0.strong_art(l["title"], l.get("detail", "")) else 0
+        store.update_lot(conn, key, stage=("s1" if keep else "junk"),
+                         s1_priority=pri)
     conn.commit()
     store.set_auction_status(conn, a["key"], "fetched", lots_total=len(lots))
     return added

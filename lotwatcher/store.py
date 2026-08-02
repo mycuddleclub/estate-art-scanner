@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS lots (
     stage TEXT DEFAULT 's0',           -- s0 | s1 | s3 | done | junk
     s1 TEXT, s3 TEXT,                  -- json blobs
     category TEXT, artist TEXT, promise REAL,
-    img TEXT, vision TEXT,
+    img TEXT, vision TEXT, s1_priority INTEGER DEFAULT 0,
     flagged INTEGER DEFAULT 0,
     emailed INTEGER DEFAULT 0,
     updated_at REAL
@@ -47,6 +47,15 @@ def connect() -> sqlite3.Connection:
             pass
     try:
         conn.execute("ALTER TABLE auctions ADD COLUMN art_density REAL DEFAULT 0")
+    except Exception:
+        pass
+    try:
+        conn.execute("ALTER TABLE lots ADD COLUMN s1_priority INTEGER DEFAULT 0")
+    except Exception:
+        pass
+    try:
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_lots_pri"
+                     " ON lots(stage, s1_priority DESC)")
     except Exception:
         pass
     conn.commit()
@@ -88,8 +97,11 @@ def add_lot(conn, platform, lot_id, auction_key, title, estimate, bid, url,
 
 
 def lots_in_stage(conn, stage, limit=100000):
+    """Priority-ordered: lots with an explicit art signal are screened first so
+    real finds surface in hours, not after the whole recall-first tail."""
     return conn.execute(
-        "SELECT * FROM lots WHERE stage=? ORDER BY updated_at LIMIT ?",
+        "SELECT * FROM lots WHERE stage=?"
+        " ORDER BY s1_priority DESC, updated_at LIMIT ?",
         (stage, limit)).fetchall()
 
 
