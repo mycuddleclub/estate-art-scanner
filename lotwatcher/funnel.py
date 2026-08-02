@@ -139,6 +139,15 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
         for row in rows:
             r = dict(row)
             a = (r.get("artist") or "").strip()
+            # No artist name => can never flag (Daniel's hard rule), so judging
+            # it is pure waste. NOTE: this also means an uncatalogued work whose
+            # signature only appears in the PHOTO is missed — see vision-rescue.
+            if len(a.split()) < 2:
+                store.update_lot(conn, r["key"], stage="done", flagged=0,
+                                 s3=json.dumps({"flag": "NO",
+                                                "reasoning": "no identifiable artist name"}))
+                dropped += 1
+                continue
             pr = _profiles.get(artist_intel._key(a)) if a else None
             if pr and pr.get("deferred"):
                 deferred += 1        # undetermined — stays in s3 for next cycle
