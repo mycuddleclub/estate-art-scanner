@@ -129,57 +129,68 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
             ev = (ev + "\n" + gl) if ev else gl
         base.append([r, s1, detail, ev, auction])
 
-    # Vision in PARALLEL (pure httpx — thread-safe; the serial version was the
-    # judge-stage bottleneck). Both models resident, so this overlaps freely.
-    if not _os.environ.get("LW_NO_VISION"):
-        vworkers = int(_os.environ.get("LW_VISION_WORKERS", "6"))
-
-        def _vis(i):
-            r = base[i][0]
-            if not r.get("img"):
-                return i, None
-            return i, vision.read_lot(r["img"], r.get("title", ""))
-
-        with ThreadPoolExecutor(max_workers=vworkers) as vex:
-            for fut in as_completed([vex.submit(_vis, i) for i in range(len(base))]):
-                i, v = fut.result()
-                if v:
-                    r = base[i][0]
-                    store.update_lot(conn, r["key"], vision=json.dumps(v))
-                    vline = vision.evidence_line(v)
-                    if vline:
-                        base[i][3] = (base[i][3] + "\n" + vline) if base[i][3] else vline
-        conn.commit()
-
     prepared = [tuple(b) for b in base]
 
     def judge(item):
         r, s1, detail, ev, auction = item
         s3 = llm.stage3_judge({**r, "detail": detail}, s1, ev, auction)
-        return r, s3
+        return r, s1, detail, ev, auction, s3
 
-    n = 0
+    # PASS 1: text-only judgment (fast, parallel). Vision is NOT run here.
     workers = int(_os.environ.get("LW_STAGE3_WORKERS", "6"))
+    judged = []
+    n = 0
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = [ex.submit(judge, item) for item in prepared]
-        for fut in as_completed(futs):
+        for fut in as_completed([ex.submit(judge, it) for it in prepared]):
             try:
-                r, s3 = fut.result()
+                judged.append(fut.result())
             except Exception as e:
                 print(f"  stage3 error: {str(e)[:120]}")
-                continue
-            flagged = 1 if str(s3.get("flag", "")).upper().startswith("Y") else 0
-            # hard gate (Daniel 2026-08-01): no identifiable artist = no flag,
-            # no matter how promising — he wants name-able artists he can buy,
-            # not anonymous "might be undervalued" lots
-            if flagged and not (r.get("artist") or "").strip():
-                flagged = 0
-            store.update_lot(conn, r["key"], s3=json.dumps(s3), flagged=flagged,
-                             stage="done",
-                             promise=float(s3.get("score", r["promise"] or 0)))
             n += 1
             if n % 25 == 0:
-                conn.commit()
                 print(f"  stage3 {n}/{len(rows)}")
+
+    def _flag(s3, r):
+        f = 1 if str(s3.get("flag", "")).upper().startswith("Y") else 0
+        if f and not (r.get("artist") or "").strip():   # no name = no flag
+            f = 0
+        return f
+
+    flagged_items = [t for t in judged if _flag(t[5], t[0])]
+
+    # PASS 2: VISION only on the flags (Daniel's call — vision where it counts).
+    # Looks at the photo to (a) enrich the digest with a signature/condition and
+    # (b) veto a false positive if the image plainly doesn't match the listing.
+    if not _os.environ.get("LW_NO_VISION") and flagged_items:
+        vworkers = int(_os.environ.get("LW_VISION_WORKERS", "6"))
+        print(f"  vision on {len(flagged_items)} flagged lots")
+
+        def _vis(t):
+            r = t[0]
+            return (r["key"],
+                    vision.read_lot(r["img"], r.get("title", "")) if r.get("img") else None)
+
+        vmap = {}
+        with ThreadPoolExecutor(max_workers=vworkers) as vex:
+            for fut in as_completed([vex.submit(_vis, t) for t in flagged_items]):
+                k, v = fut.result()
+                vmap[k] = v
+    else:
+        vmap = {}
+
+    # persist everything
+    flagged_keys = {t[0]["key"] for t in flagged_items}
+    for r, s1, detail, ev, auction, s3 in judged:
+        f = _flag(s3, r)
+        v = vmap.get(r["key"])
+        vjson = None
+        if v:
+            vjson = json.dumps(v)
+            # vision veto: image plainly not the listed work -> drop the flag
+            if v.get("matches_listing") is False:
+                f = 0
+        store.update_lot(conn, r["key"], s3=json.dumps(s3), flagged=f,
+                         stage="done", vision=vjson,
+                         promise=float(s3.get("score", r["promise"] or 0)))
     conn.commit()
-    return n
+    return len(judged)
