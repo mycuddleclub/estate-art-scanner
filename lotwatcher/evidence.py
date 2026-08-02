@@ -96,3 +96,31 @@ def comp_line(lot: dict, artist: str) -> str:
         return line
     except Exception:
         return ""
+
+def authority_info(artist: str) -> dict:
+    """{standing, museums, museum_count} from the Reference Library, or {}."""
+    if authority is None or not artist or len(artist.split()) < 2:
+        return {}
+    try:
+        a = authority.lookup(artist)
+        if not a:
+            return {}
+        return {"standing": authority.standing(a) or "",
+                "museums": authority.describe(a) or "",
+                "museum_count": a.get("museum_count", 0)}
+    except Exception:
+        return {}
+
+
+def market_ceiling(artist: str) -> float:
+    """Highest documented realized (tier-A comp) for the artist, or 0.0.
+    This is the '$2,000 auction-value floor' signal."""
+    if comp_engine is None or not artist or len(artist.split()) < 2:
+        return 0.0
+    try:
+        comps = comp_engine.fetch_comps(artist) or []
+        vals = [float(c.get("price_usd")) for c in comps
+                if c.get("price_usd") and str(c.get("outcome")) in ("sold", "final_bid")]
+        return max(vals) if vals else 0.0
+    except Exception:
+        return 0.0

@@ -22,6 +22,27 @@ def _smtp_creds():
     return env
 
 
+def _signif(s3) -> str:
+    """Green significance line: museums + gallery tier + realized ceiling."""
+    g = (s3 or {}).get("_gate") or {}
+    bits = []
+    if g.get("museums"):
+        bits.append(g["museums"])
+    elif g.get("standing"):
+        bits.append(f"{g['standing']} institutional standing")
+    t = g.get("gallery_tier")
+    if t and 1 <= t <= 3:
+        label = {1: "Tier-1 mega-gallery", 2: "Tier-2 launchpad",
+                 3: "Tier-3 feeder"}[t]
+        bits.append(label)
+    if g.get("ceiling"):
+        bits.append(f"auction ceiling ${g['ceiling']:,.0f}")
+    if not bits:
+        return ""
+    return ('<div style="margin-top:5px;color:#0a7;font-size:13px;">'
+            + " · ".join(bits) + "</div>")
+
+
 def _card(r) -> str:
     import json
     s3 = json.loads(r["s3"]) if r["s3"] else {}
@@ -36,6 +57,7 @@ def _card(r) -> str:
         <span style="background:#f3e5f5;border-radius:4px;padding:1px 6px;">score {r['promise']:.0f}</span>
       </div>
       <div>Est: {r['estimate'] or '—'} &nbsp; Bid: {r['bid'] or '—'} &nbsp; Artist: {r['artist'] or '—'}</div>
+      {_signif(s3)}
       <div style="margin-top:6px;">{s3.get('reasoning','')}</div>
     </div>"""
 

@@ -178,17 +178,46 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
     else:
         vmap = {}
 
-    # persist everything
-    flagged_keys = {t[0]["key"] for t in flagged_items}
+    # persist everything, applying the SIGNIFICANCE GATE (Daniel 2026-08-02):
+    # a judge-YES only becomes a real flag if the artist is museum-backed,
+    # Tier 1-3 gallery, OR has >= $2,000 documented auction value. Everything
+    # else is a "researchable unknown" and is dropped.
+    import re as _re
+    MIN_VALUE = float(_os.environ.get("LW_MIN_VALUE", "2000"))
+    _POSTER = _re.compile(r"\b(poster|repro(duction)?|giclee|giclée|"
+                          r"offset lithograph|photo.?mechanical)\b", _re.I)
     for r, s1, detail, ev, auction, s3 in judged:
         f = _flag(s3, r)
+        artist = (r.get("artist") or "").strip()
+        gate = {}
+        if f:
+            ai = evidence.authority_info(artist)
+            tier = galleries.best_tier(artist)
+            ceiling = evidence.market_ceiling(artist)
+            museum = bool(ai.get("standing"))
+            gallery_ok = 1 <= tier <= 3
+            value_ok = ceiling >= MIN_VALUE
+            gate = {"standing": ai.get("standing", ""),
+                    "museums": ai.get("museums", ""),
+                    "museum_count": ai.get("museum_count", 0),
+                    "gallery_tier": tier, "ceiling": ceiling,
+                    "reason": ("museum" if museum else
+                               "gallery" if gallery_ok else
+                               "value" if value_ok else "")}
+            if not (museum or gallery_ok or value_ok):
+                f = 0                        # insignificant -> drop
+            # poster/reproduction kill (Daniel: "thought we got rid of that")
+            if f and _POSTER.search(r.get("title", "")) and not museum and tier == 0:
+                f = 0
         v = vmap.get(r["key"])
         vjson = None
         if v:
             vjson = json.dumps(v)
-            # vision veto: image plainly not the listed work -> drop the flag
             if v.get("matches_listing") is False:
                 f = 0
+        # fold the gate facts into the stored s3 so the digest can show them
+        if gate:
+            s3 = {**s3, "_gate": gate}
         store.update_lot(conn, r["key"], s3=json.dumps(s3), flagged=f,
                          stage="done", vision=vjson,
                          promise=float(s3.get("score", r["promise"] or 0)))

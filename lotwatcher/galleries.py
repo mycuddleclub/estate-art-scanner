@@ -101,3 +101,11 @@ def evidence_line(artist: str) -> str:
         return ""
     named = ", ".join(galleries[:4])
     return f"GALLERY: represented by {named} — best is {_TIER_LABEL[best_tier]}"
+
+
+def best_tier(artist: str) -> int:
+    """Lowest (best) tier among the artist's real galleries, or 0 if none.
+    1=mega, 2=launchpad, 3=incubator/feeder, 4=other gallery."""
+    gs = represented_galleries(artist)
+    tiers = [_tier_of(g) for g in gs if _tier_of(g)]
+    return min(tiers) if tiers else 0
