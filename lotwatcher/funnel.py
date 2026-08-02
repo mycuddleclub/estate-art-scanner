@@ -333,7 +333,14 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
     import re as _re
     MIN_VALUE = float(_os.environ.get("LW_MIN_VALUE", "2000"))
     _POSTER = _re.compile(r"\b(poster|repro(duction)?|giclee|giclée|"
-                          r"offset lithograph|photo.?mechanical)\b", _re.I)
+                          r"offset lithograph|photo.?mechanical|seriolithograph|"
+                          r"collector plate|figurine|commemorative)\b", _re.I)
+    # "11380/22900" — a huge edition is a decorative commodity, not fine art
+    _BIG_EDITION = _re.compile(r"\b\d{1,6}\s*/\s*(\d{3,6})\b")
+
+    def _mass_produced(title):
+        m = _BIG_EDITION.search(title or "")
+        return bool(m) and int(m.group(1)) >= 500
     for r, s1, detail, ev, auction, s3 in judged:
         f = _flag(s3, r)
         artist = (r.get("artist") or "").strip()
@@ -345,6 +352,10 @@ def run_stage3(conn, la_page=None, detail_fetch_fn=None, limit=2000) -> int:
             # poster/reproduction kill (Daniel: "thought we got rid of that")
             if f and _POSTER.search(r.get("title", "")) and not (
                     pr and (pr.get("museums") or (pr.get("gallery_tier") or 0) in (1, 2, 3))):
+                f = 0
+            # mass-production edition kill — applies even to listed artists,
+            # because a 1-of-22,900 print is a decorative commodity
+            if f and _mass_produced(r.get("title", "")):
                 f = 0
         v = vmap.get(r["key"])
         vjson = None

@@ -81,6 +81,23 @@ def _save(p):
 # --------------------------------------------------------------------------- #
 #  1. LOCAL — free, instant
 # --------------------------------------------------------------------------- #
+# Companies, studios, potteries and licensed brands are not artists Daniel can
+# build a case on, even when they appear in museum collections.
+_FIRM = (
+    "currier", "ives", "precious moments", "goebel", "hummel", "lladro",
+    "royal doulton", "wedgwood", "lenox", "franklin mint", "bradford exchange",
+    "disney", "warner bros", "hallmark", "department 56", "swarovski",
+    "tiffany studios", "roseville", "weller", "van briggle", "fenton",
+    " inc", " llc", " ltd", " co.", "& sons", "& co", "company", "studios",
+    "pottery", "porcelain works", "manufactory", "foundry", "mint",
+)
+
+
+def is_firm(name: str) -> bool:
+    n = " " + (name or "").lower().strip() + " "
+    return any(f in n for f in _FIRM)
+
+
 def _local(name):
     ai = evidence.authority_info(name) or {}
     tier = galleries.best_tier(name)
@@ -211,6 +228,18 @@ def _wiki(name):
         desc = (ent.get("descriptions", {}).get("en", {}) or {}).get("value", "").lower()
         is_artist = any(w in occ or w in desc for w in _ART_WORDS)
         museums = _wd_labels(_ids("P6379"))
+
+        # must be a HUMAN: firms/brands (Currier & Ives, Precious Moments,
+        # Walt Disney Company) are in museums but are not artists to buy.
+        if "Q5" not in _ids("P31"):
+            continue
+        # and the entity's own label must share the surname we searched for,
+        # otherwise "Wm. Clay" silently matches an unrelated person
+        label = (ent.get("labels", {}).get("en", {}) or {}).get("value", "")
+        q_toks = {t.strip(".").lower() for t in name.split() if len(t.strip(".")) >= 3}
+        l_toks = {t.strip(".").lower() for t in label.split() if len(t.strip(".")) >= 3}
+        if q_toks and not (q_toks & l_toks):
+            continue
         if not is_artist and not museums:
             continue                      # wrong entity (e.g. the NBA player)
         summary = ""
@@ -275,6 +304,13 @@ def resolve(names, web_budget=None):
     for n in names:
         k = _key(n)
         if k in out:
+            continue
+        if is_firm(n):                    # a company/brand, never an artist
+            p = {"name": n, "significant": False, "why": "firm/brand, not an artist",
+                 "standing": "", "museums": "", "gallery": "", "gallery_tier": 0,
+                 "market_high": 0.0, "source": "firm"}
+            _save(p)
+            out[k] = p
             continue
         c = _cached(n)
         if c:
