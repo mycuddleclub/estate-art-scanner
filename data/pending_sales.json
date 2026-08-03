@@ -1,12 +1,4 @@
 {
-  "5005668": {
-    "zip": "66208",
-    "city": "Prairie Village",
-    "state": "KS",
-    "name": "Nice Prairie Village Sale - Pence Estate Sales",
-    "first_seen": "2026-07-20T09:53:24.539732+00:00",
-    "last_photo_count": 1
-  },
   "5006847": {
     "zip": "48009",
     "city": "Birmingham",
@@ -37,14 +29,6 @@
     "state": "MI",
     "name": "Birmingham Estate Sale",
     "first_seen": "2026-07-21T09:23:37.415972+00:00",
-    "last_photo_count": 3
-  },
-  "5013456": {
-    "zip": "32792",
-    "city": "Winter Park",
-    "state": "FL",
-    "name": "Estate Sale Liquidators are in Winter Park",
-    "first_seen": "2026-07-26T09:08:08.339716+00:00",
     "last_photo_count": 3
   },
   "5011860": {
@@ -134,5 +118,13 @@
     "name": "WINNETKA ESTATE SALE-50 years of antiques",
     "first_seen": "2026-08-02T09:05:38.452320+00:00",
     "last_photo_count": 0
+  },
+  "5023272": {
+    "zip": "77007",
+    "city": "Houston",
+    "state": "TX",
+    "name": "Rice Military - Modern & Sophisticated - Blue Family Estate Sales",
+    "first_seen": "2026-08-03T10:36:03.756340+00:00",
+    "last_photo_count": 1
   }
 }
