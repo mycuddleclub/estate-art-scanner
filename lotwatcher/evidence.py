@@ -112,15 +112,48 @@ def authority_info(artist: str) -> dict:
         return {}
 
 
-def market_ceiling(artist: str) -> float:
-    """Highest documented realized (tier-A comp) for the artist, or 0.0.
-    This is the '$2,000 auction-value floor' signal."""
-    if comp_engine is None or not artist or len(artist.split()) < 2:
-        return 0.0
+def market_detail(artist: str) -> dict:
+    """Documented realized prices for the artist from prices.db.
+
+    Reads BOTH tiers: tier A = MutualArt (authoritative, 83 artists) and
+    tier B = HiBid realized regional results (1,086 artists) which the gate
+    was previously ignoring entirely. Returns {high, n, source}.
+    """
+    out = {"high": 0.0, "n": 0, "source": ""}
+    if not artist or len(artist.split()) < 2:
+        return out
     try:
-        comps = comp_engine.fetch_comps(artist) or []
-        vals = [float(c.get("price_usd")) for c in comps
-                if c.get("price_usd") and str(c.get("outcome")) in ("sold", "final_bid")]
-        return max(vals) if vals else 0.0
+        import os as _o
+        import sqlite3 as _sq
+        conn = _sq.connect(
+            f"file:{_o.path.expanduser('~/estate-art-scanner/wh_data/prices.db')}?mode=ro",
+            uri=True, timeout=20)
+        key = None
+        if prices is not None and hasattr(prices, "_key"):
+            key = prices._key(artist)
+        if not key:
+            import re as _re
+            key = _re.sub(r"\s+", " ",
+                          _re.sub(r"[^a-z ]+", " ", artist.lower())).strip()
+        rows = conn.execute(
+            "SELECT price_usd, tier FROM prices WHERE artist_key=? AND suspect=0"
+            " AND price_usd IS NOT NULL AND outcome IN ('sold','final_bid')",
+            (key,)).fetchall()
+        conn.close()
+        if not rows:
+            return out
+        a = [float(r[0]) for r in rows if r[1] == "A"]
+        b = [float(r[0]) for r in rows if r[1] != "A"]
+        if a:
+            out.update(high=max(a), n=len(a), source="MutualArt")
+        if b and (not a or max(b) > out["high"]):
+            out.update(high=max(max(b), out["high"]), n=out["n"] + len(b),
+                       source=("MutualArt+HiBid" if a else "HiBid realized"))
+        return out
     except Exception:
-        return 0.0
+        return out
+
+
+def market_ceiling(artist: str) -> float:
+    """Highest documented realized price (either tier) — the $2,000 gate arm."""
+    return market_detail(artist).get("high", 0.0)

@@ -190,3 +190,13 @@ def best_tier(artist: str) -> int:
     gs = represented_galleries(artist)
     tiers = [_tier_of(g) for g in gs if _tier_of(g)]
     return min(tiers) if tiers else 0
+
+
+def best_gallery(artist: str):
+    """(tier, gallery_name) for the artist's best real gallery, else (0, "")."""
+    best_t, best_n = 0, ""
+    for g in represented_galleries(artist):
+        t = _tier_of(g)
+        if t and (best_t == 0 or t < best_t):
+            best_t, best_n = t, g
+    return best_t, best_n

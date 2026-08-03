@@ -100,6 +100,25 @@ def is_firm(name: str) -> bool:
     return any(f in n for f in _FIRM)
 
 
+def market_detail_cached(name):
+    try:
+        return evidence.market_detail(name)
+    except Exception:
+        return {"high": 0.0, "n": 0, "source": ""}
+
+
+def sane_usd(v):
+    """Models answer "12" meaning $12k. A sub-$100 auction record is
+    meaningless for a $2,000 gate, so treat it as thousands."""
+    try:
+        v = float(v or 0)
+    except Exception:
+        return 0.0
+    if 0 < v < 100:
+        return v * 1000.0
+    return v
+
+
 def _local(name):
     ai = evidence.authority_info(name) or {}
     ceiling = evidence.market_ceiling(name)       # local sqlite, instant
@@ -110,7 +129,7 @@ def _local(name):
     _qualified = bool(_st) or (ai.get("museum_count", 0) or 0) > 0 \
         or "collections per" in (_mus or "").lower() \
         or "papers at" in (_mus or "").lower() or ceiling >= MIN_VALUE
-    tier = 0 if _qualified else galleries.best_tier(name)
+    tier, gal_name = (0, "") if _qualified else galleries.best_gallery(name)
     standing = ai.get("standing", "")
     museums = ai.get("museums", "")
     reasons = []
@@ -131,9 +150,11 @@ def _local(name):
         reasons.append(f"gallery T{tier}")
     if ceiling >= MIN_VALUE:
         reasons.append(f"auction ${ceiling:,.0f}")
+    md = market_detail_cached(name)
     return {"name": name, "significant": bool(reasons), "why": " + ".join(reasons),
             "standing": standing, "museums": ai.get("museums", ""),
-            "gallery": "", "gallery_tier": tier, "market_high": ceiling,
+            "gallery": gal_name, "gallery_tier": tier, "market_high": ceiling,
+            "market_n": md.get("n", 0), "market_source": md.get("source", ""),
             "source": "local"}
 
 
@@ -143,7 +164,7 @@ def _local(name):
 _KNOW = """You are an art-market reference. For EACH artist below, answer ONLY from knowledge you actually have. Never invent museums or prices — if you do not know the artist, say known:false.
 
 Return a STRICT JSON array, one object per artist, same order:
-[{{"name":"...","known":true/false,"museums":"comma-separated major museums holding their work, or empty","auction_high_usd":<highest realized auction price you know in USD, else 0>,"gallery":"their main commercial gallery, or empty","note":"<=10 words"}}]
+[{{"name":"...","known":true/false,"museums":"comma-separated major museums holding their work, or empty","auction_high_usd":<highest realized auction price in FULL USD, e.g. 12000 not 12, else 0>,"gallery":"their main commercial gallery, or empty","note":"<=10 words"}}]
 
 Artists:
 {lst}"""
@@ -288,7 +309,7 @@ def _web(name):
                     "From this encyclopedia summary ONLY (invent nothing), answer about the artist.\n\n"
                     f"Artist: {name}\nSummary: {w['summary']}\n\n"
                     'STRICT JSON: {"gallery":"commercial gallery named in the text, else empty",'
-                    '"auction_high_usd": <highest auction price stated in the text, else 0>,'
+                    '"auction_high_usd": <highest auction price as a FULL number in USD, e.g. 12000 not 12, else 0>,'
                     '"notable": true/false}'}]})
             t = r.json()["choices"][0]["message"].get("content") or ""
             m = re.search(r"\{.*\}", t, re.S)
@@ -373,7 +394,7 @@ def resolve(names, web_budget=None):
             out[k] = b
             continue
         museums = (d.get("museums") or "").strip()
-        high = float(d.get("auction_high_usd") or 0)
+        high = sane_usd(d.get("auction_high_usd"))
         gal = (d.get("gallery") or "").strip()
         tier = base.get("gallery_tier") or (
             galleries.classify_gallery(gal)["tier"] if gal else 0)

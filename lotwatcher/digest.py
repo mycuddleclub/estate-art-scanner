@@ -35,9 +35,13 @@ def _signif(s3) -> str:
         label = {1: "Tier-1 mega-gallery", 2: "Tier-2 launchpad",
                  3: "Tier-3 feeder gallery"}[t]
         bits.append("🖼 " + (f"{g['gallery']} — {label}" if g.get("gallery") else label))
-    high = g.get("market_high") or g.get("ceiling")
+    high = g.get("market_high") or g.get("ceilingedge") or g.get("ceiling")
     if high:
-        bits.append(f"💰 auction high ${high:,.0f}")
+        src = g.get("market_source") or ""
+        n = g.get("market_n") or 0
+        extra = f" ({n} sales, {src})" if n and src else (f" ({src})" if src else "")
+        bits.append("💰 <b style='font-size:15px'>auction high "
+                    f"${high:,.0f}</b>{extra}")
     if g.get("source") and bits:
         bits.append(f"<span style='color:#999'>[{g['source']}]</span>")
     if not bits:
