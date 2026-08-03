@@ -174,10 +174,12 @@ def _local(name):
     if ceiling >= MIN_VALUE:
         reasons.append(f"auction ${ceiling:,.0f}")
     md = market_detail_cached(name)
+    _avg, _yr, _msrc = md.get("avg", 0), md.get("year", ""), md.get("source", "")
     return {"name": name, "significant": bool(reasons), "why": " + ".join(reasons),
             "standing": standing, "museums": ai.get("museums", ""),
             "gallery": gal_name, "gallery_tier": tier, "market_high": ceiling,
             "market_n": md.get("n", 0), "market_source": md.get("source", ""),
+            "market_avg": _avg, "market_year": _yr, "market_src": _msrc,
             "source": "local"}
 
 
@@ -329,6 +331,53 @@ def _wiki(name):
     return {"is_artist": False, "museums": [], "summary": "", "qid": ""}
 
 
+def badges_for(name: str) -> str:
+    """Background badges only (P21 gender, P172 ethnic group). Display-only —
+    never affects the gate. Cheap: one search + one entity fetch, cached."""
+    try:
+        r = httpx.get("https://www.wikidata.org/w/api.php", headers=_WIKI_UA,
+                      timeout=15, params={"action": "wbsearchentities",
+                                          "search": name, "language": "en",
+                                          "format": "json", "limit": 1})
+        hits = r.json().get("search") or []
+        if not hits:
+            return ""
+        qid = hits[0]["id"]
+        e = httpx.get(f"https://www.wikidata.org/wiki/Special:EntityData/{qid}.json",
+                      headers=_WIKI_UA, timeout=20).json()["entities"][qid]
+        cl = e.get("claims", {})
+
+        def ids(prop):
+            return [c["mainsnak"]["datavalue"]["value"]["id"]
+                    for c in cl.get(prop, []) if "datavalue" in c.get("mainsnak", {})]
+
+        if "Q5" not in ids("P31"):
+            return ""
+        label = (e.get("labels", {}).get("en", {}) or {}).get("value", "")
+        q = {t.strip(".").lower() for t in name.split() if len(t.strip(".")) >= 3}
+        l = {t.strip(".").lower() for t in label.split() if len(t.strip(".")) >= 3}
+        if q and not (q & l):
+            return ""
+        gender = " ".join(_wd_labels(ids("P21"))).lower()
+        eth = " ".join(_wd_labels(ids("P172"))).lower()
+        out = []
+        if "female" in gender or "woman" in gender:
+            out.append("Woman")
+        if "african" in eth or "black" in eth:
+            out.append("African American")
+        if any(k in eth for k in ("native american", "indian", "cherokee", "navajo",
+                                  "cree", "salish", "shoshone", "sioux", "apache",
+                                  "hopi", "pueblo", "inuit", "ojibwe", "choctaw",
+                                  "seminole", "iroquois", "lakota", "first nations",
+                                  "mission indians", "m\u00e9tis", "metis")):
+            out.append("Native American")
+        if any(k in eth for k in ("hispanic", "latino", "chicano", "mexican american")):
+            out.append("Hispanic/Latino")
+        return ", ".join(out)
+    except Exception:
+        return ""
+
+
 def _web(name):
     """External significance check via Wikidata/Wikipedia (replaces the
     blocked search engines). Museums are hard evidence; the summary is read by
@@ -455,6 +504,27 @@ def resolve(names, web_budget=None):
              "source": "web"}
         _save(p)              # a real determination — cache it forever
         out[k] = p
+
+    # badges for anything that qualified (display-only, cached forever)
+    todo_b = [(k, p) for k, p in out.items()
+              if p.get("significant") and not (p.get("badges") or "").strip()]
+    if todo_b:
+        bw = int(os.environ.get("LW_BADGE_WORKERS", "6"))
+        with ThreadPoolExecutor(max_workers=bw) as ex:
+            futs = {ex.submit(badges_for, p["name"]): k for k, p in todo_b}
+            for fut in as_completed(futs):
+                k = futs[fut]
+                try:
+                    b = fut.result()
+                except Exception:
+                    b = ""
+                if b:
+                    out[k]["badges"] = b
+                    try:
+                        _db().execute("UPDATE artist SET badges=? WHERE akey=?", (b, k))
+                    except Exception:
+                        pass
+        _db().commit()
     return out
 
 

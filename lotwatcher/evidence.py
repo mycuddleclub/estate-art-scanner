@@ -119,7 +119,7 @@ def market_detail(artist: str) -> dict:
     tier B = HiBid realized regional results (1,086 artists) which the gate
     was previously ignoring entirely. Returns {high, n, source}.
     """
-    out = {"high": 0.0, "n": 0, "source": ""}
+    out = {"high": 0.0, "n": 0, "source": "", "avg": 0.0, "year": ""}
     if not artist or len(artist.split()) < 2:
         return out
     try:

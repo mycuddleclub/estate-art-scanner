@@ -42,6 +42,10 @@ def _signif(s3) -> str:
         extra = f" ({n} sales, {src})" if n and src else (f" ({src})" if src else "")
         bits.append("💰 <b style='font-size:15px'>auction high "
                     f"${high:,.0f}</b>{extra}")
+    avg = g.get("market_avg") or 0
+    if avg and avg != high:
+        yr = g.get("market_year") or ""
+        bits.append(f"avg <b>${avg:,.0f}</b>{' (' + yr + ')' if yr else ''}")
     b = (g.get("badges") or "").strip()
     if b:
         bits.append("<b style='color:#7b1fa2'>" + b + "</b>")
