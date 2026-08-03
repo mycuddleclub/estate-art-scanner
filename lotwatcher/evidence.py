@@ -135,6 +135,18 @@ def market_detail(artist: str) -> dict:
             import re as _re
             key = _re.sub(r"\s+", " ",
                           _re.sub(r"[^a-z ]+", " ", artist.lower())).strip()
+        # MutualArt artist-page summary (fast pass) is the BEST market number —
+        # real market averages, unlike HiBid's regional realized prices.
+        try:
+            am = conn.execute(
+                "SELECT avg_realized, max_est, year FROM artist_market"
+                " WHERE artist_key=?", (key,)).fetchone()
+            if am and (am[0] or am[1]):
+                out.update(high=float(am[0] or am[1] or 0), n=0,
+                           source=f"MutualArt avg{' ' + am[2] if am[2] else ''}",
+                           avg=float(am[0] or 0), year=am[2] or "")
+        except Exception:
+            pass
         rows = conn.execute(
             "SELECT price_usd, tier FROM prices WHERE artist_key=? AND suspect=0"
             " AND price_usd IS NOT NULL AND outcome IN ('sold','final_bid')",
@@ -144,7 +156,7 @@ def market_detail(artist: str) -> dict:
             return out
         a = [float(r[0]) for r in rows if r[1] == "A"]
         b = [float(r[0]) for r in rows if r[1] != "A"]
-        if a:
+        if a and max(a) > out["high"]:
             out.update(high=max(a), n=len(a), source="MutualArt")
         if b and (not a or max(b) > out["high"]):
             out.update(high=max(max(b), out["high"]), n=out["n"] + len(b),

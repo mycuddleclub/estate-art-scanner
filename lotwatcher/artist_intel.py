@@ -49,6 +49,12 @@ def _db():
             akey TEXT PRIMARY KEY, name TEXT, significant INT, why TEXT,
             standing TEXT, museums TEXT, gallery TEXT, gallery_tier INT,
             market_high REAL, source TEXT, at REAL)""")
+        for col in ("badges TEXT", "market_avg REAL", "market_year TEXT",
+                    "market_src TEXT"):
+            try:
+                _conn.execute(f"ALTER TABLE artist ADD COLUMN {col}")
+            except Exception:
+                pass
         _conn.commit()
     return _conn
 
@@ -63,9 +69,18 @@ def _cached(name):
         " market_high, source FROM artist WHERE akey=?", (_key(name),)).fetchone()
     if not row:
         return None
-    return {"significant": bool(row[0]), "why": row[1], "standing": row[2],
-            "museums": row[3], "gallery": row[4], "gallery_tier": row[5],
-            "market_high": row[6], "source": row[7], "name": name}
+    d = {"significant": bool(row[0]), "why": row[1], "standing": row[2],
+         "museums": row[3], "gallery": row[4], "gallery_tier": row[5],
+         "market_high": row[6], "source": row[7], "name": name}
+    try:
+        x = _db().execute("SELECT badges, market_avg, market_year, market_src"
+                          " FROM artist WHERE akey=?", (_key(name),)).fetchone()
+        if x:
+            d.update(badges=x[0] or "", market_avg=x[1] or 0,
+                     market_year=x[2] or "", market_src=x[3] or "")
+    except Exception:
+        pass
+    return d
 
 
 def _save(p):
@@ -77,6 +92,14 @@ def _save(p):
          p.get("standing", ""), p.get("museums", "")[:400], p.get("gallery", "")[:160],
          int(p.get("gallery_tier") or 0), float(p.get("market_high") or 0),
          p.get("source", ""), time.time()))
+    try:
+        _db().execute("UPDATE artist SET badges=?, market_avg=?, market_year=?,"
+                      " market_src=? WHERE akey=?",
+                      (p.get("badges", ""), float(p.get("market_avg") or 0),
+                       p.get("market_year", ""), p.get("market_src", ""),
+                       _key(p["name"])))
+    except Exception:
+        pass
     _db().commit()
 
 
@@ -255,6 +278,10 @@ def _wiki(name):
                     for c in claims.get(prop, [])
                     if "datavalue" in c.get("mainsnak", {})]
 
+        # Background badges (Daniel 2026-08-02): evidence-only, exactly like the
+        # Super Smart Checker — they NEVER affect the gate, they just label.
+        gender = " ".join(_wd_labels(_ids("P21"))).lower()
+        ethnic = _wd_labels(_ids("P172"))
         occ = " ".join(_wd_labels(_ids("P106"))).lower()
         desc = (ent.get("descriptions", {}).get("en", {}) or {}).get("value", "").lower()
         is_artist = any(w in occ or w in desc for w in _ART_WORDS)
@@ -284,8 +311,21 @@ def _wiki(name):
                     summary = (sr.json().get("extract") or "")[:600]
         except Exception:
             pass
-        return {"is_artist": is_artist, "museums": museums,
-                "summary": summary, "qid": qid}
+        badges = []
+        if "female" in gender or "woman" in gender:
+            badges.append("Woman")
+        _e = " ".join(ethnic).lower()
+        if "african" in _e or "black" in _e:
+            badges.append("African American")
+        if any(k in _e for k in ("native american", "indian", "cherokee", "navajo",
+                                 "cree", "salish", "shoshone", "sioux", "apache",
+                                 "hopi", "pueblo", "inuit", "ojibwe", "choctaw",
+                                 "seminole", "iroquois", "lakota", "first nations")):
+            badges.append("Native American")
+        if "hispanic" in _e or "latino" in _e or "chicano" in _e:
+            badges.append("Hispanic/Latino")
+        return {"is_artist": is_artist, "museums": museums, "badges": badges,
+                "ethnic": ", ".join(ethnic[:3]), "summary": summary, "qid": qid}
     return {"is_artist": False, "museums": [], "summary": "", "qid": ""}
 
 
@@ -299,6 +339,7 @@ def _web(name):
     museums = w.get("museums") or []
     out = {"significant": bool(museums), "museums": ", ".join(museums[:6]),
            "auction_high_usd": 0, "gallery": "",
+           "badges": w.get("badges") or [],
            "why": ("museum" if museums else "no museum record")}
     if w.get("summary") and (w.get("is_artist") or museums):
         try:
@@ -410,6 +451,7 @@ def resolve(names, web_budget=None):
              "standing": base["standing"] or ("strong" if museums else ""),
              "museums": museums or base["museums"], "gallery": gal,
              "gallery_tier": tier, "market_high": max(high, base["market_high"]),
+             "badges": ", ".join(d.get("badges") or []),
              "source": "web"}
         _save(p)              # a real determination — cache it forever
         out[k] = p

@@ -42,6 +42,9 @@ def _signif(s3) -> str:
         extra = f" ({n} sales, {src})" if n and src else (f" ({src})" if src else "")
         bits.append("💰 <b style='font-size:15px'>auction high "
                     f"${high:,.0f}</b>{extra}")
+    b = (g.get("badges") or "").strip()
+    if b:
+        bits.append("<b style='color:#7b1fa2'>" + b + "</b>")
     if g.get("source") and bits:
         bits.append(f"<span style='color:#999'>[{g['source']}]</span>")
     if not bits:
