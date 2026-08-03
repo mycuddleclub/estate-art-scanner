@@ -295,11 +295,12 @@ def _wiki(name):
             continue
         # and the entity's own label must share the surname we searched for,
         # otherwise "Wm. Clay" silently matches an unrelated person
-        label = (ent.get("labels", {}).get("en", {}) or {}).get("value", "")
+        label = ((ent.get("labels", {}).get("en", {}) or {}).get("value", "")
+                 or h.get("label", "") or "")
         q_toks = {t.strip(".").lower() for t in name.split() if len(t.strip(".")) >= 3}
         l_toks = {t.strip(".").lower() for t in label.split() if len(t.strip(".")) >= 3}
-        if q_toks and not (q_toks & l_toks):
-            continue
+        if q_toks and l_toks and not (q_toks & l_toks):
+            continue                       # only reject on a REAL mismatch
         if not is_artist and not museums:
             continue                      # wrong entity (e.g. the NBA player)
         summary = ""
@@ -353,11 +354,12 @@ def badges_for(name: str) -> str:
 
         if "Q5" not in ids("P31"):
             return ""
-        label = (e.get("labels", {}).get("en", {}) or {}).get("value", "")
+        label = ((e.get("labels", {}).get("en", {}) or {}).get("value", "")
+                 or hits[0].get("label", "") or "")
         q = {t.strip(".").lower() for t in name.split() if len(t.strip(".")) >= 3}
         l = {t.strip(".").lower() for t in label.split() if len(t.strip(".")) >= 3}
-        if q and not (q & l):
-            return ""
+        if q and l and not (q & l):
+            return ""                      # only reject on a REAL mismatch
         gender = " ".join(_wd_labels(ids("P21"))).lower()
         eth = " ".join(_wd_labels(ids("P172"))).lower()
         out = []
