@@ -360,6 +360,12 @@ def badges_for(name: str) -> str:
         l = {t.strip(".").lower() for t in label.split() if len(t.strip(".")) >= 3}
         if q and l and not (q & l):
             return ""                      # only reject on a REAL mismatch
+        # the entity must actually be an ARTIST — otherwise a namesake
+        # (searching "Ron Lee" hits an NBA player) gets the badge
+        occ = " ".join(_wd_labels(ids("P106"))).lower()
+        desc = (e.get("descriptions", {}).get("en", {}) or {}).get("value", "").lower()
+        if not any(w in occ or w in desc for w in _ART_WORDS):
+            return ""
         gender = " ".join(_wd_labels(ids("P21"))).lower()
         eth = " ".join(_wd_labels(ids("P172"))).lower()
         out = []
