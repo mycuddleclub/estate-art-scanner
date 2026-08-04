@@ -1,36 +1,4 @@
 {
-  "5006847": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Birmingham Estate Sale",
-    "first_seen": "2026-07-21T09:23:37.415751+00:00",
-    "last_photo_count": 1
-  },
-  "5006943": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Birmingham Estate Sale",
-    "first_seen": "2026-07-21T09:23:37.415794+00:00",
-    "last_photo_count": 1
-  },
-  "5007051": {
-    "zip": "75225",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "~Incredible Preston Hollow Estate Sale! Steinway Piano, Fine Art, Jet Woodworking, Collectibles..",
-    "first_seen": "2026-07-21T09:23:37.415842+00:00",
-    "last_photo_count": 1
-  },
-  "5006931": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Birmingham Estate Sale",
-    "first_seen": "2026-07-21T09:23:37.415972+00:00",
-    "last_photo_count": 3
-  },
   "5011860": {
     "zip": "90274",
     "city": "Palos Verdes Peninsula",
@@ -126,5 +94,37 @@
     "name": "Rice Military - Modern & Sophisticated - Blue Family Estate Sales",
     "first_seen": "2026-08-03T10:36:03.756340+00:00",
     "last_photo_count": 1
+  },
+  "5024724": {
+    "zip": "97035",
+    "city": "Lake Oswego",
+    "state": "OR",
+    "name": "Time Travel in Lake Oswego - Antique Clocks, Vintage Toys, and more!",
+    "first_seen": "2026-08-04T09:35:31.435439+00:00",
+    "last_photo_count": 7
+  },
+  "5025150": {
+    "zip": "77007",
+    "city": "Houston",
+    "state": "TX",
+    "name": "3 FLOORS FULL in The Heights",
+    "first_seen": "2026-08-04T09:35:31.435659+00:00",
+    "last_photo_count": 0
+  },
+  "5024172": {
+    "zip": "48302",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "AMAZING 7,000 SF BLOOMFIELD HILLS ESTATE SALE!",
+    "first_seen": "2026-08-04T09:35:31.435707+00:00",
+    "last_photo_count": 0
+  },
+  "5025564": {
+    "zip": "18938",
+    "city": "New Hope",
+    "state": "PA",
+    "name": "Hydrangeas\u2019 Estate Sales In New Hope",
+    "first_seen": "2026-08-04T09:35:31.435758+00:00",
+    "last_photo_count": 6
   }
 }
