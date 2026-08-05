@@ -15,14 +15,6 @@
     "first_seen": "2026-07-26T09:08:08.340054+00:00",
     "last_photo_count": 4
   },
-  "5013756": {
-    "zip": "48302",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "ANOTHER GREAT BLMFLD TOWNSHIP SALE",
-    "first_seen": "2026-07-26T09:08:08.340080+00:00",
-    "last_photo_count": 3
-  },
   "5015448": {
     "zip": "48098",
     "city": "Troy",
@@ -38,22 +30,6 @@
     "name": "BALDERDASH ESTATE SALES - WILMETTE - Vintage Household & More!!",
     "first_seen": "2026-07-28T09:32:02.441942+00:00",
     "last_photo_count": 0
-  },
-  "5017440": {
-    "zip": "48301",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Poof! Jewelry, Antiques, Art & More Bloomfield Village Estate Sale",
-    "first_seen": "2026-07-29T09:33:33.069630+00:00",
-    "last_photo_count": 7
-  },
-  "5017932": {
-    "zip": "07042",
-    "city": "Montclair",
-    "state": "NJ",
-    "name": "Montclair 8/7 & 8/8",
-    "first_seen": "2026-07-29T09:33:33.069921+00:00",
-    "last_photo_count": 1
   },
   "5017287": {
     "zip": "78212",
@@ -109,7 +85,7 @@
     "state": "TX",
     "name": "3 FLOORS FULL in The Heights",
     "first_seen": "2026-08-04T09:35:31.435659+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 2
   },
   "5024172": {
     "zip": "48302",
@@ -119,12 +95,20 @@
     "first_seen": "2026-08-04T09:35:31.435707+00:00",
     "last_photo_count": 0
   },
-  "5025564": {
-    "zip": "18938",
-    "city": "New Hope",
-    "state": "PA",
-    "name": "Hydrangeas\u2019 Estate Sales In New Hope",
-    "first_seen": "2026-08-04T09:35:31.435758+00:00",
-    "last_photo_count": 6
+  "5026176": {
+    "zip": "90274",
+    "city": "Palos Verdes Peninsula",
+    "state": "CA",
+    "name": "OUTSTANDING Palos Verdes Estates EsTaTe SaLe ! COMING SOON !",
+    "first_seen": "2026-08-05T09:31:17.730202+00:00",
+    "last_photo_count": 0
+  },
+  "5026203": {
+    "zip": "48098",
+    "city": "Troy",
+    "state": "MI",
+    "name": "Troy Estate Sale",
+    "first_seen": "2026-08-05T09:31:17.730421+00:00",
+    "last_photo_count": 1
   }
 }
