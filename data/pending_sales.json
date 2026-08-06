@@ -87,14 +87,6 @@
     "first_seen": "2026-08-04T09:35:31.435659+00:00",
     "last_photo_count": 2
   },
-  "5024172": {
-    "zip": "48302",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "AMAZING 7,000 SF BLOOMFIELD HILLS ESTATE SALE!",
-    "first_seen": "2026-08-04T09:35:31.435707+00:00",
-    "last_photo_count": 0
-  },
   "5026176": {
     "zip": "90274",
     "city": "Palos Verdes Peninsula",
@@ -109,6 +101,30 @@
     "state": "MI",
     "name": "Troy Estate Sale",
     "first_seen": "2026-08-05T09:31:17.730421+00:00",
+    "last_photo_count": 1
+  },
+  "5027898": {
+    "zip": "48302",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Poof! $1.5M Designer Goods & Clothing Bloomfield Hills Estate Sale",
+    "first_seen": "2026-08-06T09:35:57.946763+00:00",
+    "last_photo_count": 7
+  },
+  "5027949": {
+    "zip": "60035",
+    "city": "Highland Park",
+    "state": "IL",
+    "name": "Sheridan Sales is at a Moving Sale in Highland Park!",
+    "first_seen": "2026-08-06T09:35:57.947052+00:00",
+    "last_photo_count": 1
+  },
+  "5027352": {
+    "zip": "48301",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Bloomfield Hills Estate Sale",
+    "first_seen": "2026-08-06T09:35:57.947104+00:00",
     "last_photo_count": 1
   }
 }
