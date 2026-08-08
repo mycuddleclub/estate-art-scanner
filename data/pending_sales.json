@@ -110,5 +110,21 @@
     "name": "Bloomfield Hills Estate Sale",
     "first_seen": "2026-08-06T09:35:57.947104+00:00",
     "last_photo_count": 1
+  },
+  "5030874": {
+    "zip": "20816",
+    "city": "Bethesda",
+    "state": "MD",
+    "name": "Elegant Estate Sale in Sumner Bethesda",
+    "first_seen": "2026-08-08T07:43:00.288279+00:00",
+    "last_photo_count": 1
+  },
+  "5030364": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Beautifully Curated Home in Bloomfield Hills",
+    "first_seen": "2026-08-08T07:43:00.288562+00:00",
+    "last_photo_count": 1
   }
 }
