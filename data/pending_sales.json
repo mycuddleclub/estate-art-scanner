@@ -1,20 +1,4 @@
 {
-  "5011860": {
-    "zip": "90274",
-    "city": "Palos Verdes Peninsula",
-    "state": "CA",
-    "name": "Rolling Hills Estate Sale",
-    "first_seen": "2026-07-26T09:08:08.339999+00:00",
-    "last_photo_count": 3
-  },
-  "5012649": {
-    "zip": "48236",
-    "city": "Grosse Pointe Farms",
-    "state": "MI",
-    "name": "Grand GROSSE POINTE FARMS Estate Sale",
-    "first_seen": "2026-07-26T09:08:08.340054+00:00",
-    "last_photo_count": 4
-  },
   "5015448": {
     "zip": "48098",
     "city": "Troy",
@@ -126,5 +110,29 @@
     "name": "Beautifully Curated Home in Bloomfield Hills",
     "first_seen": "2026-08-08T07:43:00.288562+00:00",
     "last_photo_count": 1
+  },
+  "5032932": {
+    "zip": "37205",
+    "city": "Nashville",
+    "state": "TN",
+    "name": "WONDERFUL WEST MEADE ESTATE SALE",
+    "first_seen": "2026-08-10T08:22:50.096190+00:00",
+    "last_photo_count": 0
+  },
+  "5032797": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "ANTIQUES, ART, AND FOLK ART IN AMAZING BIRMINGHAM ESTATE SALE",
+    "first_seen": "2026-08-10T08:22:50.096413+00:00",
+    "last_photo_count": 0
+  },
+  "5032689": {
+    "zip": "75205",
+    "city": "Dallas",
+    "state": "TX",
+    "name": "Help Me Ronda ... Outstanding Highland Park Home",
+    "first_seen": "2026-08-10T08:22:50.096465+00:00",
+    "last_photo_count": 0
   }
 }
