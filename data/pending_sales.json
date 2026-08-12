@@ -1,20 +1,4 @@
 {
-  "5015448": {
-    "zip": "48098",
-    "city": "Troy",
-    "state": "MI",
-    "name": "Troy Estate Sale",
-    "first_seen": "2026-07-28T09:32:02.441908+00:00",
-    "last_photo_count": 0
-  },
-  "5016666": {
-    "zip": "60091",
-    "city": "Wilmette",
-    "state": "IL",
-    "name": "BALDERDASH ESTATE SALES - WILMETTE - Vintage Household & More!!",
-    "first_seen": "2026-07-28T09:32:02.441942+00:00",
-    "last_photo_count": 0
-  },
   "5020272": {
     "zip": "75225",
     "city": "Dallas",
@@ -111,14 +95,6 @@
     "first_seen": "2026-08-10T08:22:50.096413+00:00",
     "last_photo_count": 0
   },
-  "5032689": {
-    "zip": "75205",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "Help Me Ronda ... Outstanding Highland Park Home",
-    "first_seen": "2026-08-10T08:22:50.096465+00:00",
-    "last_photo_count": 0
-  },
   "5033367": {
     "zip": "87501",
     "city": "Santa Fe",
@@ -126,14 +102,6 @@
     "name": "New Old Stock Jewelry Sale",
     "first_seen": "2026-08-11T08:06:33.436061+00:00",
     "last_photo_count": 7
-  },
-  "5034582": {
-    "zip": "60045",
-    "city": "Lake Forest",
-    "state": "IL",
-    "name": "CK Estate Sale @ Lake Forest",
-    "first_seen": "2026-08-11T08:06:33.436361+00:00",
-    "last_photo_count": 0
   },
   "5034666": {
     "zip": "66208",
@@ -150,5 +118,21 @@
     "name": "Charming $3M Chastain Estate...Presented by Nanette",
     "first_seen": "2026-08-11T08:06:33.436443+00:00",
     "last_photo_count": 2
+  },
+  "5035116": {
+    "zip": "70115",
+    "city": "New Orleans",
+    "state": "LA",
+    "name": "New Orleans Estate Sale",
+    "first_seen": "2026-08-12T08:10:42.896368+00:00",
+    "last_photo_count": 0
+  },
+  "5032794": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "ANTIQUES, ART, AND FOLK ART IN AMAZING BIRMINGHAM ESTATE SALE",
+    "first_seen": "2026-08-12T08:10:42.896652+00:00",
+    "last_photo_count": 0
   }
 }
