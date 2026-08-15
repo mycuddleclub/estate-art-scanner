@@ -1,20 +1,4 @@
 {
-  "5020272": {
-    "zip": "75225",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "Dallas: Unbeatable Deals by Dayspring",
-    "first_seen": "2026-07-31T09:39:05.636077+00:00",
-    "last_photo_count": 3
-  },
-  "5021349": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Homework Interiors Moving Sale",
-    "first_seen": "2026-08-01T09:01:35.241317+00:00",
-    "last_photo_count": 0
-  },
   "5022558": {
     "zip": "60093",
     "city": "Winnetka",
@@ -46,14 +30,6 @@
     "name": "Troy Estate Sale",
     "first_seen": "2026-08-05T09:31:17.730421+00:00",
     "last_photo_count": 1
-  },
-  "5027898": {
-    "zip": "48302",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Poof! $1.5M Designer Goods & Clothing Bloomfield Hills Estate Sale",
-    "first_seen": "2026-08-06T09:35:57.946763+00:00",
-    "last_photo_count": 7
   },
   "5027949": {
     "zip": "60035",
@@ -149,6 +125,38 @@
     "state": "TX",
     "name": "MARVELOUSLY Mid Century, ART, Electronics, DANISH TEAK, RECORDS & MORE",
     "first_seen": "2026-08-14T08:09:01.607816+00:00",
+    "last_photo_count": 0
+  },
+  "5040039": {
+    "zip": "70118",
+    "city": "New Orleans",
+    "state": "LA",
+    "name": "New Orleans Estate Sale",
+    "first_seen": "2026-08-15T07:24:22.315972+00:00",
+    "last_photo_count": 0
+  },
+  "5040249": {
+    "zip": "32792",
+    "city": "Winter Park",
+    "state": "FL",
+    "name": "Things That Are Round",
+    "first_seen": "2026-08-15T07:24:22.316074+00:00",
+    "last_photo_count": 0
+  },
+  "5039745": {
+    "zip": "55424",
+    "city": "Edina",
+    "state": "MN",
+    "name": "EDINA MOVING SALE",
+    "first_seen": "2026-08-15T07:24:22.316107+00:00",
+    "last_photo_count": 3
+  },
+  "5040021": {
+    "zip": "70115",
+    "city": "New Orleans",
+    "state": "LA",
+    "name": "New Orleans Estate Sale",
+    "first_seen": "2026-08-15T07:24:22.316129+00:00",
     "last_photo_count": 0
   }
 }
