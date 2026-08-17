@@ -1,12 +1,4 @@
 {
-  "5022558": {
-    "zip": "60093",
-    "city": "Winnetka",
-    "state": "IL",
-    "name": "WINNETKA ESTATE SALE-50 years of antiques",
-    "first_seen": "2026-08-02T09:05:38.452320+00:00",
-    "last_photo_count": 0
-  },
   "5023272": {
     "zip": "77007",
     "city": "Houston",
@@ -150,5 +142,13 @@
     "name": "New Orleans Estate Sale",
     "first_seen": "2026-08-15T07:24:22.316129+00:00",
     "last_photo_count": 0
+  },
+  "5035698": {
+    "zip": "77005",
+    "city": "West University Place",
+    "state": "TX",
+    "name": "STORIED Post Modern Estate",
+    "first_seen": "2026-08-17T07:46:27.225898+00:00",
+    "last_photo_count": 2
   }
 }
