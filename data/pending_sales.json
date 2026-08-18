@@ -1,12 +1,4 @@
 {
-  "5023272": {
-    "zip": "77007",
-    "city": "Houston",
-    "state": "TX",
-    "name": "Rice Military - Modern & Sophisticated - Blue Family Estate Sales",
-    "first_seen": "2026-08-03T10:36:03.756340+00:00",
-    "last_photo_count": 1
-  },
   "5026176": {
     "zip": "90274",
     "city": "Palos Verdes Peninsula",
@@ -30,14 +22,6 @@
     "name": "Sheridan Sales is at a Moving Sale in Highland Park!",
     "first_seen": "2026-08-06T09:35:57.947052+00:00",
     "last_photo_count": 2
-  },
-  "5027352": {
-    "zip": "48301",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Bloomfield Hills Estate Sale",
-    "first_seen": "2026-08-06T09:35:57.947104+00:00",
-    "last_photo_count": 1
   },
   "5030874": {
     "zip": "20816",
@@ -71,30 +55,6 @@
     "first_seen": "2026-08-11T08:06:33.436061+00:00",
     "last_photo_count": 7
   },
-  "5034666": {
-    "zip": "66208",
-    "city": "Prairie Village",
-    "state": "KS",
-    "name": "Fun Collector's Prairie Village Sale - Pence Estate Sales",
-    "first_seen": "2026-08-11T08:06:33.436407+00:00",
-    "last_photo_count": 1
-  },
-  "5034027": {
-    "zip": "30327",
-    "city": "Atlanta",
-    "state": "GA",
-    "name": "Charming $3M Chastain Estate...Presented by Nanette",
-    "first_seen": "2026-08-11T08:06:33.436443+00:00",
-    "last_photo_count": 2
-  },
-  "5035116": {
-    "zip": "70115",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "New Orleans Estate Sale",
-    "first_seen": "2026-08-12T08:10:42.896368+00:00",
-    "last_photo_count": 0
-  },
   "5032794": {
     "zip": "48009",
     "city": "Birmingham",
@@ -109,7 +69,7 @@
     "state": "IL",
     "name": "Sheridan Sales is in a Million Dollar ++ home in Wilmette",
     "first_seen": "2026-08-14T08:09:01.607582+00:00",
-    "last_photo_count": 3
+    "last_photo_count": 4
   },
   "5039247": {
     "zip": "77005",
@@ -125,7 +85,7 @@
     "state": "LA",
     "name": "New Orleans Estate Sale",
     "first_seen": "2026-08-15T07:24:22.315972+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 1
   },
   "5039745": {
     "zip": "55424",
@@ -150,5 +110,53 @@
     "name": "STORIED Post Modern Estate",
     "first_seen": "2026-08-17T07:46:27.225898+00:00",
     "last_photo_count": 2
+  },
+  "5040444": {
+    "zip": "92067",
+    "city": "Rancho Santa Fe",
+    "state": "CA",
+    "name": "Rancho Santa Fe beauty",
+    "first_seen": "2026-08-18T07:31:51.534838+00:00",
+    "last_photo_count": 0
+  },
+  "5041695": {
+    "zip": "78212",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "#624:  Monte Vista Estate Sale",
+    "first_seen": "2026-08-18T07:31:51.534932+00:00",
+    "last_photo_count": 0
+  },
+  "5042889": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "Birmingham Estate Sale",
+    "first_seen": "2026-08-18T07:31:51.534976+00:00",
+    "last_photo_count": 1
+  },
+  "5042763": {
+    "zip": "20817",
+    "city": "Bethesda",
+    "state": "MD",
+    "name": "Beautiful Bethesda Estate Sale-Jewelry, Art, & Unique Pieces!",
+    "first_seen": "2026-08-18T07:31:51.535000+00:00",
+    "last_photo_count": 11
+  },
+  "5043750": {
+    "zip": "48098",
+    "city": "Troy",
+    "state": "MI",
+    "name": "Troy Estate Sale!",
+    "first_seen": "2026-08-18T07:31:51.535024+00:00",
+    "last_photo_count": 0
+  },
+  "5042553": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "UPSCALE RESALE EVENT",
+    "first_seen": "2026-08-18T07:31:51.535059+00:00",
+    "last_photo_count": 0
   }
 }
