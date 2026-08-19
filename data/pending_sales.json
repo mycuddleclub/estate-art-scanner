@@ -7,14 +7,6 @@
     "first_seen": "2026-08-05T09:31:17.730202+00:00",
     "last_photo_count": 0
   },
-  "5026203": {
-    "zip": "48098",
-    "city": "Troy",
-    "state": "MI",
-    "name": "Troy Estate Sale",
-    "first_seen": "2026-08-05T09:31:17.730421+00:00",
-    "last_photo_count": 1
-  },
   "5027949": {
     "zip": "60035",
     "city": "Highland Park",
@@ -71,22 +63,6 @@
     "first_seen": "2026-08-14T08:09:01.607582+00:00",
     "last_photo_count": 4
   },
-  "5039247": {
-    "zip": "77005",
-    "city": "Houston",
-    "state": "TX",
-    "name": "MARVELOUSLY Mid Century, ART, Electronics, DANISH TEAK, RECORDS & MORE",
-    "first_seen": "2026-08-14T08:09:01.607816+00:00",
-    "last_photo_count": 0
-  },
-  "5040039": {
-    "zip": "70118",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "New Orleans Estate Sale",
-    "first_seen": "2026-08-15T07:24:22.315972+00:00",
-    "last_photo_count": 1
-  },
   "5039745": {
     "zip": "55424",
     "city": "Edina",
@@ -119,14 +95,6 @@
     "first_seen": "2026-08-18T07:31:51.534838+00:00",
     "last_photo_count": 0
   },
-  "5041695": {
-    "zip": "78212",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "#624:  Monte Vista Estate Sale",
-    "first_seen": "2026-08-18T07:31:51.534932+00:00",
-    "last_photo_count": 0
-  },
   "5042889": {
     "zip": "48009",
     "city": "Birmingham",
@@ -157,6 +125,22 @@
     "state": "MI",
     "name": "UPSCALE RESALE EVENT",
     "first_seen": "2026-08-18T07:31:51.535059+00:00",
+    "last_photo_count": 0
+  },
+  "5044839": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Poof! Eclectic Decorative Collection, Antiques & More Bloomfield Hills Estate Sale",
+    "first_seen": "2026-08-19T07:32:06.917600+00:00",
+    "last_photo_count": 7
+  },
+  "5044386": {
+    "zip": "14850",
+    "city": "Ithaca",
+    "state": "NY",
+    "name": "EXCEPTIONAL ITHACA ESTATE SALE",
+    "first_seen": "2026-08-19T07:32:06.917847+00:00",
     "last_photo_count": 0
   }
 }
