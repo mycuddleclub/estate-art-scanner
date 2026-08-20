@@ -1,12 +1,4 @@
 {
-  "5026176": {
-    "zip": "90274",
-    "city": "Palos Verdes Peninsula",
-    "state": "CA",
-    "name": "OUTSTANDING Palos Verdes Estates EsTaTe SaLe ! COMING SOON !",
-    "first_seen": "2026-08-05T09:31:17.730202+00:00",
-    "last_photo_count": 0
-  },
   "5027949": {
     "zip": "60035",
     "city": "Highland Park",
@@ -47,14 +39,6 @@
     "first_seen": "2026-08-11T08:06:33.436061+00:00",
     "last_photo_count": 7
   },
-  "5032794": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "ANTIQUES, ART, AND FOLK ART IN AMAZING BIRMINGHAM ESTATE SALE",
-    "first_seen": "2026-08-12T08:10:42.896652+00:00",
-    "last_photo_count": 0
-  },
   "5038851": {
     "zip": "60091",
     "city": "Wilmette",
@@ -70,14 +54,6 @@
     "name": "EDINA MOVING SALE",
     "first_seen": "2026-08-15T07:24:22.316107+00:00",
     "last_photo_count": 3
-  },
-  "5040021": {
-    "zip": "70115",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "New Orleans Estate Sale",
-    "first_seen": "2026-08-15T07:24:22.316129+00:00",
-    "last_photo_count": 0
   },
   "5035698": {
     "zip": "77005",
@@ -103,30 +79,6 @@
     "first_seen": "2026-08-18T07:31:51.534976+00:00",
     "last_photo_count": 1
   },
-  "5042763": {
-    "zip": "20817",
-    "city": "Bethesda",
-    "state": "MD",
-    "name": "Beautiful Bethesda Estate Sale-Jewelry, Art, & Unique Pieces!",
-    "first_seen": "2026-08-18T07:31:51.535000+00:00",
-    "last_photo_count": 11
-  },
-  "5043750": {
-    "zip": "48098",
-    "city": "Troy",
-    "state": "MI",
-    "name": "Troy Estate Sale!",
-    "first_seen": "2026-08-18T07:31:51.535024+00:00",
-    "last_photo_count": 0
-  },
-  "5042553": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "UPSCALE RESALE EVENT",
-    "first_seen": "2026-08-18T07:31:51.535059+00:00",
-    "last_photo_count": 0
-  },
   "5044839": {
     "zip": "48304",
     "city": "Bloomfield Hills",
@@ -142,5 +94,21 @@
     "name": "EXCEPTIONAL ITHACA ESTATE SALE",
     "first_seen": "2026-08-19T07:32:06.917847+00:00",
     "last_photo_count": 0
+  },
+  "5047284": {
+    "zip": "46032",
+    "city": "Carmel",
+    "state": "IN",
+    "name": "Signature Finds in Sedgemoor, Carmel!",
+    "first_seen": "2026-08-20T07:35:02.033701+00:00",
+    "last_photo_count": 1
+  },
+  "5046648": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Bloomfield Hills Estate Sale",
+    "first_seen": "2026-08-20T07:35:02.033792+00:00",
+    "last_photo_count": 1
   }
 }
