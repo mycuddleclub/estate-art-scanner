@@ -1,20 +1,4 @@
 {
-  "5032932": {
-    "zip": "37205",
-    "city": "Nashville",
-    "state": "TN",
-    "name": "WONDERFUL WEST MEADE ESTATE SALE",
-    "first_seen": "2026-08-10T08:22:50.096190+00:00",
-    "last_photo_count": 0
-  },
-  "5032797": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "ANTIQUES, ART, AND FOLK ART IN AMAZING BIRMINGHAM ESTATE SALE",
-    "first_seen": "2026-08-10T08:22:50.096413+00:00",
-    "last_photo_count": 0
-  },
   "5033367": {
     "zip": "87501",
     "city": "Santa Fe",
@@ -79,12 +63,28 @@
     "first_seen": "2026-08-20T07:35:02.033792+00:00",
     "last_photo_count": 1
   },
-  "5051298": {
-    "zip": "77005",
-    "city": "Houston",
-    "state": "TX",
-    "name": "The Arnold Estate by Emily Styles",
-    "first_seen": "2026-08-24T07:52:20.588298+00:00",
+  "5051853": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "OUTSTANDING  ESTATE SALE IN 13,000 SF BLOOMFIELD HILLS ESTATE HOME!",
+    "first_seen": "2026-08-25T07:38:23.626856+00:00",
+    "last_photo_count": 0
+  },
+  "5052486": {
+    "zip": "60093",
+    "city": "Northfield",
+    "state": "IL",
+    "name": "Northfield Private Enclave - From Practical to Plush",
+    "first_seen": "2026-08-25T07:38:23.627087+00:00",
+    "last_photo_count": 1
+  },
+  "5052675": {
+    "zip": "60093",
+    "city": "Winnetka",
+    "state": "IL",
+    "name": "**Winnetka**  Traditional furniture, Framed Art, Clothing, Bikes & More",
+    "first_seen": "2026-08-25T07:38:23.627123+00:00",
     "last_photo_count": 0
   }
 }
