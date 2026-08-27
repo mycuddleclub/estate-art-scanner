@@ -7,14 +7,6 @@
     "first_seen": "2026-08-14T08:09:01.607582+00:00",
     "last_photo_count": 4
   },
-  "5035698": {
-    "zip": "77005",
-    "city": "West University Place",
-    "state": "TX",
-    "name": "STORIED Post Modern Estate",
-    "first_seen": "2026-08-17T07:46:27.225898+00:00",
-    "last_photo_count": 2
-  },
   "5040444": {
     "zip": "92067",
     "city": "Rancho Santa Fe",
@@ -55,14 +47,6 @@
     "first_seen": "2026-08-20T07:35:02.033792+00:00",
     "last_photo_count": 1
   },
-  "5051853": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "OUTSTANDING  ESTATE SALE IN 13,000 SF BLOOMFIELD HILLS ESTATE HOME!",
-    "first_seen": "2026-08-25T07:38:23.626856+00:00",
-    "last_photo_count": 0
-  },
   "5052486": {
     "zip": "60093",
     "city": "Northfield",
@@ -77,6 +61,22 @@
     "state": "IL",
     "name": "**Winnetka**  Traditional furniture, Framed Art, Clothing, Bikes & More",
     "first_seen": "2026-08-25T07:38:23.627123+00:00",
+    "last_photo_count": 0
+  },
+  "5055474": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Poof! Waterford Crystal, High End Decor, & More Bloomfield Hills Estate Sale",
+    "first_seen": "2026-08-27T18:01:43.321177+00:00",
+    "last_photo_count": 7
+  },
+  "5056761": {
+    "zip": "55424",
+    "city": "Edina",
+    "state": "MN",
+    "name": "Exceptional Country Club Estate",
+    "first_seen": "2026-08-27T18:01:43.321414+00:00",
     "last_photo_count": 0
   }
 }
