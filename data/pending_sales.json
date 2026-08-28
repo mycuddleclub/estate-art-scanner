@@ -1,12 +1,4 @@
 {
-  "5038851": {
-    "zip": "60091",
-    "city": "Wilmette",
-    "state": "IL",
-    "name": "Sheridan Sales is in a Million Dollar ++ home in Wilmette",
-    "first_seen": "2026-08-14T08:09:01.607582+00:00",
-    "last_photo_count": 4
-  },
   "5040444": {
     "zip": "92067",
     "city": "Rancho Santa Fe",
@@ -77,6 +69,14 @@
     "state": "MN",
     "name": "Exceptional Country Club Estate",
     "first_seen": "2026-08-27T18:01:43.321414+00:00",
+    "last_photo_count": 0
+  },
+  "5057826": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "Birmingham Pre, Demolition, Estate Sale by Everything Goes",
+    "first_seen": "2026-08-28T19:11:26.745250+00:00",
     "last_photo_count": 0
   }
 }
