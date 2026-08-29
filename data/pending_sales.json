@@ -15,14 +15,6 @@
     "first_seen": "2026-08-18T07:31:51.534976+00:00",
     "last_photo_count": 1
   },
-  "5044839": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Poof! Eclectic Decorative Collection, Antiques & More Bloomfield Hills Estate Sale",
-    "first_seen": "2026-08-19T07:32:06.917600+00:00",
-    "last_photo_count": 7
-  },
   "5047284": {
     "zip": "46032",
     "city": "Carmel",
@@ -78,5 +70,13 @@
     "name": "Birmingham Pre, Demolition, Estate Sale by Everything Goes",
     "first_seen": "2026-08-28T19:11:26.745250+00:00",
     "last_photo_count": 0
+  },
+  "5058579": {
+    "zip": "37205",
+    "city": "Nashville",
+    "state": "TN",
+    "name": "Grasons of Nashville - Fabulous Hillwood Estates Moving Sale",
+    "first_seen": "2026-08-29T12:55:05.466426+00:00",
+    "last_photo_count": 1
   }
 }
