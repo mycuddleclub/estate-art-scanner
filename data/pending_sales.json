@@ -1,20 +1,4 @@
 {
-  "5040444": {
-    "zip": "92067",
-    "city": "Rancho Santa Fe",
-    "state": "CA",
-    "name": "Rancho Santa Fe beauty",
-    "first_seen": "2026-08-18T07:31:51.534838+00:00",
-    "last_photo_count": 0
-  },
-  "5042889": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Birmingham Estate Sale",
-    "first_seen": "2026-08-18T07:31:51.534976+00:00",
-    "last_photo_count": 1
-  },
   "5047284": {
     "zip": "46032",
     "city": "Carmel",
@@ -30,22 +14,6 @@
     "name": "Bloomfield Hills Estate Sale",
     "first_seen": "2026-08-20T07:35:02.033792+00:00",
     "last_photo_count": 1
-  },
-  "5052486": {
-    "zip": "60093",
-    "city": "Northfield",
-    "state": "IL",
-    "name": "Northfield Private Enclave - From Practical to Plush",
-    "first_seen": "2026-08-25T07:38:23.627087+00:00",
-    "last_photo_count": 1
-  },
-  "5052675": {
-    "zip": "60093",
-    "city": "Winnetka",
-    "state": "IL",
-    "name": "**Winnetka**  Traditional furniture, Framed Art, Clothing, Bikes & More",
-    "first_seen": "2026-08-25T07:38:23.627123+00:00",
-    "last_photo_count": 0
   },
   "5055474": {
     "zip": "48304",
@@ -94,5 +62,13 @@
     "name": "BETHESDA",
     "first_seen": "2026-08-30T12:29:25.248358+00:00",
     "last_photo_count": 0
+  },
+  "5060376": {
+    "zip": "48230",
+    "city": "Grosse Pointe",
+    "state": "MI",
+    "name": "ONE DAY ONLY!!! AWESOME VINTAGE & COLLECTIBLES GROSSE POINTE SALE!!! DON\u2019T MISS OUT!!!",
+    "first_seen": "2026-09-01T12:16:51.453220+00:00",
+    "last_photo_count": 3
   }
 }
