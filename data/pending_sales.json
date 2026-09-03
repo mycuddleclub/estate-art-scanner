@@ -1,20 +1,4 @@
 {
-  "5047284": {
-    "zip": "46032",
-    "city": "Carmel",
-    "state": "IN",
-    "name": "Signature Finds in Sedgemoor, Carmel!",
-    "first_seen": "2026-08-20T07:35:02.033701+00:00",
-    "last_photo_count": 1
-  },
-  "5046648": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Bloomfield Hills Estate Sale",
-    "first_seen": "2026-08-20T07:35:02.033792+00:00",
-    "last_photo_count": 1
-  },
   "5055474": {
     "zip": "48304",
     "city": "Bloomfield Hills",
@@ -29,14 +13,6 @@
     "state": "MN",
     "name": "Exceptional Country Club Estate",
     "first_seen": "2026-08-27T18:01:43.321414+00:00",
-    "last_photo_count": 0
-  },
-  "5057826": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Birmingham Pre, Demolition, Estate Sale by Everything Goes",
-    "first_seen": "2026-08-28T19:11:26.745250+00:00",
     "last_photo_count": 0
   },
   "5058579": {
@@ -77,7 +53,7 @@
     "state": "IL",
     "name": "Evanston Vintage & Collected by Blue Moon",
     "first_seen": "2026-09-02T11:54:15.642241+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 1
   },
   "5062119": {
     "zip": "70118",
@@ -101,6 +77,22 @@
     "state": "VA",
     "name": "Labor Day, Mansion Collection Online Auction",
     "first_seen": "2026-09-02T11:54:15.642548+00:00",
+    "last_photo_count": 1
+  },
+  "5063274": {
+    "zip": "78209",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "New furniture arrive",
+    "first_seen": "2026-09-03T11:52:31.160848+00:00",
+    "last_photo_count": 4
+  },
+  "5063880": {
+    "zip": "60035",
+    "city": "Highland Park",
+    "state": "IL",
+    "name": "Oh, the Treasures You\u2019ll Find! Dr Seuss Signed Art, Paintings, Furniture, Garden & More!",
+    "first_seen": "2026-09-03T11:52:31.161106+00:00",
     "last_photo_count": 1
   }
 }
