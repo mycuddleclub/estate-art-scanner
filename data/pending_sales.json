@@ -23,14 +23,6 @@
     "first_seen": "2026-08-29T12:55:05.466426+00:00",
     "last_photo_count": 1
   },
-  "5059269": {
-    "zip": "75209",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "KIngs Attic Estate Sale ~ DALLAS Super sale",
-    "first_seen": "2026-08-30T12:29:25.248123+00:00",
-    "last_photo_count": 0
-  },
   "5059140": {
     "zip": "20817",
     "city": "Bethesda",
@@ -94,5 +86,13 @@
     "name": "Oh, the Treasures You\u2019ll Find! Dr Seuss Signed Art, Paintings, Furniture, Garden & More!",
     "first_seen": "2026-09-03T11:52:31.161106+00:00",
     "last_photo_count": 1
+  },
+  "5065830": {
+    "zip": "37205",
+    "city": "Nashville",
+    "state": "TN",
+    "name": "Eclectic treasures in West Meade Park",
+    "first_seen": "2026-09-04T11:55:29.063029+00:00",
+    "last_photo_count": 3
   }
 }
