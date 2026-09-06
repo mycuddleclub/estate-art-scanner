@@ -102,5 +102,21 @@
     "name": "N  &  M  Sales",
     "first_seen": "2026-09-05T11:04:50.208155+00:00",
     "last_photo_count": 0
+  },
+  "5067081": {
+    "zip": "75205",
+    "city": "Dallas",
+    "state": "TX",
+    "name": "~Massive Dallas (Highland Park) Estate Sale! 6K SQFT Condo! More info coming soon!",
+    "first_seen": "2026-09-06T11:28:22.150106+00:00",
+    "last_photo_count": 1
+  },
+  "5067498": {
+    "zip": "32792",
+    "city": "Winter Park",
+    "state": "FL",
+    "name": "Winter Park Moving Sale",
+    "first_seen": "2026-09-06T11:28:22.150307+00:00",
+    "last_photo_count": 7
   }
 }
