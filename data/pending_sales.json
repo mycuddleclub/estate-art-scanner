@@ -39,14 +39,6 @@
     "first_seen": "2026-09-01T12:16:51.453220+00:00",
     "last_photo_count": 3
   },
-  "5060172": {
-    "zip": "60201",
-    "city": "Evanston",
-    "state": "IL",
-    "name": "Evanston Vintage & Collected by Blue Moon",
-    "first_seen": "2026-09-02T11:54:15.642241+00:00",
-    "last_photo_count": 1
-  },
   "5062119": {
     "zip": "70118",
     "city": "New Orleans",
@@ -79,14 +71,6 @@
     "first_seen": "2026-09-03T11:52:31.160848+00:00",
     "last_photo_count": 4
   },
-  "5063880": {
-    "zip": "60035",
-    "city": "Highland Park",
-    "state": "IL",
-    "name": "Oh, the Treasures You\u2019ll Find! Dr Seuss Signed Art, Paintings, Furniture, Garden & More!",
-    "first_seen": "2026-09-03T11:52:31.161106+00:00",
-    "last_photo_count": 1
-  },
   "5065830": {
     "zip": "37205",
     "city": "Nashville",
@@ -94,14 +78,6 @@
     "name": "Eclectic treasures in West Meade Park",
     "first_seen": "2026-09-04T11:55:29.063029+00:00",
     "last_photo_count": 3
-  },
-  "5066580": {
-    "zip": "63131",
-    "city": "Des Peres",
-    "state": "MO",
-    "name": "N  &  M  Sales",
-    "first_seen": "2026-09-05T11:04:50.208155+00:00",
-    "last_photo_count": 0
   },
   "5067081": {
     "zip": "75205",
@@ -118,5 +94,37 @@
     "name": "Winter Park Moving Sale",
     "first_seen": "2026-09-06T11:28:22.150307+00:00",
     "last_photo_count": 7
+  },
+  "5068266": {
+    "zip": "60045",
+    "city": "Lake Forest",
+    "state": "IL",
+    "name": "CK Estate Sale @ Upscale Lake Forest",
+    "first_seen": "2026-09-07T13:12:09.552787+00:00",
+    "last_photo_count": 0
+  },
+  "5068119": {
+    "zip": "22207",
+    "city": "Arlington",
+    "state": "VA",
+    "name": "Arlington, VA - VINTAGE TREASURES, VINTAGE ELECTRONICS, MCM FINDS, KARAOKE,  AND MORE",
+    "first_seen": "2026-09-07T13:12:09.553019+00:00",
+    "last_photo_count": 2
+  },
+  "5068257": {
+    "zip": "60045",
+    "city": "Lake Forest",
+    "state": "IL",
+    "name": "CK Estate Sale @ Lake Forest",
+    "first_seen": "2026-09-07T13:12:09.553064+00:00",
+    "last_photo_count": 0
+  },
+  "5068263": {
+    "zip": "60045",
+    "city": "Lake Forest",
+    "state": "IL",
+    "name": "CK Estate Sale @ Upscale East Lake Forest",
+    "first_seen": "2026-09-07T13:12:09.553091+00:00",
+    "last_photo_count": 0
   }
 }
