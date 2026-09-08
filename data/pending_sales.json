@@ -103,28 +103,20 @@
     "first_seen": "2026-09-07T13:12:09.552787+00:00",
     "last_photo_count": 0
   },
-  "5068119": {
-    "zip": "22207",
-    "city": "Arlington",
-    "state": "VA",
-    "name": "Arlington, VA - VINTAGE TREASURES, VINTAGE ELECTRONICS, MCM FINDS, KARAOKE,  AND MORE",
-    "first_seen": "2026-09-07T13:12:09.553019+00:00",
-    "last_photo_count": 2
-  },
-  "5068257": {
-    "zip": "60045",
-    "city": "Lake Forest",
-    "state": "IL",
-    "name": "CK Estate Sale @ Lake Forest",
-    "first_seen": "2026-09-07T13:12:09.553064+00:00",
-    "last_photo_count": 0
-  },
   "5068263": {
     "zip": "60045",
     "city": "Lake Forest",
     "state": "IL",
     "name": "CK Estate Sale @ Upscale East Lake Forest",
     "first_seen": "2026-09-07T13:12:09.553091+00:00",
+    "last_photo_count": 0
+  },
+  "5069781": {
+    "zip": "48236",
+    "city": "Grosse Pointe",
+    "state": "MI",
+    "name": "Marcia Wilk Estate Sale",
+    "first_seen": "2026-09-08T11:55:53.429546+00:00",
     "last_photo_count": 0
   }
 }
