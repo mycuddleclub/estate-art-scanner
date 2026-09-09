@@ -13,7 +13,7 @@
     "state": "MN",
     "name": "Exceptional Country Club Estate",
     "first_seen": "2026-08-27T18:01:43.321414+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 10
   },
   "5058579": {
     "zip": "37205",
@@ -55,14 +55,6 @@
     "first_seen": "2026-09-02T11:54:15.642513+00:00",
     "last_photo_count": 1
   },
-  "5062779": {
-    "zip": "22101",
-    "city": "Mc Lean",
-    "state": "VA",
-    "name": "Labor Day, Mansion Collection Online Auction",
-    "first_seen": "2026-09-02T11:54:15.642548+00:00",
-    "last_photo_count": 1
-  },
   "5063274": {
     "zip": "78209",
     "city": "San Antonio",
@@ -70,14 +62,6 @@
     "name": "New furniture arrive",
     "first_seen": "2026-09-03T11:52:31.160848+00:00",
     "last_photo_count": 4
-  },
-  "5065830": {
-    "zip": "37205",
-    "city": "Nashville",
-    "state": "TN",
-    "name": "Eclectic treasures in West Meade Park",
-    "first_seen": "2026-09-04T11:55:29.063029+00:00",
-    "last_photo_count": 3
   },
   "5067081": {
     "zip": "75205",
@@ -95,14 +79,6 @@
     "first_seen": "2026-09-06T11:28:22.150307+00:00",
     "last_photo_count": 7
   },
-  "5068266": {
-    "zip": "60045",
-    "city": "Lake Forest",
-    "state": "IL",
-    "name": "CK Estate Sale @ Upscale Lake Forest",
-    "first_seen": "2026-09-07T13:12:09.552787+00:00",
-    "last_photo_count": 0
-  },
   "5068263": {
     "zip": "60045",
     "city": "Lake Forest",
@@ -118,5 +94,13 @@
     "name": "Marcia Wilk Estate Sale",
     "first_seen": "2026-09-08T11:55:53.429546+00:00",
     "last_photo_count": 0
+  },
+  "5071545": {
+    "zip": "77005",
+    "city": "Houston",
+    "state": "TX",
+    "name": "Houston Estate Sale!",
+    "first_seen": "2026-09-09T12:05:38.300671+00:00",
+    "last_photo_count": 1
   }
 }
