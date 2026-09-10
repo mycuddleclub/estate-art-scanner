@@ -7,14 +7,6 @@
     "first_seen": "2026-08-27T18:01:43.321177+00:00",
     "last_photo_count": 7
   },
-  "5056761": {
-    "zip": "55424",
-    "city": "Edina",
-    "state": "MN",
-    "name": "Exceptional Country Club Estate",
-    "first_seen": "2026-08-27T18:01:43.321414+00:00",
-    "last_photo_count": 10
-  },
   "5058579": {
     "zip": "37205",
     "city": "Nashville",
@@ -38,14 +30,6 @@
     "name": "ONE DAY ONLY!!! AWESOME VINTAGE & COLLECTIBLES GROSSE POINTE SALE!!! DON\u2019T MISS OUT!!!",
     "first_seen": "2026-09-01T12:16:51.453220+00:00",
     "last_photo_count": 3
-  },
-  "5062119": {
-    "zip": "70118",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "New Orleans Estate Sale",
-    "first_seen": "2026-09-02T11:54:15.642482+00:00",
-    "last_photo_count": 0
   },
   "5061759": {
     "zip": "60201",
@@ -87,14 +71,6 @@
     "first_seen": "2026-09-07T13:12:09.553091+00:00",
     "last_photo_count": 0
   },
-  "5069781": {
-    "zip": "48236",
-    "city": "Grosse Pointe",
-    "state": "MI",
-    "name": "Marcia Wilk Estate Sale",
-    "first_seen": "2026-09-08T11:55:53.429546+00:00",
-    "last_photo_count": 0
-  },
   "5071545": {
     "zip": "77005",
     "city": "Houston",
@@ -102,5 +78,21 @@
     "name": "Houston Estate Sale!",
     "first_seen": "2026-09-09T12:05:38.300671+00:00",
     "last_photo_count": 1
+  },
+  "5072157": {
+    "zip": "55105",
+    "city": "Saint Paul",
+    "state": "MN",
+    "name": "ST. PAUL ESTATE SALE",
+    "first_seen": "2026-09-10T11:59:45.316928+00:00",
+    "last_photo_count": 0
+  },
+  "5072664": {
+    "zip": "48104",
+    "city": "Ann Arbor",
+    "state": "MI",
+    "name": "Ann Arbor Hills Estate Sale",
+    "first_seen": "2026-09-10T11:59:45.317153+00:00",
+    "last_photo_count": 0
   }
 }
