@@ -1,12 +1,4 @@
 {
-  "5059140": {
-    "zip": "20817",
-    "city": "Bethesda",
-    "state": "MD",
-    "name": "BETHESDA",
-    "first_seen": "2026-08-30T12:29:25.248358+00:00",
-    "last_photo_count": 0
-  },
   "5063274": {
     "zip": "78209",
     "city": "San Antonio",
@@ -70,5 +62,29 @@
     "name": "Sheridan Sales Moving Sale in a Million Dollar Home in Wilmette!",
     "first_seen": "2026-09-12T11:25:04.945838+00:00",
     "last_photo_count": 3
+  },
+  "5077191": {
+    "zip": "48301",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "BEAUTIFUL BLOOMFIELD VILLAGE ESTATE SALE!",
+    "first_seen": "2026-09-14T13:33:21.517670+00:00",
+    "last_photo_count": 0
+  },
+  "5077500": {
+    "zip": "75205",
+    "city": "Dallas",
+    "state": "TX",
+    "name": "Help Me Ronda ... Another Fabulous Highland Park Home!",
+    "first_seen": "2026-09-14T13:33:21.517921+00:00",
+    "last_photo_count": 0
+  },
+  "5077536": {
+    "zip": "44124",
+    "city": "Pepper Pike",
+    "state": "OH",
+    "name": "Blue Moon Sale in Pepper Pike!",
+    "first_seen": "2026-09-14T13:33:21.517965+00:00",
+    "last_photo_count": 1
   }
 }
