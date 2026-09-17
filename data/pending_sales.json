@@ -1,12 +1,4 @@
 {
-  "5063274": {
-    "zip": "78209",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "New furniture arrive",
-    "first_seen": "2026-09-03T11:52:31.160848+00:00",
-    "last_photo_count": 4
-  },
   "5067081": {
     "zip": "75205",
     "city": "Dallas",
@@ -39,14 +31,6 @@
     "first_seen": "2026-09-09T12:05:38.300671+00:00",
     "last_photo_count": 1
   },
-  "5072664": {
-    "zip": "48104",
-    "city": "Ann Arbor",
-    "state": "MI",
-    "name": "Ann Arbor Hills Estate Sale",
-    "first_seen": "2026-09-10T11:59:45.317153+00:00",
-    "last_photo_count": 0
-  },
   "5075307": {
     "zip": "48009",
     "city": "Birmingham",
@@ -71,14 +55,6 @@
     "first_seen": "2026-09-14T13:33:21.517670+00:00",
     "last_photo_count": 0
   },
-  "5077500": {
-    "zip": "75205",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "Help Me Ronda ... Another Fabulous Highland Park Home!",
-    "first_seen": "2026-09-14T13:33:21.517921+00:00",
-    "last_photo_count": 0
-  },
   "5077536": {
     "zip": "44124",
     "city": "Pepper Pike",
@@ -93,14 +69,6 @@
     "state": "VA",
     "name": "Arlington Downsizing",
     "first_seen": "2026-09-15T12:23:55.200331+00:00",
-    "last_photo_count": 0
-  },
-  "5078955": {
-    "zip": "48236",
-    "city": "Grosse Pointe",
-    "state": "MI",
-    "name": "Marcia Wilk Estate Sale",
-    "first_seen": "2026-09-15T12:23:55.200405+00:00",
     "last_photo_count": 0
   },
   "5078694": {
@@ -119,14 +87,6 @@
     "first_seen": "2026-09-16T12:21:42.846898+00:00",
     "last_photo_count": 0
   },
-  "5081427": {
-    "zip": "66208",
-    "city": "Prairie Village",
-    "state": "KS",
-    "name": "ESTATE SALE BY TOMMY! ONE DAY! 75% OFF MOST ITEMS,",
-    "first_seen": "2026-09-16T12:21:42.847144+00:00",
-    "last_photo_count": 10
-  },
   "5080455": {
     "zip": "46077",
     "city": "Zionsville",
@@ -141,6 +101,14 @@
     "state": "MI",
     "name": "BLOOMFIELD ESTATE w TOBOCMAN INTERIORS, DESIGNER CLOTHING, ART, FURNITURE",
     "first_seen": "2026-09-16T12:21:42.847242+00:00",
+    "last_photo_count": 1
+  },
+  "5082102": {
+    "zip": "48301",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Bloomfield Hills Estate Sale",
+    "first_seen": "2026-09-17T12:21:19.367054+00:00",
     "last_photo_count": 1
   }
 }
