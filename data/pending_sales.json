@@ -1,12 +1,4 @@
 {
-  "5068263": {
-    "zip": "60045",
-    "city": "Lake Forest",
-    "state": "IL",
-    "name": "CK Estate Sale @ Upscale East Lake Forest",
-    "first_seen": "2026-09-07T13:12:09.553091+00:00",
-    "last_photo_count": 0
-  },
   "5071545": {
     "zip": "77005",
     "city": "Houston",
@@ -78,5 +70,45 @@
     "name": "Bloomfield Hills Estate Sale",
     "first_seen": "2026-09-17T12:21:19.367054+00:00",
     "last_photo_count": 1
+  },
+  "5086704": {
+    "zip": "75205",
+    "city": "Dallas",
+    "state": "TX",
+    "name": "Help Me Ronda ... Back in Lovely Highland Park Home!",
+    "first_seen": "2026-09-21T13:32:24.818364+00:00",
+    "last_photo_count": 0
+  },
+  "5087481": {
+    "zip": "60045",
+    "city": "Lake Forest",
+    "state": "IL",
+    "name": "Quintessential quality in Lake Forest",
+    "first_seen": "2026-09-21T13:32:24.818538+00:00",
+    "last_photo_count": 0
+  },
+  "5087160": {
+    "zip": "32789",
+    "city": "Winter Park",
+    "state": "FL",
+    "name": "Posh Peacock in Winter Park - MacKenzie Childs, Portmeirion, artist\u2019s home",
+    "first_seen": "2026-09-21T13:32:24.818565+00:00",
+    "last_photo_count": 1
+  },
+  "5087499": {
+    "zip": "77019",
+    "city": "Houston",
+    "state": "TX",
+    "name": "WONDROUS ON WELCH!  Fine Traditional Estate",
+    "first_seen": "2026-09-21T13:32:24.818584+00:00",
+    "last_photo_count": 2
+  },
+  "5087610": {
+    "zip": "85253",
+    "city": "Paradise Valley",
+    "state": "AZ",
+    "name": "ESTATE IN TIME\u00ae - EXCEPTIONAL LUXURY ESTATE",
+    "first_seen": "2026-09-21T13:32:24.818603+00:00",
+    "last_photo_count": 0
   }
 }
