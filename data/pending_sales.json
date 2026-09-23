@@ -1,12 +1,4 @@
 {
-  "5071545": {
-    "zip": "77005",
-    "city": "Houston",
-    "state": "TX",
-    "name": "Houston Estate Sale!",
-    "first_seen": "2026-09-09T12:05:38.300671+00:00",
-    "last_photo_count": 1
-  },
   "5075307": {
     "zip": "48009",
     "city": "Birmingham",
@@ -71,14 +63,6 @@
     "first_seen": "2026-09-17T12:21:19.367054+00:00",
     "last_photo_count": 1
   },
-  "5086704": {
-    "zip": "75205",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "Help Me Ronda ... Back in Lovely Highland Park Home!",
-    "first_seen": "2026-09-21T13:32:24.818364+00:00",
-    "last_photo_count": 0
-  },
   "5087481": {
     "zip": "60045",
     "city": "Lake Forest",
@@ -86,14 +70,6 @@
     "name": "Quintessential quality in Lake Forest",
     "first_seen": "2026-09-21T13:32:24.818538+00:00",
     "last_photo_count": 0
-  },
-  "5087160": {
-    "zip": "32789",
-    "city": "Winter Park",
-    "state": "FL",
-    "name": "Posh Peacock in Winter Park - MacKenzie Childs, Portmeirion, artist\u2019s home",
-    "first_seen": "2026-09-21T13:32:24.818565+00:00",
-    "last_photo_count": 1
   },
   "5087610": {
     "zip": "85253",
@@ -109,6 +85,14 @@
     "state": "MI",
     "name": "Fabulous Grosse Pointe Shores Estate Sale",
     "first_seen": "2026-09-22T12:16:43.224464+00:00",
+    "last_photo_count": 1
+  },
+  "5089494": {
+    "zip": "48230",
+    "city": "Grosse Pointe",
+    "state": "MI",
+    "name": "GROSSE POINTE..A PRETTY..AND GOOOD ESTATE SALE!!",
+    "first_seen": "2026-09-23T12:29:25.943290+00:00",
     "last_photo_count": 1
   }
 }
