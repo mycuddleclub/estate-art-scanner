@@ -1,12 +1,4 @@
 {
-  "5075307": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Poof! Art, Antiques, Books, Teak Furniture & More - Historic Downtown Birmingham Estate Sale",
-    "first_seen": "2026-09-12T11:25:04.945771+00:00",
-    "last_photo_count": 7
-  },
   "5075376": {
     "zip": "60091",
     "city": "Wilmette",
@@ -14,14 +6,6 @@
     "name": "Sheridan Sales Moving Sale in a Million Dollar Home in Wilmette!",
     "first_seen": "2026-09-12T11:25:04.945838+00:00",
     "last_photo_count": 3
-  },
-  "5077191": {
-    "zip": "48301",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "BEAUTIFUL BLOOMFIELD VILLAGE ESTATE SALE!",
-    "first_seen": "2026-09-14T13:33:21.517670+00:00",
-    "last_photo_count": 0
   },
   "5077536": {
     "zip": "44124",
@@ -63,14 +47,6 @@
     "first_seen": "2026-09-17T12:21:19.367054+00:00",
     "last_photo_count": 1
   },
-  "5087481": {
-    "zip": "60045",
-    "city": "Lake Forest",
-    "state": "IL",
-    "name": "Quintessential quality in Lake Forest",
-    "first_seen": "2026-09-21T13:32:24.818538+00:00",
-    "last_photo_count": 0
-  },
   "5087610": {
     "zip": "85253",
     "city": "Paradise Valley",
@@ -79,20 +55,20 @@
     "first_seen": "2026-09-21T13:32:24.818603+00:00",
     "last_photo_count": 0
   },
-  "5088312": {
-    "zip": "48236",
-    "city": "Grosse Pointe Shores",
-    "state": "MI",
-    "name": "Fabulous Grosse Pointe Shores Estate Sale",
-    "first_seen": "2026-09-22T12:16:43.224464+00:00",
+  "5091492": {
+    "zip": "55405",
+    "city": "Minneapolis",
+    "state": "MN",
+    "name": "IMS Sample Sale!",
+    "first_seen": "2026-09-24T12:28:28.800268+00:00",
     "last_photo_count": 1
   },
-  "5089494": {
-    "zip": "48230",
-    "city": "Grosse Pointe",
+  "5091885": {
+    "zip": "48009",
+    "city": "Birmingham",
     "state": "MI",
-    "name": "GROSSE POINTE..A PRETTY..AND GOOOD ESTATE SALE!!",
-    "first_seen": "2026-09-23T12:29:25.943290+00:00",
+    "name": "Birmingham Estate Sale",
+    "first_seen": "2026-09-24T12:28:28.800484+00:00",
     "last_photo_count": 1
   }
 }
