@@ -1,12 +1,4 @@
 {
-  "5079240": {
-    "zip": "22207",
-    "city": "Arlington",
-    "state": "VA",
-    "name": "Arlington Downsizing",
-    "first_seen": "2026-09-15T12:23:55.200331+00:00",
-    "last_photo_count": 0
-  },
   "5080635": {
     "zip": "78209",
     "city": "San Antonio",
@@ -29,7 +21,7 @@
     "state": "MN",
     "name": "IMS Sample Sale!",
     "first_seen": "2026-09-24T12:28:28.800268+00:00",
-    "last_photo_count": 1
+    "last_photo_count": 3
   },
   "5091885": {
     "zip": "48009",
@@ -54,5 +46,13 @@
     "name": "Potomac Estate Sale",
     "first_seen": "2026-09-28T14:50:54.240336+00:00",
     "last_photo_count": 0
+  },
+  "5097270": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "Birmingham Estate Sale",
+    "first_seen": "2026-09-29T13:39:35.041060+00:00",
+    "last_photo_count": 1
   }
 }
