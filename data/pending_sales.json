@@ -1,12 +1,4 @@
 {
-  "5080635": {
-    "zip": "78209",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "SMALL BUT NICE ITEMS",
-    "first_seen": "2026-09-16T12:21:42.846898+00:00",
-    "last_photo_count": 0
-  },
   "5082102": {
     "zip": "48301",
     "city": "Bloomfield Hills",
@@ -14,14 +6,6 @@
     "name": "Bloomfield Hills Estate Sale",
     "first_seen": "2026-09-17T12:21:19.367054+00:00",
     "last_photo_count": 1
-  },
-  "5091492": {
-    "zip": "55405",
-    "city": "Minneapolis",
-    "state": "MN",
-    "name": "IMS Sample Sale!",
-    "first_seen": "2026-09-24T12:28:28.800268+00:00",
-    "last_photo_count": 3
   },
   "5091885": {
     "zip": "48009",
@@ -53,6 +37,30 @@
     "state": "MI",
     "name": "Birmingham Estate Sale",
     "first_seen": "2026-09-29T13:39:35.041060+00:00",
+    "last_photo_count": 1
+  },
+  "5098662": {
+    "zip": "46032",
+    "city": "Carmel",
+    "state": "IN",
+    "name": "Coming Soon: Carmel Luxury Estate Sale",
+    "first_seen": "2026-09-30T13:14:20.155981+00:00",
+    "last_photo_count": 1
+  },
+  "5098611": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "Poof! Men\u2019s Fashion & Accessories, Jewelry, New Home Furnishings & More Birmingham Estate Sale",
+    "first_seen": "2026-09-30T13:14:20.156256+00:00",
+    "last_photo_count": 7
+  },
+  "5099967": {
+    "zip": "20817",
+    "city": "Bethesda",
+    "state": "MD",
+    "name": "BETHESDA - Artist & Antique Dealer's Estate - Amazing Collection of American Folk Art and Primitives",
+    "first_seen": "2026-09-30T13:14:20.156295+00:00",
     "last_photo_count": 1
   }
 }
