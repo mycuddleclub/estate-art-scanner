@@ -53,7 +53,7 @@
     "state": "IL",
     "name": "Highland Park",
     "first_seen": "2026-10-01T14:05:57.940080+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 3
   },
   "5101629": {
     "zip": "46077",
@@ -69,6 +69,22 @@
     "state": "FL",
     "name": "Way Cool Jr",
     "first_seen": "2026-10-02T13:26:56.601719+00:00",
+    "last_photo_count": 0
+  },
+  "5103135": {
+    "zip": "48230",
+    "city": "Grosse Pointe",
+    "state": "MI",
+    "name": "Grosse Pointe Park Estate Sale",
+    "first_seen": "2026-10-03T12:10:20.242564+00:00",
+    "last_photo_count": 1
+  },
+  "5103522": {
+    "zip": "78209",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "Mid Century Modern in a Time Capsule Sale in 78209, Karges Furniture, Patio, Art,",
+    "first_seen": "2026-10-03T12:10:20.242702+00:00",
     "last_photo_count": 0
   }
 }
