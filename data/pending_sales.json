@@ -29,7 +29,7 @@
     "state": "IN",
     "name": "Coming Soon: Carmel Luxury Estate Sale",
     "first_seen": "2026-09-30T13:14:20.155981+00:00",
-    "last_photo_count": 1
+    "last_photo_count": 2
   },
   "5098611": {
     "zip": "48009",
@@ -79,12 +79,20 @@
     "first_seen": "2026-10-03T12:10:20.242564+00:00",
     "last_photo_count": 1
   },
-  "5103522": {
-    "zip": "78209",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "Mid Century Modern in a Time Capsule Sale in 78209, Karges Furniture, Patio, Art,",
-    "first_seen": "2026-10-03T12:10:20.242702+00:00",
-    "last_photo_count": 0
+  "5104263": {
+    "zip": "48302",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Bloomfield  Estate Sale",
+    "first_seen": "2026-10-04T12:59:49.212449+00:00",
+    "last_photo_count": 6
+  },
+  "5104659": {
+    "zip": "63131",
+    "city": "Saint Louis",
+    "state": "MO",
+    "name": "Joan and David Estate Sale - Functional Trainer Gym Equipment",
+    "first_seen": "2026-10-04T12:59:49.212672+00:00",
+    "last_photo_count": 4
   }
 }
