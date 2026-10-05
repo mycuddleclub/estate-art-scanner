@@ -23,14 +23,6 @@
     "first_seen": "2026-09-29T13:39:35.041060+00:00",
     "last_photo_count": 1
   },
-  "5098662": {
-    "zip": "46032",
-    "city": "Carmel",
-    "state": "IN",
-    "name": "Coming Soon: Carmel Luxury Estate Sale",
-    "first_seen": "2026-09-30T13:14:20.155981+00:00",
-    "last_photo_count": 2
-  },
   "5098611": {
     "zip": "48009",
     "city": "Birmingham",
@@ -63,14 +55,6 @@
     "first_seen": "2026-10-01T14:05:57.940350+00:00",
     "last_photo_count": 1
   },
-  "5103114": {
-    "zip": "32792",
-    "city": "Winter Park",
-    "state": "FL",
-    "name": "Way Cool Jr",
-    "first_seen": "2026-10-02T13:26:56.601719+00:00",
-    "last_photo_count": 0
-  },
   "5103135": {
     "zip": "48230",
     "city": "Grosse Pointe",
@@ -94,5 +78,37 @@
     "name": "Joan and David Estate Sale - Functional Trainer Gym Equipment",
     "first_seen": "2026-10-04T12:59:49.212672+00:00",
     "last_photo_count": 4
+  },
+  "5105592": {
+    "zip": "48009",
+    "city": "Birmingham",
+    "state": "MI",
+    "name": "FABULOUS MODERN ESTATE SALE IN BIRMINGHAM!",
+    "first_seen": "2026-10-05T15:28:13.880538+00:00",
+    "last_photo_count": 0
+  },
+  "5105637": {
+    "zip": "48302",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "AMAZING FURNITURE, ART, & COLLECTIONS IN TOBOCMAN-DESIGNED CONDO!",
+    "first_seen": "2026-10-05T15:28:13.880641+00:00",
+    "last_photo_count": 0
+  },
+  "5105163": {
+    "zip": "70115",
+    "city": "New Orleans",
+    "state": "LA",
+    "name": "New Orleans Estate Sale",
+    "first_seen": "2026-10-05T15:28:13.880694+00:00",
+    "last_photo_count": 0
+  },
+  "5105505": {
+    "zip": "46077",
+    "city": "Zionsville",
+    "state": "IN",
+    "name": "We added an extra day! Zionsville Vintage estate sale.",
+    "first_seen": "2026-10-05T15:28:13.880740+00:00",
+    "last_photo_count": 1
   }
 }
