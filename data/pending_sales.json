@@ -1,19 +1,11 @@
 {
-  "5091885": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Birmingham Estate Sale",
-    "first_seen": "2026-09-24T12:28:28.800484+00:00",
-    "last_photo_count": 1
-  },
   "5096604": {
     "zip": "20854",
     "city": "Potomac",
     "state": "MD",
     "name": "Potomac Estate Sale",
     "first_seen": "2026-09-28T14:50:54.240336+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 1
   },
   "5097270": {
     "zip": "48009",
@@ -22,14 +14,6 @@
     "name": "Birmingham Estate Sale",
     "first_seen": "2026-09-29T13:39:35.041060+00:00",
     "last_photo_count": 1
-  },
-  "5098611": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Poof! Men\u2019s Fashion & Accessories, Jewelry, New Home Furnishings & More Birmingham Estate Sale",
-    "first_seen": "2026-09-30T13:14:20.156256+00:00",
-    "last_photo_count": 7
   },
   "5099967": {
     "zip": "20817",
@@ -55,28 +39,12 @@
     "first_seen": "2026-10-04T12:59:49.212672+00:00",
     "last_photo_count": 4
   },
-  "5105592": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "FABULOUS MODERN ESTATE SALE IN BIRMINGHAM!",
-    "first_seen": "2026-10-05T15:28:13.880538+00:00",
-    "last_photo_count": 0
-  },
   "5105637": {
     "zip": "48302",
     "city": "Bloomfield Hills",
     "state": "MI",
     "name": "AMAZING FURNITURE, ART, & COLLECTIONS IN TOBOCMAN-DESIGNED CONDO!",
     "first_seen": "2026-10-05T15:28:13.880641+00:00",
-    "last_photo_count": 0
-  },
-  "5105163": {
-    "zip": "70115",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "New Orleans Estate Sale",
-    "first_seen": "2026-10-05T15:28:13.880694+00:00",
     "last_photo_count": 0
   },
   "5105505": {
@@ -103,22 +71,6 @@
     "first_seen": "2026-10-06T13:50:28.953445+00:00",
     "last_photo_count": 0
   },
-  "5107833": {
-    "zip": "48301",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Professionally Decorated Cranbrook Chase Condominium",
-    "first_seen": "2026-10-06T13:50:28.953484+00:00",
-    "last_photo_count": 0
-  },
-  "5108892": {
-    "zip": "78212",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "Beautiful Monte Vista Estate Sale",
-    "first_seen": "2026-10-07T14:08:14.986816+00:00",
-    "last_photo_count": 0
-  },
   "5109360": {
     "zip": "90274",
     "city": "Rolling Hills Estates",
@@ -142,5 +94,13 @@
     "name": "Bloomfield Hills Estate Sale",
     "first_seen": "2026-10-07T14:08:14.987058+00:00",
     "last_photo_count": 1
+  },
+  "5110296": {
+    "zip": "29401",
+    "city": "Charleston",
+    "state": "SC",
+    "name": "Charleston Collects",
+    "first_seen": "2026-10-08T14:18:31.679258+00:00",
+    "last_photo_count": 0
   }
 }
