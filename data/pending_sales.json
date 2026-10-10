@@ -63,14 +63,6 @@
     "first_seen": "2026-10-06T13:50:28.953200+00:00",
     "last_photo_count": 1
   },
-  "5109360": {
-    "zip": "90274",
-    "city": "Rolling Hills Estates",
-    "state": "CA",
-    "name": "MCM Furniture Vintage Sale in Rolling Hills Estate",
-    "first_seen": "2026-10-07T14:08:14.987011+00:00",
-    "last_photo_count": 1
-  },
   "5108046": {
     "zip": "48301",
     "city": "Bloomfield Hills",
@@ -117,6 +109,14 @@
     "state": "MI",
     "name": "Bloomfield Township Estate Sale",
     "first_seen": "2026-10-09T14:03:08.055405+00:00",
+    "last_photo_count": 1
+  },
+  "5113629": {
+    "zip": "70115",
+    "city": "New Orleans",
+    "state": "LA",
+    "name": "COLORFUL & ECLECTIC! SONIAT STREET ESTATE SALE",
+    "first_seen": "2026-10-10T13:12:38.336634+00:00",
     "last_photo_count": 1
   }
 }
