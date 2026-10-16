@@ -69,7 +69,7 @@
     "state": "IL",
     "name": "Sheridan Sales Historical Landmark Home Sale in Wilmette!",
     "first_seen": "2026-10-14T12:35:44.317890+00:00",
-    "last_photo_count": 4
+    "last_photo_count": 10
   },
   "5118006": {
     "zip": "48236",
@@ -85,6 +85,14 @@
     "state": "MI",
     "name": "MOVING SALE",
     "first_seen": "2026-10-14T12:35:44.318141+00:00",
+    "last_photo_count": 0
+  },
+  "5121726": {
+    "zip": "77005",
+    "city": "Houston",
+    "state": "TX",
+    "name": "Magnificent Museum District MANSION Estate Sale",
+    "first_seen": "2026-10-16T12:02:30.089271+00:00",
     "last_photo_count": 0
   }
 }
