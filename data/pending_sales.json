@@ -1,12 +1,4 @@
 {
-  "5103135": {
-    "zip": "48230",
-    "city": "Grosse Pointe",
-    "state": "MI",
-    "name": "Grosse Pointe Park Estate Sale",
-    "first_seen": "2026-10-03T12:10:20.242564+00:00",
-    "last_photo_count": 1
-  },
   "5104659": {
     "zip": "63131",
     "city": "Saint Louis",
@@ -85,6 +77,30 @@
     "state": "TX",
     "name": "Magnificent Museum District MANSION Estate Sale",
     "first_seen": "2026-10-16T12:02:30.089271+00:00",
+    "last_photo_count": 0
+  },
+  "5123184": {
+    "zip": "02906",
+    "city": "Providence",
+    "state": "RI",
+    "name": "A Grand Collection: Treasures of Providence\u2019s East Side!! A Must See Sale",
+    "first_seen": "2026-10-18T11:54:10.159464+00:00",
+    "last_photo_count": 0
+  },
+  "5124030": {
+    "zip": "48301",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "INCREDIBLE VINTAGE & MID CENTURY BLOOMFIELD HILLS SALE! FURNITURE, COLLECTIBLES, DECOR & MORE!!!",
+    "first_seen": "2026-10-18T11:54:10.159778+00:00",
+    "last_photo_count": 3
+  },
+  "5124039": {
+    "zip": "60091",
+    "city": "Wilmette",
+    "state": "IL",
+    "name": "French Extravaganza Estate Sale in Wilmette by An Estate To Remember",
+    "first_seen": "2026-10-18T11:54:10.159820+00:00",
     "last_photo_count": 0
   }
 }
