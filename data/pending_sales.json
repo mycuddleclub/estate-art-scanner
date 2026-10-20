@@ -1,20 +1,4 @@
 {
-  "5105637": {
-    "zip": "48302",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "AMAZING FURNITURE, ART, & COLLECTIONS IN TOBOCMAN-DESIGNED CONDO!",
-    "first_seen": "2026-10-05T15:28:13.880641+00:00",
-    "last_photo_count": 0
-  },
-  "5105505": {
-    "zip": "46077",
-    "city": "Zionsville",
-    "state": "IN",
-    "name": "We added an extra day! Zionsville Vintage estate sale.",
-    "first_seen": "2026-10-05T15:28:13.880740+00:00",
-    "last_photo_count": 1
-  },
   "5106954": {
     "zip": "48302",
     "city": "Bloomfield Township",
@@ -47,14 +31,6 @@
     "first_seen": "2026-10-09T14:03:08.055405+00:00",
     "last_photo_count": 1
   },
-  "5118078": {
-    "zip": "60091",
-    "city": "Wilmette",
-    "state": "IL",
-    "name": "Sheridan Sales Historical Landmark Home Sale in Wilmette!",
-    "first_seen": "2026-10-14T12:35:44.317890+00:00",
-    "last_photo_count": 12
-  },
   "5118006": {
     "zip": "48236",
     "city": "Grosse Pointe",
@@ -85,6 +61,14 @@
     "state": "FL",
     "name": "BEAUTIFUL HOME in COCONUT GROVE",
     "first_seen": "2026-10-19T14:14:38.693172+00:00",
+    "last_photo_count": 1
+  },
+  "5126274": {
+    "zip": "48236",
+    "city": "Grosse Pointe",
+    "state": "MI",
+    "name": "Marcia Wilk Estate Sale",
+    "first_seen": "2026-10-20T12:28:13.157416+00:00",
     "last_photo_count": 1
   }
 }
