@@ -1,12 +1,4 @@
 {
-  "5110296": {
-    "zip": "29401",
-    "city": "Charleston",
-    "state": "SC",
-    "name": "Charleston Collects",
-    "first_seen": "2026-10-08T14:18:31.679258+00:00",
-    "last_photo_count": 1
-  },
   "5112489": {
     "zip": "48302",
     "city": "Bloomfield Township",
@@ -22,14 +14,6 @@
     "name": "Poof! High-End Antiques, Books, Holiday Decor & Much More Grosse Pointe Shores Estate Sale",
     "first_seen": "2026-10-14T12:35:44.318078+00:00",
     "last_photo_count": 7
-  },
-  "5124030": {
-    "zip": "48301",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "INCREDIBLE VINTAGE & MID CENTURY BLOOMFIELD HILLS SALE! FURNITURE, COLLECTIBLES, DECOR & MORE!!!",
-    "first_seen": "2026-10-18T11:54:10.159778+00:00",
-    "last_photo_count": 3
   },
   "5116494": {
     "zip": "33133",
@@ -62,5 +46,29 @@
     "name": "Estate Sale",
     "first_seen": "2026-10-22T12:42:42.282002+00:00",
     "last_photo_count": 11
+  },
+  "5130792": {
+    "zip": "78212",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "Parting ways",
+    "first_seen": "2026-10-23T12:20:09.779355+00:00",
+    "last_photo_count": 0
+  },
+  "5131431": {
+    "zip": "90274",
+    "city": "Palos Verdes Peninsula",
+    "state": "CA",
+    "name": "Palos Verdes Estates Treasures Estate Sales - Tons of Nice Furniture and Clothes!",
+    "first_seen": "2026-10-23T12:20:09.779582+00:00",
+    "last_photo_count": 1
+  },
+  "5116521": {
+    "zip": "63131",
+    "city": "Saint Louis",
+    "state": "MO",
+    "name": "close to frontenac area estate sale",
+    "first_seen": "2026-10-23T12:20:09.779669+00:00",
+    "last_photo_count": 2
   }
 }
