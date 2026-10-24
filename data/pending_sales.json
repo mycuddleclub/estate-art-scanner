@@ -1,12 +1,4 @@
 {
-  "5112489": {
-    "zip": "48302",
-    "city": "Bloomfield Township",
-    "state": "MI",
-    "name": "Bloomfield Township Estate Sale",
-    "first_seen": "2026-10-09T14:03:08.055405+00:00",
-    "last_photo_count": 1
-  },
   "5118006": {
     "zip": "48236",
     "city": "Grosse Pointe",
@@ -63,12 +55,12 @@
     "first_seen": "2026-10-23T12:20:09.779582+00:00",
     "last_photo_count": 1
   },
-  "5116521": {
-    "zip": "63131",
-    "city": "Saint Louis",
-    "state": "MO",
-    "name": "close to frontenac area estate sale",
-    "first_seen": "2026-10-23T12:20:09.779669+00:00",
-    "last_photo_count": 2
+  "5132151": {
+    "zip": "92106",
+    "city": "San Diego",
+    "state": "CA",
+    "name": "True Legacy Estate Sales",
+    "first_seen": "2026-10-24T11:47:10.843155+00:00",
+    "last_photo_count": 0
   }
 }
