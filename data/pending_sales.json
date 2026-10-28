@@ -1,12 +1,4 @@
 {
-  "5118006": {
-    "zip": "48236",
-    "city": "Grosse Pointe",
-    "state": "MI",
-    "name": "Poof! High-End Antiques, Books, Holiday Decor & Much More Grosse Pointe Shores Estate Sale",
-    "first_seen": "2026-10-14T12:35:44.318078+00:00",
-    "last_photo_count": 7
-  },
   "5116494": {
     "zip": "33133",
     "city": "Coconut Grove",
@@ -47,14 +39,6 @@
     "first_seen": "2026-10-23T12:20:09.779582+00:00",
     "last_photo_count": 1
   },
-  "5132151": {
-    "zip": "92106",
-    "city": "San Diego",
-    "state": "CA",
-    "name": "True Legacy Estate Sales",
-    "first_seen": "2026-10-24T11:47:10.843155+00:00",
-    "last_photo_count": 0
-  },
   "5132808": {
     "zip": "48009",
     "city": "Birmingham",
@@ -85,6 +69,30 @@
     "state": "MO",
     "name": "Ladue Contemporary Decor Art Crystal Neon Tractor Piano  Jewelry 2 day Tag sale",
     "first_seen": "2026-10-27T12:54:35.190813+00:00",
+    "last_photo_count": 0
+  },
+  "5136336": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Bloomfield Hills Estate Sale",
+    "first_seen": "2026-10-28T13:43:37.376644+00:00",
+    "last_photo_count": 1
+  },
+  "5133663": {
+    "zip": "33156",
+    "city": "Pinecrest",
+    "state": "FL",
+    "name": "PINECREST BEAUTY",
+    "first_seen": "2026-10-28T13:43:37.377045+00:00",
+    "last_photo_count": 1
+  },
+  "5136303": {
+    "zip": "85255",
+    "city": "Scottsdale",
+    "state": "AZ",
+    "name": "ESTATE IN TIME\u00ae - NORTH SCOTTSDALE  ESTATE SALE| EXTRAORDINARY ART & RARE TREASURES",
+    "first_seen": "2026-10-28T13:43:37.377110+00:00",
     "last_photo_count": 0
   }
 }
