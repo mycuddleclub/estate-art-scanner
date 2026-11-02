@@ -1,12 +1,4 @@
 {
-  "5116494": {
-    "zip": "33133",
-    "city": "Coconut Grove",
-    "state": "FL",
-    "name": "BEAUTIFUL HOME in COCONUT GROVE",
-    "first_seen": "2026-10-19T14:14:38.693172+00:00",
-    "last_photo_count": 1
-  },
   "5127636": {
     "zip": "60201",
     "city": "Evanston",
@@ -119,14 +111,6 @@
     "first_seen": "2026-10-31T13:14:24.351693+00:00",
     "last_photo_count": 7
   },
-  "5133057": {
-    "zip": "63124",
-    "city": "Saint Louis",
-    "state": "MO",
-    "name": "Ladue Moving Sale",
-    "first_seen": "2026-10-31T13:14:24.351804+00:00",
-    "last_photo_count": 4
-  },
   "5140977": {
     "zip": "20854",
     "city": "Potomac",
@@ -150,5 +134,37 @@
     "name": "North Bethesda",
     "first_seen": "2026-11-01T13:57:56.049552+00:00",
     "last_photo_count": 1
+  },
+  "5142582": {
+    "zip": "60045",
+    "city": "Lake Forest",
+    "state": "IL",
+    "name": "Lovely Lake Forest Estate Sale",
+    "first_seen": "2026-11-02T16:44:17.760909+00:00",
+    "last_photo_count": 0
+  },
+  "5142807": {
+    "zip": "48304",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "OUTSTANDING ESTATE SALE IN MAJESTIC 5,000 SF BLOOMFIELD HILLS HOME!",
+    "first_seen": "2026-11-02T16:44:17.760969+00:00",
+    "last_photo_count": 0
+  },
+  "5142771": {
+    "zip": "37205",
+    "city": "Nashville",
+    "state": "TN",
+    "name": "SUPER WEST MEADE ESTATE SALE!!!",
+    "first_seen": "2026-11-02T16:44:17.760997+00:00",
+    "last_photo_count": 0
+  },
+  "5142462": {
+    "zip": "70115",
+    "city": "New Orleans",
+    "state": "LA",
+    "name": "New Orleans Estate Sale",
+    "first_seen": "2026-11-02T16:44:17.761022+00:00",
+    "last_photo_count": 0
   }
 }
