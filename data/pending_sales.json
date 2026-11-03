@@ -135,14 +135,6 @@
     "first_seen": "2026-11-01T13:57:56.049552+00:00",
     "last_photo_count": 1
   },
-  "5142582": {
-    "zip": "60045",
-    "city": "Lake Forest",
-    "state": "IL",
-    "name": "Lovely Lake Forest Estate Sale",
-    "first_seen": "2026-11-02T16:44:17.760909+00:00",
-    "last_photo_count": 0
-  },
   "5142807": {
     "zip": "48304",
     "city": "Bloomfield Hills",
@@ -165,6 +157,30 @@
     "state": "LA",
     "name": "New Orleans Estate Sale",
     "first_seen": "2026-11-02T16:44:17.761022+00:00",
+    "last_photo_count": 0
+  },
+  "5144100": {
+    "zip": "32792",
+    "city": "Winter Park",
+    "state": "FL",
+    "name": "Thursday Night Fever",
+    "first_seen": "2026-11-03T14:47:52.764786+00:00",
+    "last_photo_count": 0
+  },
+  "5144358": {
+    "zip": "48236",
+    "city": "Grosse Pointe",
+    "state": "MI",
+    "name": "Marcia Wilk Estate Sale",
+    "first_seen": "2026-11-03T14:47:52.764843+00:00",
+    "last_photo_count": 1
+  },
+  "5144367": {
+    "zip": "32789",
+    "city": "Winter Park",
+    "state": "FL",
+    "name": "Hathaway Estate Sales - Winter Park",
+    "first_seen": "2026-11-03T14:47:52.764878+00:00",
     "last_photo_count": 0
   }
 }
