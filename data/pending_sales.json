@@ -1,12 +1,4 @@
 {
-  "5127636": {
-    "zip": "60201",
-    "city": "Evanston",
-    "state": "IL",
-    "name": "CAIT'S\u00ae Naperville Estate Sale",
-    "first_seen": "2026-10-21T12:38:09.768892+00:00",
-    "last_photo_count": 4
-  },
   "5128872": {
     "zip": "37205",
     "city": "Nashville",
@@ -87,14 +79,6 @@
     "first_seen": "2026-10-29T13:53:04.405232+00:00",
     "last_photo_count": 4
   },
-  "5138994": {
-    "zip": "46032",
-    "city": "Carmel",
-    "state": "IN",
-    "name": "Contemporary Traditional Estate Sale in the Village of West Clay",
-    "first_seen": "2026-10-29T13:53:04.405502+00:00",
-    "last_photo_count": 1
-  },
   "5139009": {
     "zip": "48236",
     "city": "Grosse Pointe",
@@ -151,36 +135,12 @@
     "first_seen": "2026-11-02T16:44:17.760997+00:00",
     "last_photo_count": 0
   },
-  "5142462": {
-    "zip": "70115",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "New Orleans Estate Sale",
-    "first_seen": "2026-11-02T16:44:17.761022+00:00",
-    "last_photo_count": 0
-  },
-  "5144100": {
-    "zip": "32792",
-    "city": "Winter Park",
-    "state": "FL",
-    "name": "Thursday Night Fever",
-    "first_seen": "2026-11-03T14:47:52.764786+00:00",
-    "last_photo_count": 0
-  },
-  "5144358": {
-    "zip": "48236",
-    "city": "Grosse Pointe",
-    "state": "MI",
-    "name": "Marcia Wilk Estate Sale",
-    "first_seen": "2026-11-03T14:47:52.764843+00:00",
+  "5146875": {
+    "zip": "46077",
+    "city": "Zionsville",
+    "state": "IN",
+    "name": "Zionsville Pre-Indy Home Show Estate Sale",
+    "first_seen": "2026-11-04T14:59:40.891312+00:00",
     "last_photo_count": 1
-  },
-  "5144367": {
-    "zip": "32789",
-    "city": "Winter Park",
-    "state": "FL",
-    "name": "Hathaway Estate Sales - Winter Park",
-    "first_seen": "2026-11-03T14:47:52.764878+00:00",
-    "last_photo_count": 0
   }
 }
