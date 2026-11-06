@@ -1,12 +1,4 @@
 {
-  "5131431": {
-    "zip": "90274",
-    "city": "Palos Verdes Peninsula",
-    "state": "CA",
-    "name": "Palos Verdes Estates Treasures Estate Sales - Tons of Nice Furniture and Clothes!",
-    "first_seen": "2026-10-23T12:20:09.779582+00:00",
-    "last_photo_count": 1
-  },
   "5135097": {
     "zip": "48302",
     "city": "Bloomfield Hills",
@@ -54,14 +46,6 @@
     "name": "Terrific TROY Estate Sale",
     "first_seen": "2026-10-29T13:53:04.405232+00:00",
     "last_photo_count": 4
-  },
-  "5139009": {
-    "zip": "48236",
-    "city": "Grosse Pointe",
-    "state": "MI",
-    "name": "Chicka-relics in Grosse Pointe",
-    "first_seen": "2026-10-29T13:53:04.405542+00:00",
-    "last_photo_count": 0
   },
   "5140413": {
     "zip": "48009",
@@ -157,6 +141,14 @@
     "state": "MI",
     "name": "Ann Arbor Estate Sale - Small but Grand!!",
     "first_seen": "2026-11-05T15:05:35.127663+00:00",
+    "last_photo_count": 0
+  },
+  "5149164": {
+    "zip": "78209",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "Monday Nov 16, 100 Vintage Furs & Fabulous Jewelry Sale Included Native American, Sterling and More!",
+    "first_seen": "2026-11-06T14:43:53.999271+00:00",
     "last_photo_count": 0
   }
 }
