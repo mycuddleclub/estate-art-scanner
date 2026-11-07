@@ -103,14 +103,6 @@
     "first_seen": "2026-11-04T14:59:40.891312+00:00",
     "last_photo_count": 1
   },
-  "5147940": {
-    "zip": "77007",
-    "city": "Houston",
-    "state": "TX",
-    "name": "YOUR WISHLIST CALLED. IT\u2019S IN THIS HEIGHTS SALE!",
-    "first_seen": "2026-11-05T15:05:35.127457+00:00",
-    "last_photo_count": 5
-  },
   "5148180": {
     "zip": "44120",
     "city": "Shaker Heights",
@@ -150,5 +142,13 @@
     "name": "Monday Nov 16, 100 Vintage Furs & Fabulous Jewelry Sale Included Native American, Sterling and More!",
     "first_seen": "2026-11-06T14:43:53.999271+00:00",
     "last_photo_count": 0
+  },
+  "5150661": {
+    "zip": "30327",
+    "city": "Atlanta",
+    "state": "GA",
+    "name": "Buckhead Elegance....Presented by Nanette",
+    "first_seen": "2026-11-07T13:41:28.177192+00:00",
+    "last_photo_count": 2
   }
 }
