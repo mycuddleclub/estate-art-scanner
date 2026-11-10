@@ -1,20 +1,4 @@
 {
-  "5135097": {
-    "zip": "48302",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "STUNNING ESTATE DOWNSIZING SALE!",
-    "first_seen": "2026-10-27T12:54:35.190552+00:00",
-    "last_photo_count": 0
-  },
-  "5135064": {
-    "zip": "48302",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "STUNNING ESTATE DOWNSIZING SALE!!",
-    "first_seen": "2026-10-27T12:54:35.190778+00:00",
-    "last_photo_count": 1
-  },
   "5136336": {
     "zip": "48304",
     "city": "Bloomfield Hills",
@@ -71,14 +55,6 @@
     "first_seen": "2026-11-01T13:57:56.049478+00:00",
     "last_photo_count": 1
   },
-  "5141646": {
-    "zip": "20854",
-    "city": "Potomac",
-    "state": "MD",
-    "name": "North Bethesda",
-    "first_seen": "2026-11-01T13:57:56.049552+00:00",
-    "last_photo_count": 1
-  },
   "5142807": {
     "zip": "48304",
     "city": "Bloomfield Hills",
@@ -94,14 +70,6 @@
     "name": "SUPER WEST MEADE ESTATE SALE!!!",
     "first_seen": "2026-11-02T16:44:17.760997+00:00",
     "last_photo_count": 0
-  },
-  "5146875": {
-    "zip": "46077",
-    "city": "Zionsville",
-    "state": "IN",
-    "name": "Zionsville Pre-Indy Home Show Estate Sale",
-    "first_seen": "2026-11-04T14:59:40.891312+00:00",
-    "last_photo_count": 3
   },
   "5148180": {
     "zip": "44120",
@@ -166,5 +134,21 @@
     "name": "Grasons of Nashville - West Meade Estate Sale - Treasures before Teardown",
     "first_seen": "2026-11-08T14:00:11.861821+00:00",
     "last_photo_count": 1
+  },
+  "5154195": {
+    "zip": "37205",
+    "city": "Nashville",
+    "state": "TN",
+    "name": "UNIQUE BELLE MEADE ESTATE SALE!!",
+    "first_seen": "2026-11-10T15:21:23.159218+00:00",
+    "last_photo_count": 0
+  },
+  "5154705": {
+    "zip": "48302",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "EXCEPTIONAL BLOOMFIELD HILLS ESTATE SALE!",
+    "first_seen": "2026-11-10T15:21:23.159272+00:00",
+    "last_photo_count": 0
   }
 }
