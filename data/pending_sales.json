@@ -1,28 +1,4 @@
 {
-  "5136336": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Bloomfield Hills Estate Sale",
-    "first_seen": "2026-10-28T13:43:37.376644+00:00",
-    "last_photo_count": 1
-  },
-  "5133663": {
-    "zip": "33156",
-    "city": "Pinecrest",
-    "state": "FL",
-    "name": "PINECREST BEAUTY",
-    "first_seen": "2026-10-28T13:43:37.377045+00:00",
-    "last_photo_count": 1
-  },
-  "5136303": {
-    "zip": "85255",
-    "city": "Scottsdale",
-    "state": "AZ",
-    "name": "ESTATE IN TIME\u00ae - NORTH SCOTTSDALE  ESTATE SALE| EXTRAORDINARY ART & RARE TREASURES",
-    "first_seen": "2026-10-28T13:43:37.377110+00:00",
-    "last_photo_count": 1
-  },
   "5138175": {
     "zip": "48098",
     "city": "Troy",
@@ -87,14 +63,6 @@
     "first_seen": "2026-11-05T15:05:35.127574+00:00",
     "last_photo_count": 1
   },
-  "5148189": {
-    "zip": "48301",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Poof! Vintage, Costume Jewelry, Women\u2019s Clothing & More Bloomfield Hills Estate Sale",
-    "first_seen": "2026-11-05T15:05:35.127618+00:00",
-    "last_photo_count": 7
-  },
   "5148450": {
     "zip": "48105",
     "city": "Ann Arbor",
@@ -119,22 +87,6 @@
     "first_seen": "2026-11-07T13:41:28.177192+00:00",
     "last_photo_count": 2
   },
-  "5151483": {
-    "zip": "60093",
-    "city": "Winnetka",
-    "state": "IL",
-    "name": "Old School Eclectic in Winnetka!",
-    "first_seen": "2026-11-08T14:00:11.861729+00:00",
-    "last_photo_count": 1
-  },
-  "5151171": {
-    "zip": "37205",
-    "city": "Nashville",
-    "state": "TN",
-    "name": "Grasons of Nashville - West Meade Estate Sale - Treasures before Teardown",
-    "first_seen": "2026-11-08T14:00:11.861821+00:00",
-    "last_photo_count": 1
-  },
   "5154195": {
     "zip": "37205",
     "city": "Nashville",
@@ -150,5 +102,37 @@
     "name": "EXCEPTIONAL BLOOMFIELD HILLS ESTATE SALE!",
     "first_seen": "2026-11-10T15:21:23.159272+00:00",
     "last_photo_count": 0
+  },
+  "5156013": {
+    "zip": "10583",
+    "city": "Scarsdale",
+    "state": "NY",
+    "name": "Sugar Pond Estate Sale",
+    "first_seen": "2026-11-11T14:51:43.531551+00:00",
+    "last_photo_count": 8
+  },
+  "5155950": {
+    "zip": "32963",
+    "city": "Vero Beach",
+    "state": "FL",
+    "name": "Barrier Island Collective",
+    "first_seen": "2026-11-11T14:51:43.531618+00:00",
+    "last_photo_count": 11
+  },
+  "5155878": {
+    "zip": "70118",
+    "city": "New Orleans",
+    "state": "LA",
+    "name": "H&H Estate Sales",
+    "first_seen": "2026-11-11T14:51:43.531665+00:00",
+    "last_photo_count": 1
+  },
+  "5156394": {
+    "zip": "48302",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Amazing Echo Rd  Estate Sale",
+    "first_seen": "2026-11-11T14:51:43.531719+00:00",
+    "last_photo_count": 2
   }
 }
