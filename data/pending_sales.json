@@ -1,20 +1,4 @@
 {
-  "5138175": {
-    "zip": "48098",
-    "city": "Troy",
-    "state": "MI",
-    "name": "Terrific TROY Estate Sale",
-    "first_seen": "2026-10-29T13:53:04.405232+00:00",
-    "last_photo_count": 4
-  },
-  "5140413": {
-    "zip": "48009",
-    "city": "Birmingham",
-    "state": "MI",
-    "name": "Poof! Waterford Crystal, Jewelry, Women\u2019s Clothing & Accessories, & More Birmingham Estate Sale",
-    "first_seen": "2026-10-31T13:14:24.351693+00:00",
-    "last_photo_count": 7
-  },
   "5140977": {
     "zip": "20854",
     "city": "Potomac",
@@ -30,14 +14,6 @@
     "name": "Carmel Estate Sale Vintage & Antiques, Jewelry, Tools & Treasures",
     "first_seen": "2026-11-01T13:57:56.049478+00:00",
     "last_photo_count": 1
-  },
-  "5142807": {
-    "zip": "48304",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "OUTSTANDING ESTATE SALE IN MAJESTIC 5,000 SF BLOOMFIELD HILLS HOME!",
-    "first_seen": "2026-11-02T16:44:17.760969+00:00",
-    "last_photo_count": 0
   },
   "5142771": {
     "zip": "37205",
@@ -71,14 +47,6 @@
     "first_seen": "2026-11-05T15:05:35.127663+00:00",
     "last_photo_count": 0
   },
-  "5149164": {
-    "zip": "78209",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "Monday Nov 16, 100 Vintage Furs & Fabulous Jewelry Sale Included Native American, Sterling and More!",
-    "first_seen": "2026-11-06T14:43:53.999271+00:00",
-    "last_photo_count": 0
-  },
   "5150661": {
     "zip": "30327",
     "city": "Atlanta",
@@ -103,22 +71,6 @@
     "first_seen": "2026-11-10T15:21:23.159272+00:00",
     "last_photo_count": 0
   },
-  "5156013": {
-    "zip": "10583",
-    "city": "Scarsdale",
-    "state": "NY",
-    "name": "Sugar Pond Estate Sale",
-    "first_seen": "2026-11-11T14:51:43.531551+00:00",
-    "last_photo_count": 8
-  },
-  "5155950": {
-    "zip": "32963",
-    "city": "Vero Beach",
-    "state": "FL",
-    "name": "Barrier Island Collective",
-    "first_seen": "2026-11-11T14:51:43.531618+00:00",
-    "last_photo_count": 11
-  },
   "5155878": {
     "zip": "70118",
     "city": "New Orleans",
@@ -127,12 +79,44 @@
     "first_seen": "2026-11-11T14:51:43.531665+00:00",
     "last_photo_count": 1
   },
-  "5156394": {
-    "zip": "48302",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "Amazing Echo Rd  Estate Sale",
-    "first_seen": "2026-11-11T14:51:43.531719+00:00",
+  "5156634": {
+    "zip": "19087",
+    "city": "Strafford",
+    "state": "PA",
+    "name": "GUNNING & CO. ESTATE SALES IS IN STRAFFORD/WAYNE FOR A 1-DAY SALE",
+    "first_seen": "2026-11-12T15:42:42.341304+00:00",
+    "last_photo_count": 0
+  },
+  "5157747": {
+    "zip": "78212",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "Historic Sale - Olmos Park Terrace",
+    "first_seen": "2026-11-12T15:42:42.341367+00:00",
+    "last_photo_count": 0
+  },
+  "5158005": {
+    "zip": "78212",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "The Greastest of All Part 1 @ Olmos Park",
+    "first_seen": "2026-11-12T15:42:42.341395+00:00",
+    "last_photo_count": 1
+  },
+  "5158008": {
+    "zip": "78212",
+    "city": "Olmos Park",
+    "state": "TX",
+    "name": "The Greatest of All Part 2 @ Olmos Park",
+    "first_seen": "2026-11-12T15:42:42.341420+00:00",
+    "last_photo_count": 1
+  },
+  "5157996": {
+    "zip": "85253",
+    "city": "Paradise Valley",
+    "state": "AZ",
+    "name": "Paradise Valley Gem! Featuring Excellent Quality Furniture, Decor, Antiques, Garage, Patio & More!",
+    "first_seen": "2026-11-12T15:42:42.341440+00:00",
     "last_photo_count": 2
   }
 }
