@@ -1,12 +1,4 @@
 {
-  "5140977": {
-    "zip": "20854",
-    "city": "Potomac",
-    "state": "MD",
-    "name": "Still Downsizing in Chevy Chase",
-    "first_seen": "2026-10-31T13:14:24.351848+00:00",
-    "last_photo_count": 1
-  },
   "5141622": {
     "zip": "46032",
     "city": "Carmel",
@@ -61,7 +53,7 @@
     "state": "TN",
     "name": "UNIQUE BELLE MEADE ESTATE SALE!!",
     "first_seen": "2026-11-10T15:21:23.159218+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 6
   },
   "5154705": {
     "zip": "48302",
@@ -85,15 +77,7 @@
     "state": "PA",
     "name": "GUNNING & CO. ESTATE SALES IS IN STRAFFORD/WAYNE FOR A 1-DAY SALE",
     "first_seen": "2026-11-12T15:42:42.341304+00:00",
-    "last_photo_count": 0
-  },
-  "5157747": {
-    "zip": "78212",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "Historic Sale - Olmos Park Terrace",
-    "first_seen": "2026-11-12T15:42:42.341367+00:00",
-    "last_photo_count": 0
+    "last_photo_count": 1
   },
   "5158005": {
     "zip": "78212",
@@ -118,5 +102,21 @@
     "name": "Paradise Valley Gem! Featuring Excellent Quality Furniture, Decor, Antiques, Garage, Patio & More!",
     "first_seen": "2026-11-12T15:42:42.341440+00:00",
     "last_photo_count": 2
+  },
+  "5148879": {
+    "zip": "77006",
+    "city": "Houston",
+    "state": "TX",
+    "name": "Montrose Museum Quality Estate!",
+    "first_seen": "2026-11-14T13:53:55.567336+00:00",
+    "last_photo_count": 2
+  },
+  "5160105": {
+    "zip": "12514",
+    "city": "Clinton Corners",
+    "state": "NY",
+    "name": "A 2017 Toyota Prius Three Hybrid Exceptionally Low 21,000 Miles and a Low Buyer's Premium",
+    "first_seen": "2026-11-14T13:53:55.567399+00:00",
+    "last_photo_count": 9
   }
 }
