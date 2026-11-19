@@ -1,20 +1,4 @@
 {
-  "5147364": {
-    "zip": "48302",
-    "city": "Bloomfield Township",
-    "state": "MI",
-    "name": "Bloomfield Township Estate Sale",
-    "first_seen": "2026-11-05T15:05:35.127574+00:00",
-    "last_photo_count": 1
-  },
-  "5148450": {
-    "zip": "48105",
-    "city": "Ann Arbor",
-    "state": "MI",
-    "name": "Ann Arbor Estate Sale - Small but Grand!!",
-    "first_seen": "2026-11-05T15:05:35.127663+00:00",
-    "last_photo_count": 0
-  },
   "5150661": {
     "zip": "30327",
     "city": "Atlanta",
@@ -87,30 +71,6 @@
     "first_seen": "2026-11-16T16:40:13.995259+00:00",
     "last_photo_count": 0
   },
-  "5161569": {
-    "zip": "70115",
-    "city": "New Orleans",
-    "state": "LA",
-    "name": "sidehaul // uptown art collector part II",
-    "first_seen": "2026-11-16T16:40:13.995316+00:00",
-    "last_photo_count": 1
-  },
-  "5161854": {
-    "zip": "48301",
-    "city": "Bloomfield Hills",
-    "state": "MI",
-    "name": "ANTIQUES & MORE IN BLOOMFIELD VILLAGE ESTATE SALE!",
-    "first_seen": "2026-11-16T16:40:13.995363+00:00",
-    "last_photo_count": 0
-  },
-  "5162337": {
-    "zip": "63131",
-    "city": "Saint Louis",
-    "state": "MO",
-    "name": "Frontenac House Full of Great Quality Decor & Collectibles by Luby\u2019s Great Estate",
-    "first_seen": "2026-11-16T16:40:13.995409+00:00",
-    "last_photo_count": 7
-  },
   "5129922": {
     "zip": "75205",
     "city": "Dallas",
@@ -134,5 +94,21 @@
     "name": "Scottsdale Estate Sale",
     "first_seen": "2026-11-18T16:05:49.334672+00:00",
     "last_photo_count": 0
+  },
+  "5165709": {
+    "zip": "48301",
+    "city": "Bloomfield Hills",
+    "state": "MI",
+    "name": "Bloomfield Hills Estate Sale",
+    "first_seen": "2026-11-19T16:13:34.261218+00:00",
+    "last_photo_count": 1
+  },
+  "5166093": {
+    "zip": "34231",
+    "city": "Sarasota",
+    "state": "FL",
+    "name": "The Artist's Private Collection \u2013 Original Art, Jewelry, Fashion & More!",
+    "first_seen": "2026-11-19T16:13:34.261288+00:00",
+    "last_photo_count": 2
   }
 }
