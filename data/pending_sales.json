@@ -87,14 +87,6 @@
     "first_seen": "2026-11-18T16:05:49.334649+00:00",
     "last_photo_count": 9
   },
-  "5165160": {
-    "zip": "85255",
-    "city": "Scottsdale",
-    "state": "AZ",
-    "name": "Scottsdale Estate Sale",
-    "first_seen": "2026-11-18T16:05:49.334672+00:00",
-    "last_photo_count": 0
-  },
   "5165709": {
     "zip": "48301",
     "city": "Bloomfield Hills",
@@ -110,5 +102,21 @@
     "name": "The Artist's Private Collection \u2013 Original Art, Jewelry, Fashion & More!",
     "first_seen": "2026-11-19T16:13:34.261288+00:00",
     "last_photo_count": 2
+  },
+  "5167401": {
+    "zip": "22101",
+    "city": "Mc Lean",
+    "state": "VA",
+    "name": "The Loudoun County Mansion Collection | 9,000 SF Luxury Downsizing Online Auction",
+    "first_seen": "2026-11-20T15:52:28.838698+00:00",
+    "last_photo_count": 1
+  },
+  "5167338": {
+    "zip": "22102",
+    "city": "Mc Lean",
+    "state": "VA",
+    "name": "Ring Around the Rotonda",
+    "first_seen": "2026-11-20T15:52:28.838766+00:00",
+    "last_photo_count": 1
   }
 }
