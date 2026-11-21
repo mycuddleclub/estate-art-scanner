@@ -1,12 +1,4 @@
 {
-  "5150661": {
-    "zip": "30327",
-    "city": "Atlanta",
-    "state": "GA",
-    "name": "Buckhead Elegance....Presented by Nanette",
-    "first_seen": "2026-11-07T13:41:28.177192+00:00",
-    "last_photo_count": 2
-  },
   "5154195": {
     "zip": "37205",
     "city": "Nashville",
@@ -118,5 +110,13 @@
     "name": "Ring Around the Rotonda",
     "first_seen": "2026-11-20T15:52:28.838766+00:00",
     "last_photo_count": 1
+  },
+  "5168148": {
+    "zip": "75205",
+    "city": "Dallas",
+    "state": "TX",
+    "name": "University Park: Unbeatable Deals by Dayspring",
+    "first_seen": "2026-11-21T15:01:36.167056+00:00",
+    "last_photo_count": 3
   }
 }
