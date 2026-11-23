@@ -63,14 +63,6 @@
     "first_seen": "2026-11-16T16:40:13.995259+00:00",
     "last_photo_count": 0
   },
-  "5129922": {
-    "zip": "75205",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "ABOUT THE HOUSE in Highland Park",
-    "first_seen": "2026-11-18T16:05:49.334584+00:00",
-    "last_photo_count": 0
-  },
   "5164701": {
     "zip": "60035",
     "city": "Highland Park",
@@ -86,14 +78,6 @@
     "name": "Bloomfield Hills Estate Sale",
     "first_seen": "2026-11-19T16:13:34.261218+00:00",
     "last_photo_count": 1
-  },
-  "5166093": {
-    "zip": "34231",
-    "city": "Sarasota",
-    "state": "FL",
-    "name": "The Artist's Private Collection \u2013 Original Art, Jewelry, Fashion & More!",
-    "first_seen": "2026-11-19T16:13:34.261288+00:00",
-    "last_photo_count": 2
   },
   "5167401": {
     "zip": "22101",
@@ -118,5 +102,29 @@
     "name": "University Park: Unbeatable Deals by Dayspring",
     "first_seen": "2026-11-21T15:01:36.167056+00:00",
     "last_photo_count": 3
+  },
+  "5169429": {
+    "zip": "90274",
+    "city": "Palos Verdes Peninsula",
+    "state": "CA",
+    "name": "Palos Verdes Estate - Lladro, Books and More!",
+    "first_seen": "2026-11-23T18:54:41.543645+00:00",
+    "last_photo_count": 1
+  },
+  "5169351": {
+    "zip": "44022",
+    "city": "Chagrin Falls",
+    "state": "OH",
+    "name": "One day move out sale\u2014all must go!",
+    "first_seen": "2026-11-23T18:54:41.543733+00:00",
+    "last_photo_count": 3
+  },
+  "5169924": {
+    "zip": "30327",
+    "city": "Atlanta",
+    "state": "GA",
+    "name": "*MUST SEE* PACKED 1970s Time Capsule, Art & Chinoiserie in Buckhead",
+    "first_seen": "2026-11-23T18:54:41.543803+00:00",
+    "last_photo_count": 0
   }
 }
