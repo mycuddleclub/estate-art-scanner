@@ -1,12 +1,4 @@
 {
-  "5158005": {
-    "zip": "78212",
-    "city": "San Antonio",
-    "state": "TX",
-    "name": "The Greastest of All Part 1 @ Olmos Park",
-    "first_seen": "2026-11-12T15:42:42.341395+00:00",
-    "last_photo_count": 1
-  },
   "5158008": {
     "zip": "78212",
     "city": "Olmos Park",
@@ -79,14 +71,6 @@
     "first_seen": "2026-11-20T15:52:28.838766+00:00",
     "last_photo_count": 1
   },
-  "5168148": {
-    "zip": "75205",
-    "city": "Dallas",
-    "state": "TX",
-    "name": "University Park: Unbeatable Deals by Dayspring",
-    "first_seen": "2026-11-21T15:01:36.167056+00:00",
-    "last_photo_count": 3
-  },
   "5169429": {
     "zip": "90274",
     "city": "Palos Verdes Peninsula",
@@ -109,6 +93,14 @@
     "state": "GA",
     "name": "*MUST SEE* PACKED 1970s Time Capsule, Art & Chinoiserie in Buckhead",
     "first_seen": "2026-11-23T18:54:41.543803+00:00",
+    "last_photo_count": 0
+  },
+  "5170362": {
+    "zip": "77007",
+    "city": "Houston",
+    "state": "TX",
+    "name": "Estate Sale",
+    "first_seen": "2026-11-25T17:44:48.223716+00:00",
     "last_photo_count": 0
   }
 }
