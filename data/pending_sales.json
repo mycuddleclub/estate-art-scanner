@@ -1,20 +1,4 @@
 {
-  "5158008": {
-    "zip": "78212",
-    "city": "Olmos Park",
-    "state": "TX",
-    "name": "The Greatest of All Part 2 @ Olmos Park",
-    "first_seen": "2026-11-12T15:42:42.341420+00:00",
-    "last_photo_count": 1
-  },
-  "5157996": {
-    "zip": "85253",
-    "city": "Paradise Valley",
-    "state": "AZ",
-    "name": "Paradise Valley Gem! Featuring Excellent Quality Furniture, Decor, Antiques, Garage, Patio & More!",
-    "first_seen": "2026-11-12T15:42:42.341440+00:00",
-    "last_photo_count": 2
-  },
   "5148879": {
     "zip": "77006",
     "city": "Houston",
@@ -101,6 +85,22 @@
     "state": "TX",
     "name": "Estate Sale",
     "first_seen": "2026-11-25T17:44:48.223716+00:00",
+    "last_photo_count": 0
+  },
+  "5173494": {
+    "zip": "60091",
+    "city": "Wilmette",
+    "state": "IL",
+    "name": "Sheridan Sales Holiday Special!",
+    "first_seen": "2026-11-26T17:28:22.743378+00:00",
+    "last_photo_count": 4
+  },
+  "5173548": {
+    "zip": "78212",
+    "city": "San Antonio",
+    "state": "TX",
+    "name": "Just in time for XMAS",
+    "first_seen": "2026-11-26T17:28:22.743434+00:00",
     "last_photo_count": 0
   }
 }
